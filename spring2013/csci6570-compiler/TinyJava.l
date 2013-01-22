@@ -12,8 +12,8 @@ NonZeroDigit            [1-9]
 DecimalIntegerLiteral   (0|{NonZeroDigit}{Digit}*)
 Exponent                [eE]([+-]{Digit}+|{Digit}+)
 FloatingPointLiteral    {Digit}+\.{Digit}+[fF]|{Digit}+\.{Digit}+{Exponent}[Ff]
-EscapedChar             \\[^n\\"]
-StringLiteral           \"([^\\"]|{EscapedChar})+\"
+EscapedChar             \\[n\\"]
+StringLiteral           \"([^\"\\]|{EscapedChar})+\"
 InlineComment           \/\/.*$
 LeftParenthese          \(
 RightParenthese         \)
@@ -51,12 +51,12 @@ Return                  return
 {LeftBrace}             return LBRACE;
 {RightBrace}            return RBRACE;
 {Equal}                 return EQUAL;
-{DoubleQuote}           return DQUOTE;
 {Less}                  return LESS;
 {Greater}               return GREATER;
 {LeftBracket}           return LBRACKET;
 {RightBracket}          return RBRACKET;
 {StringLiteral}         return STRING;
+{DoubleQuote}           return DQUOTE;
 ({Space}|{Newline})+    /* ignored character */
 {Minus}                 return MINUS;
 {Plus}                  return PLUS;

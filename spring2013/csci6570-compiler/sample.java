@@ -105,7 +105,7 @@ public class FactorialRec
         fact = factorial( n );                    // call factorial
         SimpleIO.printString( "Factorial of " );
         SimpleIO.printInt( n );                   // print n
-        SimpleIO.printString( " = " );
+        SimpleIO.printString( " = \n\"" );
         SimpleIO.printInt( fact );                // print the result
         SimpleIO.println();
         return;                                   // return from method (last stmt)
