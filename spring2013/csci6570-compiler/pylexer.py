@@ -17,6 +17,7 @@ def _b(text):
     else:
         return bytes(text, 'utf-8')
 
+# a simple wrapper function around the original yylex C function
 def yylex(filename):
     filename = _b(filename)
     print(filename)
@@ -30,6 +31,7 @@ def yylex(filename):
         else:
             break
 
+# parsing the header file to get the symbol table
 def get_symbols(header_file):
     d = dict()
     pattern = r'[ \t]+'
