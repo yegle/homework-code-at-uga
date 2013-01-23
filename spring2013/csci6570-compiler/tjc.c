@@ -8,10 +8,8 @@ typedef int bool;
 #define false 0
 
 extern FILE *yyin;
-extern int   yylineno;
+extern int yylineno;
 extern char *yytext;
-extern int commentDepth;
-extern int inBlockComment;
 
 void usage(){
     fprintf(stderr, "Usage: prog TinyJavaProgram.java\n");
