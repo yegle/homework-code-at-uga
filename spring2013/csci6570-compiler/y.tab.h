@@ -19,5 +19,6 @@
 #define PLUS        19
 #define MUL         20
 #define DIVIDE      21
-#define BCOMMENT    22
-#define RETURN      23
+#define RETURN      22
+#define BCOMMENTSTART   23
+#define BCOMMENTEND     24

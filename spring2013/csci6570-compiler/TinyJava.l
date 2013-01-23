@@ -29,44 +29,46 @@ Newline                 [\n\r]
 DoubleQuote             \"
 Less                    \<
 Greater                 \>
-BlockCommentBegin       \/\*
+ /*
+BlockComment            \/\*([^\*]|\n|*(?!/))+\*\/
+    */
+BlockCommentStart       \/\*
 BlockCommentEnd         \*\/
 Minus                   -
 Plus                    \+
 Multiply                \*
 Divide                  \/
 Return                  return
+%x BlockComment
 %%
-{Newline}               ;
-\n                      ;
-{Return}                return RETURN;
-{Ident}                 return IDENT;
-{FloatingPointLiteral}  return FLOAT;
-{Digit}+                return CONST;
-{InlineComment}         return ICOMMENT;
-{LeftParenthese}        return LPAR;
-{RightParenthese}       return RPAR;
-{Semicolon}             return SEMI;
-{Dot}                   return DOT;
-{LeftBrace}             return LBRACE;
-{RightBrace}            return RBRACE;
-{Equal}                 return EQUAL;
-{Less}                  return LESS;
-{Greater}               return GREATER;
-{LeftBracket}           return LBRACKET;
-{RightBracket}          return RBRACKET;
-{StringLiteral}         return STRING;
-{DoubleQuote}           return DQUOTE;
-({Space}|{Newline})+    /* ignored character */
-{Minus}                 return MINUS;
-{Plus}                  return PLUS;
-{Multiply}              return MUL;
-{Divide}                return DIVIDE;
-{BlockCommentBegin} {
-    inBlockComment = 1;
-    return BCOMMENT;
-}
-{BlockCommentEnd} {
-    inBlockComment = 0;
-    return BCOMMENT;
-}
+{BlockCommentStart}                 BEGIN(BlockComment); return BCOMMENTSTART;
+<BlockComment>[^*]*                 /*ignored*/;
+<BlockComment>\*[^\/]               /*ignored*/;
+<BlockComment>{BlockCommentEnd}     BEGIN(INITIAL); return BCOMMENTEND;
+{Newline}                           ;
+{Return}                            return RETURN;
+{Ident}                             return IDENT;
+{FloatingPointLiteral}              return FLOAT;
+{Digit}+                            return CONST;
+{InlineComment}                     return ICOMMENT;
+{LeftParenthese}                    return LPAR;
+{RightParenthese}                   return RPAR;
+{Semicolon}                         return SEMI;
+{Dot}                               return DOT;
+{LeftBrace}                         return LBRACE;
+{RightBrace}                        return RBRACE;
+{Equal}                             return EQUAL;
+{Less}                              return LESS;
+{Greater}                           return GREATER;
+{LeftBracket}                       return LBRACKET;
+{RightBracket}                      return RBRACKET;
+{StringLiteral}                     return STRING;
+{DoubleQuote}                       return DQUOTE;
+({Space}|{Newline})+                /* ignored character */
+{Minus}                             return MINUS;
+{Plus}                              return PLUS;
+{Multiply}                          return MUL;
+{Divide}                            return DIVIDE;
+ /*
+{BlockComment}                      return BCOMMENT;
+*/

@@ -3,6 +3,10 @@
 #include<string.h>
 #include "y.tab.h"
 
+typedef int bool;
+#define true 1
+#define false 0
+
 extern FILE *yyin;
 extern int   yylineno;
 extern char *yytext;
@@ -14,10 +18,36 @@ void usage(){
     return;
 }
 
+bool check_filename(const char* filename){
+    int check_len = sizeof(".java");
+    char *str = ".java";
+
+    int str_len = strlen(str);
+    int filename_len = strlen(filename);
+
+    if (filename_len < check_len){
+        return false;
+    }
+
+    bool ret = true;
+    for (int i=0; i<check_len; i++){
+        if(str[str_len-i] != filename[filename_len-i]){
+            ret = false;
+            break;
+        }
+    }
+    return ret;
+}
+
 int main(int argc, char* argv[]){
     if(argc < 2){
         usage();
         return -1;
+    }
+    if (!check_filename(argv[1])){
+        fprintf(stderr, "Error: the filename should end with .java\n");
+        usage();
+        return -2;
     }
     yyin = fopen(argv[1], "r");
     if(yyin == NULL){
@@ -30,19 +60,6 @@ int main(int argc, char* argv[]){
     int token;
 
     while((token = yylex())!=0){
-        if (token == BCOMMENT){
-            if (inBlockComment){
-                printf("BLOCK COMMENT BEGIN\n");
-            }
-            else{
-                printf("BLOCK COMMENT END\n");
-            }
-            continue;
-        }
-        else if (inBlockComment){
-            printf("IN BLOCK COMMENT\n");
-            continue;
-        }
         switch(token){
             case IDENT:
                 printf("IDENT %s\n", yytext);
@@ -94,6 +111,12 @@ int main(int argc, char* argv[]){
                 break;
             case ICOMMENT:
                 printf("ICOMMENT\n");
+                break;
+            case BCOMMENTSTART:
+                printf("BCOMMENTSTART\n");
+                break;
+            case BCOMMENTEND:
+                printf("BCOMMENTEND\n");
                 break;
             case RETURN:
                 printf("RETURN\n");
