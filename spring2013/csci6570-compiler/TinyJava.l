@@ -3,7 +3,21 @@ scanner for TinyJava language
 */
 %{
 #include "y.tab.h"
-int inBlockComment = 0;
+int yywrap(void){
+    return 1;
+}
+
+int set_file(char* filename){
+    yyin = fopen(filename, "r");
+    if (yyin==NULL){
+        fprintf(stderr, "Error opening file. Reason: %s\n",
+                strerror(errno));
+        return -1;
+    }
+    else{
+        return 0;
+    }
+}
 %}
 Letter                  [a-zA-Z_]
 Digit                   [0-9]
