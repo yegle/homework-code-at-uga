@@ -1,11 +1,9 @@
 #include<stdio.h>
 #include<errno.h>
 #include<string.h>
+#include<stdbool.h>
 #include "y.tab.h"
 
-typedef int bool;
-#define true 1
-#define false 0
 
 extern FILE *yyin;
 extern int yylineno;
@@ -16,7 +14,7 @@ void usage(){
     return;
 }
 
-bool check_filename(const char* filename){
+_Bool check_filename(const char* filename){
     int check_len = sizeof(".java");
     char *str = ".java";
 
