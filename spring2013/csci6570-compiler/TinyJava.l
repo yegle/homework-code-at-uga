@@ -76,7 +76,7 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
     reason = "Digit not allowed right after a DecimalIntegerLiteral";
     return ERROR;
 }
-<DigitNotAllowed>{NonDigit}         BEGIN(INITIAL); REJECT;
+<DigitNotAllowed>{NonDigit}         BEGIN(INITIAL); unput(yytext[0]);
 {InlineComment}                     return ICOMMENT;
 {LeftParenthese}                    return LPAR;
 {RightParenthese}                   return RPAR;
