@@ -22,3 +22,4 @@
 #define RETURN      22
 #define BCOMMENTSTART   23
 #define BCOMMENTEND     24
+#define ERROR           25

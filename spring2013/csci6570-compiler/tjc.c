@@ -57,6 +57,9 @@ int main(int argc, char* argv[]){
 
     while((token = yylex())!=0){
         switch(token){
+            case ERROR:
+                printf("ERROR on line %d: %s\n", yylineno, yytext);
+                exit(-1);
             case IDENT:
                 printf("IDENT %s\n", yytext);
                 break;

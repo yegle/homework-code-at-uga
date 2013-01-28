@@ -27,7 +27,7 @@ DecimalIntegerLiteral   (0|{NonZeroDigit}{Digit}*)
 Exponent                [eE]([+-]{Digit}+|{Digit}+)
 FloatingPointLiteral    {Digit}+\.{Digit}+[fF]|{Digit}+\.{Digit}+{Exponent}[Ff]
 EscapedChar             \\[n\\"]
-StringLiteral           \"([^\"\\]|{EscapedChar})+\"
+StringLiteral           \"([^\"\\\n]|{EscapedChar})+\"
 InlineComment           \/\/.*$
 LeftParenthese          \(
 RightParenthese         \)
@@ -40,7 +40,9 @@ Dot                     \.
 Equal                   =
 Space                   [[:space:]]
 Newline                 [\n\r]
+ /*
 DoubleQuote             \"
+ */
 Less                    \<
 Greater                 \>
  /*
@@ -59,7 +61,7 @@ Return                  return
 <BlockComment>[^*]*                 /*ignored*/;
 <BlockComment>\*[^\/]               /*ignored*/;
 <BlockComment>{BlockCommentEnd}     BEGIN(INITIAL); return BCOMMENTEND;
-{Newline}                           ;
+{Newline}                           yylineno++;
 {Return}                            return RETURN;
 {Ident}                             return IDENT;
 {FloatingPointLiteral}              return FLOAT;
@@ -77,12 +79,15 @@ Return                  return
 {LeftBracket}                       return LBRACKET;
 {RightBracket}                      return RBRACKET;
 {StringLiteral}                     return STRING;
+ /*
 {DoubleQuote}                       return DQUOTE;
-({Space}|{Newline})+                /* ignored character */
+*/
+{Space}+                            /* ignored character */
 {Minus}                             return MINUS;
 {Plus}                              return PLUS;
 {Multiply}                          return MUL;
 {Divide}                            return DIVIDE;
+.                                   return ERROR;
  /*
 {BlockComment}                      return BCOMMENT;
 */
