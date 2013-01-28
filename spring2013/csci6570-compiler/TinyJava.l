@@ -18,6 +18,8 @@ int set_file(char* filename){
         return 0;
     }
 }
+
+char* reason;
 %}
 Letter                  [a-zA-Z_]
 Digit                   [0-9]
@@ -70,7 +72,10 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {Identifier}                        return IDENT;
 {FloatingPointLiteral}              return FLOAT;
 {DecimalIntegerLiteral}             BEGIN(DigitNotAllowed); return INTEGER;
-<DigitNotAllowed>{Digit}            return ERROR;
+<DigitNotAllowed>{Digit}            {
+    reason = "Digit not allowed right after a DecimalIntegerLiteral";
+    return ERROR;
+}
 <DigitNotAllowed>{NonDigit}         BEGIN(INITIAL); REJECT;
 {InlineComment}                     return ICOMMENT;
 {LeftParenthese}                    return LPAR;
@@ -93,7 +98,10 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {Plus}                              return PLUS;
 {Multiply}                          return MUL;
 {Divide}                            return DIVIDE;
-.                                   return ERROR;
+.                                   {
+    reason="Unrecognized token";
+    return ERROR;
+}
  /*
 {BlockComment}                      return BCOMMENT;
 */

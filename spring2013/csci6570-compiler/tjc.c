@@ -8,6 +8,7 @@
 extern FILE *yyin;
 extern int yylineno;
 extern char *yytext;
+extern char *reason;
 
 void usage(){
     fprintf(stderr, "Usage: prog TinyJavaProgram.java\n");
@@ -59,6 +60,7 @@ int main(int argc, char* argv[]){
         switch(token){
             case ERROR:
                 printf("ERROR on line %d: %s\n", yylineno, yytext);
+                printf("REASON: %s\n", reason);
                 exit(-1);
             case KEYWORD:
                 printf("KEYWORD %s\n", yytext);
