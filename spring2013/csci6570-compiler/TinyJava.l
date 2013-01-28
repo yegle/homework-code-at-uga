@@ -21,8 +21,9 @@ int set_file(char* filename){
 %}
 Letter                  [a-zA-Z_]
 Digit                   [0-9]
-Ident                   {Letter}({Letter}|{Digit})*
+Identifier              {Letter}({Letter}|{Digit})*
 NonZeroDigit            [1-9]
+NonDigit                [^0-9]
 DecimalIntegerLiteral   (0|{NonZeroDigit}{Digit}*)
 Exponent                [eE]([+-]{Digit}+|{Digit}+)
 FloatingPointLiteral    {Digit}+\.{Digit}+[fF]|{Digit}+\.{Digit}+{Exponent}[Ff]
@@ -55,17 +56,22 @@ Plus                    \+
 Multiply                \*
 Divide                  \/
 Return                  return
+Keyword                 (return|if|else|for|new|null|int|float|void|public|static|while|class)
 %x BlockComment
+%x DigitNotAllowed
 %%
 {BlockCommentStart}                 BEGIN(BlockComment); return BCOMMENTSTART;
 <BlockComment>[^*]*                 /*ignored*/;
 <BlockComment>\*[^\/]               /*ignored*/;
 <BlockComment>{BlockCommentEnd}     BEGIN(INITIAL); return BCOMMENTEND;
+{Keyword}                           return KEYWORD;
 {Newline}                           yylineno++;
 {Return}                            return RETURN;
-{Ident}                             return IDENT;
+{Identifier}                        return IDENT;
 {FloatingPointLiteral}              return FLOAT;
-{Digit}+                            return CONST;
+{DecimalIntegerLiteral}             BEGIN(DigitNotAllowed); return INTEGER;
+<DigitNotAllowed>{Digit}            return ERROR;
+<DigitNotAllowed>{NonDigit}         BEGIN(INITIAL); REJECT;
 {InlineComment}                     return ICOMMENT;
 {LeftParenthese}                    return LPAR;
 {RightParenthese}                   return RPAR;
