@@ -45,5 +45,11 @@ if __name__ == '__main__':
     symbols = get_symbols('y.tab.h')
     for token in yylex('sample.java'):
         s = symbols[token[0]]
+        if s == 'ERROR':
+            reason = c_char_p.in_dll(lexer, 'reason').value
+            lineno = c_int.in_dll(lexer, 'yylineno').value
+            print("Error at line %s: %s" % (lineno, token[1]))
+            print("REASON: %s" % (reason,))
+            sys.exit(255)
         text = token[1].decode('utf-8')
         print('%s "%s"' % (s, text))
