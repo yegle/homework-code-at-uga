@@ -60,14 +60,17 @@ int main(int argc, char* argv[]){
             case ERROR:
                 printf("ERROR on line %d: %s\n", yylineno, yytext);
                 exit(-1);
+            case KEYWORD:
+                printf("KEYWORD %s\n", yytext);
+                break;
             case IDENT:
                 printf("IDENT %s\n", yytext);
                 break;
             case FLOAT:
                 printf("FLOAT %s\n", yytext);
                 break;
-            case CONST:
-                printf("CONST %s\n", yytext);
+            case INTEGER:
+                printf("INTEGER %s\n", yytext);
                 break;
             case STRING:
                 printf("STRING %s\n", yytext);
