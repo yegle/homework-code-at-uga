@@ -1,6 +1,6 @@
 #define IDENT       1
 #define FLOAT       2
-#define CONST       3
+#define INTEGER     3
 #define STRING      4
 #define ICOMMENT    5
 #define LPAR        6
@@ -21,5 +21,6 @@
 #define DIVIDE      21
 #define RETURN      22
 #define BCOMMENTSTART   23
-#define BCOMMENTEND     24
-#define ERROR           25
+#define BCOMMENTEND 24
+#define ERROR       25
+#define KEYWORD     26
