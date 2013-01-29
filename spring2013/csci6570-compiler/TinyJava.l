@@ -28,7 +28,7 @@ NonZeroDigit            [1-9]
 NonDigit                [^0-9]
 DecimalIntegerLiteral   (0|{NonZeroDigit}{Digit}*)
 Exponent                [eE]([+-]{Digit}+|{Digit}+)
-FloatingPointLiteral    {Digit}+\.{Digit}+[fF]|{Digit}+\.{Digit}+{Exponent}[Ff]
+FloatingPointLiteral    {DecimalIntegerLiteral}\.{Digit}+[fF]|{Digit}+\.{Digit}+{Exponent}[Ff]
 EscapedChar             \\[n\\"]
 StringLiteral           \"([^\"\\\n]|{EscapedChar})+\"
 InlineComment           \/\/.*$
@@ -42,6 +42,7 @@ Semicolon               ;
 Dot                     \.
 Assign                  =
 Equal                   ==
+NotEqual                !=
 Space                   " "
 Newline                 [\n\r]
 LessEqual               \<=
@@ -60,7 +61,7 @@ Return                  return
 Comma                   ,
 Keyword                 (return|if|else|for|new|null|int|float|void|public|static|while|class)
 %x BlockComment
-%x DigitNotAllowed
+%x TokenNotAllowed
 %%
 {BlockCommentStart}                 BEGIN(BlockComment); return BCOMMENTSTART;
 <BlockComment>{Newline}             yylineno++;
@@ -72,12 +73,12 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {Return}                            return RETURN;
 {Identifier}                        return IDENT;
 {FloatingPointLiteral}              return FLOAT;
-{DecimalIntegerLiteral}             BEGIN(DigitNotAllowed); return INTEGER;
-<DigitNotAllowed>{Digit}            {
-    reason = "Digit not allowed right after a DecimalIntegerLiteral";
+{DecimalIntegerLiteral}             BEGIN(TokenNotAllowed); return INTEGER;
+<TokenNotAllowed>[_a-zA-Z0-9]       {
+    reason = "This token is not allowed right after a DecimalIntegerLiteral";
     return ERROR;
 }
-<DigitNotAllowed>{NonDigit}         BEGIN(INITIAL); unput(yytext[0]);
+<TokenNotAllowed>[^_a-zA-Z0-9]      BEGIN(INITIAL); unput(yytext[0]);
 {InlineComment}                     return ICOMMENT;
 {LeftParenthese}                    return LPAR;
 {RightParenthese}                   return RPAR;
@@ -87,6 +88,7 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {RightBrace}                        return RBRACE;
 {Assign}                            return ASSIGN;
 {Equal}                             return EQUAL;
+{NotEqual}                          return NOTEQUAL;
 {LessEqual}                         return LESSEQUAL;
 {GreaterEqual}                      return GREATEREQUAL;
 {Less}                              return LESS;

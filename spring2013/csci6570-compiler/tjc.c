@@ -155,6 +155,9 @@ int main(int argc, char* argv[]){
             case COMMA:
                 printf("COMMA\n");
                 break;
+            case NOTEQUAL:
+                printf("NOTEQUAL\n");
+                break;
             default:
                 printf("UNKNOWN '%s\n'", yytext);
         }

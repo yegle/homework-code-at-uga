@@ -30,3 +30,4 @@
 #define INCREMENT   30
 #define DECREMENT   31
 #define COMMA   32
+#define NOTEQUAL    33
