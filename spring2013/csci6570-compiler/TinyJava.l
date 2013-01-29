@@ -42,7 +42,7 @@ Semicolon               ;
 Dot                     \.
 Assign                  =
 Equal                   ==
-Space                   [[:space:]]
+Space                   " "
 Newline                 [\n\r]
 LessEqual               \<=
 GreaterEqual            \>=
@@ -55,6 +55,8 @@ BlockCommentStart       \/\*
 BlockCommentEnd         \*\/
 Minus                   -
 Plus                    \+
+Increment               \+\+
+Decrement               --
 Multiply                \*
 Divide                  \/
 Return                  return
@@ -63,7 +65,8 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 %x DigitNotAllowed
 %%
 {BlockCommentStart}                 BEGIN(BlockComment); return BCOMMENTSTART;
-<BlockComment>[^*]*                 /*ignored*/;
+<BlockComment>{Newline}             yylineno++;
+<BlockComment>[^*\n\r]*             /*ignored*/;
 <BlockComment>\*[^\/]               /*ignored*/;
 <BlockComment>{BlockCommentEnd}     BEGIN(INITIAL); return BCOMMENTEND;
 {Keyword}                           return KEYWORD;
@@ -99,6 +102,8 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {Space}+                            /* ignored character */
 {Minus}                             return MINUS;
 {Plus}                              return PLUS;
+{Increment}                         return INCREMENT;
+{Decrement}                         return DECREMENT;
 {Multiply}                          return MUL;
 {Divide}                            return DIVIDE;
 .                                   {

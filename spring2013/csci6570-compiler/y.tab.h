@@ -27,3 +27,5 @@
 #define ASSIGN  27
 #define GREATEREQUAL    28
 #define LESSEQUAL   29
+#define INCREMENT   30
+#define DECREMENT   31
