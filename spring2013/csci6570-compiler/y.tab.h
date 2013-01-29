@@ -29,3 +29,4 @@
 #define LESSEQUAL   29
 #define INCREMENT   30
 #define DECREMENT   31
+#define COMMA   32

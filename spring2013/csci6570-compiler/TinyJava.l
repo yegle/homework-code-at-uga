@@ -57,6 +57,7 @@ Decrement               --
 Multiply                \*
 Divide                  \/
 Return                  return
+Comma                   ,
 Keyword                 (return|if|else|for|new|null|int|float|void|public|static|while|class)
 %x BlockComment
 %x DigitNotAllowed
@@ -100,6 +101,7 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {Decrement}                         return DECREMENT;
 {Multiply}                          return MUL;
 {Divide}                            return DIVIDE;
+{Comma}                             return COMMA;
 .                                   {
     reason="Unrecognized token";
     return ERROR;

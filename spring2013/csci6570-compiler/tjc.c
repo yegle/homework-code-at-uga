@@ -152,6 +152,9 @@ int main(int argc, char* argv[]){
             case DIVIDE:
                 printf("DIVIDE\n");
                 break;
+            case COMMA:
+                printf("COMMA\n");
+                break;
             default:
                 printf("UNKNOWN '%s\n'", yytext);
         }
