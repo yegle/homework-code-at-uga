@@ -140,6 +140,12 @@ int main(int argc, char* argv[]){
             case PLUS:
                 printf("PLUS\n");
                 break;
+            case INCREMENT:
+                printf("INCREMENT\n");
+                break;
+            case DECREMENT:
+                printf("DECREMENT\n");
+                break;
             case MUL:
                 printf("MUL\n");
                 break;
