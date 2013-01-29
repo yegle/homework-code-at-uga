@@ -64,12 +64,11 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 %x TokenNotAllowed
 %%
 {BlockCommentStart}                 BEGIN(BlockComment); return BCOMMENTSTART;
-<BlockComment>{Newline}             yylineno++;
 <BlockComment>[^*\n\r]*             /*ignored*/;
 <BlockComment>\*[^\/]               /*ignored*/;
 <BlockComment>{BlockCommentEnd}     BEGIN(INITIAL); return BCOMMENTEND;
 {Keyword}                           return KEYWORD;
-{Newline}                           yylineno++;
+<*>{Newline}                        yylineno++;
 {Return}                            return RETURN;
 {Identifier}                        return IDENT;
 {FloatingPointLiteral}              return FLOAT;
