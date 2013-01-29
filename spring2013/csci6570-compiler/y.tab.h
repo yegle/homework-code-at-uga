@@ -24,3 +24,6 @@
 #define BCOMMENTEND 24
 #define ERROR       25
 #define KEYWORD     26
+#define ASSIGN  27
+#define GREATEREQUAL    28
+#define LESSEQUAL   29

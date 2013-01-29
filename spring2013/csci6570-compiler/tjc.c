@@ -62,6 +62,15 @@ int main(int argc, char* argv[]){
                 printf("ERROR on line %d: %s\n", yylineno, yytext);
                 printf("REASON: %s\n", reason);
                 exit(-1);
+            case ASSIGN:
+                printf("ASSIGN %s\n", yytext);
+                break;
+            case GREATEREQUAL:
+                printf("GREATEREQUAL %s\n", yytext);
+                break;
+            case LESSEQUAL:
+                printf("LESSEQUAL %s\n", yytext);
+                break;
             case KEYWORD:
                 printf("KEYWORD %s\n", yytext);
                 break;

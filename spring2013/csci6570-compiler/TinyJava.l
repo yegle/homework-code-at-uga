@@ -40,12 +40,12 @@ LeftBrace               \{
 RightBrace              \}
 Semicolon               ;
 Dot                     \.
-Equal                   =
+Assign                  =
+Equal                   ==
 Space                   [[:space:]]
 Newline                 [\n\r]
- /*
-DoubleQuote             \"
- */
+LessEqual               \<=
+GreaterEqual            \>=
 Less                    \<
 Greater                 \>
  /*
@@ -84,7 +84,10 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {Dot}                               return DOT;
 {LeftBrace}                         return LBRACE;
 {RightBrace}                        return RBRACE;
+{Assign}                            return ASSIGN;
 {Equal}                             return EQUAL;
+{LessEqual}                         return LESSEQUAL;
+{GreaterEqual}                      return GREATEREQUAL;
 {Less}                              return LESS;
 {Greater}                           return GREATER;
 {LeftBracket}                       return LBRACKET;
