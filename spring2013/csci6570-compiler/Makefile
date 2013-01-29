@@ -14,9 +14,6 @@ all: tjc libtjlex.so
 tjc: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) -lfl
 
-tjc_new: tjc.o libtjlex.so
-	$(CC) $(CFLAGS) -I. -ltjlex -o $@ tjc.o
-
 # dependencies
 tjc.o: tjc.c y.tab.h
 
