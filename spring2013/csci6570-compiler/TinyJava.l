@@ -48,9 +48,6 @@ LessEqual               \<=
 GreaterEqual            \>=
 Less                    \<
 Greater                 \>
- /*
-BlockComment            \/\*([^\*]|\n|*(?!/))+\*\/
-    */
 BlockCommentStart       \/\*
 BlockCommentEnd         \*\/
 Minus                   -
@@ -96,9 +93,6 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 {LeftBracket}                       return LBRACKET;
 {RightBracket}                      return RBRACKET;
 {StringLiteral}                     return STRING;
- /*
-{DoubleQuote}                       return DQUOTE;
-*/
 {Space}+                            /* ignored character */
 {Minus}                             return MINUS;
 {Plus}                              return PLUS;
@@ -110,6 +104,3 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
     reason="Unrecognized token";
     return ERROR;
 }
- /*
-{BlockComment}                      return BCOMMENT;
-*/
