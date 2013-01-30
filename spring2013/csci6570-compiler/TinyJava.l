@@ -71,10 +71,10 @@ Keyword                 (return|if|else|for|new|null|int|float|void|public|stati
 <*>{Newline}                        yylineno++;
 {Return}                            return RETURN;
 {Identifier}                        return IDENT;
-{FloatingPointLiteral}              return FLOAT;
+{FloatingPointLiteral}              BEGIN(TokenNotAllowed); return FLOAT;
 {DecimalIntegerLiteral}             BEGIN(TokenNotAllowed); return INTEGER;
 <TokenNotAllowed>[_a-zA-Z0-9]       {
-    reason = "This token is not allowed right after a DecimalIntegerLiteral";
+    reason = "This token is not allowed right after the previous token";
     return ERROR;
 }
 <TokenNotAllowed>[^_a-zA-Z0-9]      BEGIN(INITIAL); unput(yytext[0]);
