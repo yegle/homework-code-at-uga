@@ -25,7 +25,7 @@ def str_echo(fd):
 def sig_chld(signo, ignored):
     try:
         pid, exit_status = os.waitpid(-1, 0)
-    except ChildProcessError:
+    except Exception:
         pass
 
 if __name__ == '__main__':
@@ -46,10 +46,13 @@ if __name__ == '__main__':
             else:
                 tools.err_sys(e, msg="accept error")
 
-        if not os.fork():
-            listenfd.close()
-            str_echo(connfd)
-            connfd.close()
-            sys.exit(0)
+        try:
+            if not os.fork():
+                listenfd.close()
+                str_echo(connfd)
+                connfd.close()
+                sys.exit(0)
+        except OSError:
+            pass
 
         connfd.close()
