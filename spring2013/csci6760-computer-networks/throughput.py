@@ -24,7 +24,7 @@ def make_connection(local_addr, remote_addr, data):
 if __name__ == '__main__':
     try:
         server_addr = sys.argv[1]
-        server_port = sys.argv[2]
+        server_port = int(sys.argv[2])
         packet_size = sys.argv[3]
     except IndexError:
         print("Usage: %s <server_addr> <server_port> <packet_size>" %
@@ -51,7 +51,7 @@ if __name__ == '__main__':
             start = end
             c['count'] = 0
         p.spawn(make_connection, (localaddr[c['count']%5], 0),
-                ('10.0.0.2',9000), b'A'*10240)
+                (server_addr, server_port), b'A'*packet_size)
         try:
             p.join(raise_error=True)
         except Exception:
