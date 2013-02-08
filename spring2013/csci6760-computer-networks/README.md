@@ -21,6 +21,8 @@ Client we've implemented
 2. geventtest.py: implemented using Python's gevent lib (a event based
    network lib)
 3. threadtest.py: implemented using Python's multithreading lib
+4. throughput.py: implemented using Python's gevent lib, for testing
+   throughput
 
 ## How to run the code
 
@@ -127,4 +129,4 @@ In the second test, we have these test result:
     2. eventserver.py: 134MB/s
 2. Sending 512 bytes each time
     1. threadserver.py: 273 MB/s
-    2. eventserver.py: 500 MB/s
+    2. eventserver.py: 300 MB/s
