@@ -7,6 +7,7 @@ from __future__ import (unicode_literals, absolute_import,
 from gevent import socket, pool
 from collections import Counter
 import time
+import sys
 
 
 
@@ -21,6 +22,14 @@ def make_connection(local_addr, remote_addr, data):
     c['count'] += len(data)
 
 if __name__ == '__main__':
+    try:
+        server_addr = sys.argv[1]
+        server_port = sys.argv[2]
+        packet_size = sys.argv[3]
+    except IndexError:
+        print("Usage: %s <server_addr> <server_port> <packet_size>" %
+              sys.argv[0])
+        sys.exit(1)
     c = Counter()
     p = pool.Pool()
     l = list()
