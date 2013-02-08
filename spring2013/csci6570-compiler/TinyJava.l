@@ -57,28 +57,51 @@ Increment               \+\+
 Decrement               --
 Multiply                \*
 Divide                  \/
-Return                  return
 Comma                   ,
-Keyword                 (return|if|else|for|new|null|int|float|void|public|static|while|class)
+Return                  return
+If                      if
+Else                    else
+For                     for
+New                     new
+Null                    null
+Int                     int
+Float                   float
+Void                    void
+Public                  public
+Static                  static
+While                   while
+Class                   class
 %x BlockComment
 %x TokenNotAllowed
 %%
-{BlockCommentStart}                 BEGIN(BlockComment); return BCOMMENTSTART;
+{Return}                            return RETURN;
+{If}                                return IF;
+{Else}                              return ELSE;
+{For}                               return FOR;
+{New}                               return NEW;
+{Null}                              return NULL_;
+{Int}                               return INT;
+{Float}                             return FLOAT;
+{Void}                              return VOID;
+{Public}                            return PUBLIC;
+{Static}                            return STATIC;
+{While}                             return WHILE;
+{Class}                             return CLASS;
+{BlockCommentStart}                 BEGIN(BlockComment);
 <BlockComment>[^*\n\r]*             /*ignored*/;
 <BlockComment>\*[^\/]               /*ignored*/;
-<BlockComment>{BlockCommentEnd}     BEGIN(INITIAL); return BCOMMENTEND;
-{Keyword}                           return KEYWORD;
+<BlockComment>{BlockCommentEnd}     BEGIN(INITIAL);
 <*>{Newline}                        yylineno++;
 {Return}                            return RETURN;
 {Identifier}                        return IDENT;
-{FloatingPointLiteral}              BEGIN(TokenNotAllowed); return FLOAT;
-{DecimalIntegerLiteral}             BEGIN(TokenNotAllowed); return INTEGER;
+{FloatingPointLiteral}              BEGIN(TokenNotAllowed); return FLOATLITERAL;
+{DecimalIntegerLiteral}             BEGIN(TokenNotAllowed); return INTLITERAL;
 <TokenNotAllowed>[_a-zA-Z0-9]       {
     reason = "This token is not allowed right after the previous token";
     return ERROR;
 }
 <TokenNotAllowed>[^_a-zA-Z0-9]      BEGIN(INITIAL); unput(yytext[0]);
-{InlineComment}                     return ICOMMENT;
+{InlineComment}                     //return ICOMMENT;
 {LeftParenthese}                    return LPAR;
 {RightParenthese}                   return RPAR;
 {Semicolon}                         return SEMI;

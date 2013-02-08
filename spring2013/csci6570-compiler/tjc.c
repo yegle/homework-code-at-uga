@@ -77,11 +77,11 @@ int main(int argc, char* argv[]){
             case IDENT:
                 printf("IDENT %s\n", yytext);
                 break;
-            case FLOAT:
-                printf("FLOAT %s\n", yytext);
+            case FLOATLITERAL:
+                printf("FLOATLITERAL %s\n", yytext);
                 break;
-            case INTEGER:
-                printf("INTEGER %s\n", yytext);
+            case INTLITERAL:
+                printf("INTLITERAL %s\n", yytext);
                 break;
             case STRING:
                 printf("STRING %s\n", yytext);

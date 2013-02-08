@@ -11,12 +11,13 @@ void yyerror( const char *msg );
 int yylex( void );
 
 extern int yylineno;
+int yydebug=1;
 
 %}
 
 %token IDENT
-%token FLOAT
-%token INTEGER
+%token FLOATLITERAL
+%token INTLITERAL
 %token STRING
 %token ICOMMENT
 %token LPAR
@@ -35,7 +36,6 @@ extern int yylineno;
 %token PLUS
 %token MUL
 %token DIVIDE
-%token RETURN
 %token BCOMMENTSTART
 %token BCOMMENTEND
 %token ERROR
@@ -47,18 +47,32 @@ extern int yylineno;
 %token DECREMENT
 %token COMMA
 %token NOTEQUAL
+%token RETURN
+%token IF
+%token ELSE
+%token FOR
+%token NEW
+%token NULL_
+%token INT
+%token FLOAT
+%token VOID
+%token PUBLIC
+%token STATIC
+%token WHILE
+%token CLASS
 
 %%
 
 tiny_java_program: class_decl
                  ;
 
-class_decl: 'public' 'class' IDENT LBRACE member_decl_list RBRACE
+class_decl: class_decl PUBLIC CLASS IDENT LBRACE member_decl_list RBRACE
+          | empty
           ;
 
 member_decl_list: member_decl
                 |
-                member_decl member_decl
+                member_decl member_decl_list
                 ;
 
 member_decl: field_decl
@@ -66,25 +80,25 @@ member_decl: field_decl
            method_decl
            ;
 
-field_decl: 'static' type IDENT ASSIGN literal SEMI
+field_decl: STATIC type IDENT ASSIGN literal SEMI
           ;
 
-method_decl: 'static' return_type IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
+method_decl: STATIC type IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
            |
-           'static' return_type IDENT LPAR RPAR LBRACE method_body RBRACE
+           STATIC VOID IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
            |
-           'public' 'static' 'void' IDENT LPAR IDENT LBRACKET RBRACKET IDENT RPAR LBRACE method_body RBRACE
+           STATIC type IDENT LPAR RPAR LBRACE method_body RBRACE
+           |
+           STATIC VOID IDENT LPAR RPAR LBRACE method_body RBRACE
+           |
+           PUBLIC STATIC VOID IDENT LPAR IDENT LBRACKET RBRACKET IDENT RPAR LBRACE method_body RBRACE
            ;
 
-type: 'int'
+type: INT
     |
-    'float'
+    FLOAT
     ;
 
-return_type: type
-           |
-           'void'
-           ;
 
 formal_param_list: formal_param
                  |
@@ -115,11 +129,11 @@ statement_list: statement statement_list
 
 statement: IDENT ASSIGN expression SEMI
          |
-         'if' LPAR expression RPAR statement
+         IF LPAR expression RPAR statement
          |
-         'if' LPAR expression RPAR statement 'else' statement
+         IF LPAR expression RPAR statement ELSE statement
          |
-         'while' LPAR expression RPAR statement
+         WHILE LPAR expression RPAR statement
          |
          method_invocation SEMI
          |
@@ -128,9 +142,9 @@ statement: IDENT ASSIGN expression SEMI
          SEMI
          ;
 
-return_statement: 'return' expression SEMI
+return_statement: RETURN expression SEMI
                 |
-                'return' SEMI
+                RETURN SEMI
                 ;
 
 method_invocation: qualified_name LPAR argument_list RPAR
@@ -185,6 +199,7 @@ unary_expression: primary_expression
                 PLUS unary_expression
                 |
                 MINUS unary_expression
+                |
                 LPAR type RPAR unary_expression
                 ;
 
@@ -197,9 +212,9 @@ primary_expression: literal
                   LPAR expression RPAR
                   ;
 
-literal: INTEGER
+literal: INTLITERAL
        |
-       FLOAT
+       FLOATLITERAL
        |
        STRING
        ;
