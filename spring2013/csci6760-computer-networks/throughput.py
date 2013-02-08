@@ -6,18 +6,19 @@ from __future__ import (unicode_literals, absolute_import,
 
 from gevent import socket, pool
 from collections import Counter
+import time
 
 
 
-def make_connection(local_addr, remote_addr):
+def make_connection(local_addr, remote_addr, data):
     s = socket.socket()
     s.bind(local_addr)
     s.connect(remote_addr)
-    global l
-    l.append(s)
+    s.send(data)
+    s.recv(len(data)+2)
+    s.close()
     global c
-    c['count'] +=1
-    print(c['count'])
+    c['count'] += len(data)
 
 if __name__ == '__main__':
     c = Counter()
@@ -30,11 +31,19 @@ if __name__ == '__main__':
         '10.0.0.9',
         '10.0.0.10',
     ]
+    counter = 0
+    start = time.time()
+    c['count'] = 0
     while True:
+        counter += 1
+        if counter % 1000 == 0:
+            end = time.time()
+            print("%s, %s MB/s" % (c['count'], c['count']/(1024^2)))
+            start = end
+            c['count'] = 0
         p.spawn(make_connection, (localaddr[c['count']%5], 0),
-                ('10.0.0.2',9000))
+                ('10.0.0.2',9000), b'A'*10240)
         try:
             p.join(raise_error=True)
         except Exception:
-            print(c['count'])
             break
