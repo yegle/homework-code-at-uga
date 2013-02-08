@@ -14,6 +14,9 @@ all: tjc libtjlex.so
 tjc: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) -lfl
 
+y.tab.h: TinyJava.y
+	yacc -d $<
+
 # dependencies
 tjc.o: tjc.c y.tab.h
 
