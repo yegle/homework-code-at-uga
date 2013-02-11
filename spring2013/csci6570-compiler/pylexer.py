@@ -35,10 +35,12 @@ def yylex(filename):
 def get_symbols(header_file):
     d = dict()
     pattern = r'[ \t]+'
+    def_regex = re.compile(r'^#define')
     for line in open(header_file):
-        line = re.sub(pattern, ' ', line)
-        _, symbol, value = line.strip().split(' ')
-        d[int(value)] = symbol
+        if def_regex.match(line):
+            line = re.sub(pattern, ' ', line)
+            _, symbol, value = line.strip().split(' ')
+            d[int(value)] = symbol
     return d
 
 if __name__ == '__main__':
