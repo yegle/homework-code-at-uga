@@ -217,7 +217,28 @@ literal: INTLITERAL
        FLOATLITERAL
        |
        STRING
+       |
+       LBRACKET int_list RBRACKET
+       |
+       LBRACKET float_list RBRACKET
+       |
+       LBRACKET string_list RBRACKET
        ;
+
+int_list: INTLITERAL
+        |
+        INTLITERAL COMMA int_list
+        ;
+
+float_list: FLOATLITERAL
+          |
+          FLOATLITERAL COMMA float_list
+          ;
+
+string_list: STRING
+           |
+           STRING COMMA string_list
+           ;
 
 empty: ;
 %%
