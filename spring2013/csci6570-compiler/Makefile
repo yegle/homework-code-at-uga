@@ -3,16 +3,24 @@ CC      = gcc
 CFLAGS  = -std=c99 -fPIC
 
 # object files needed for the project
-OBJS    = lex.yy.o tjc.o
+OBJS    = lex.yy.o check_filename.o
 
 all: tjc libtjlex.so parser
 
-parser: parser.c lex.yy.c y.tab.c
-	$(CC) $^ -o $@
+parser: $(OBJS) y.tab.o parser.o
+	$(CC) $(CFLAGS) -o $@ $^ -lfl
+
+parser.o: parser.c
+
+lex.yy.o: lex.yy.c
+
+y.tab.o: y.tab.c
 
 # the main target
-tjc: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) -lfl
+tjc: $(OBJS) tjc.o
+	$(CC) $(CFLAGS) -o $@ $^ -lfl
+
+check_filename.o: check_filename.c
 
 y.tab.c: TinyJava.y
 	yacc --report=all $<
