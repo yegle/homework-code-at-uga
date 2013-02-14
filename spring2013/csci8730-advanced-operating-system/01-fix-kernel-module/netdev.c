@@ -135,16 +135,10 @@ static int __init my_netdev_init(void)
 
 static void __exit my_netdev_exit(void)
 {
-<<<<<<< HEAD
     remove_proc_entry(modname, NULL);
 	if (my_netdev) {
 		unregister_netdev(my_netdev);
-		//free_netdev(my_netdev);
-=======
-	if (my_netdev) {
-		unregister_netdev(my_netdev);
 		free_netdev(my_netdev);
->>>>>>> cfe53dcccab2a7149f531e8eba627b29c08d3c6a
 	}
 
 	printk(KERN_INFO "netdev exit");
