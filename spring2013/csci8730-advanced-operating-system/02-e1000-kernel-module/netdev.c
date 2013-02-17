@@ -91,7 +91,7 @@ static void ethx_uninit(struct net_device *dev)
 static struct net_device_stats *ethx_get_stats(struct net_device *dev)
 {
     /* only return the current stats */
-    printk(KERN_INFO "-->INSIDE ethx_get_stats");
+    //printk(KERN_INFO "-->INSIDE ethx_get_stats");
     return &dev->stats;
 }
 
@@ -168,7 +168,7 @@ static void netdev_setup(struct net_device *dev)
 static int __init my_netdev_init(void)
 {
     int ret = 0;
-    unsigned long mmio_start, mmio_end, mmio_len, mmio_flags;
+    unsigned long mmio_start, mmio_len, mmio_flags;
     struct pci_dev *pdev = NULL;
     struct ethx_priv *pp = NULL;
     void *ioaddr;
@@ -197,39 +197,34 @@ static int __init my_netdev_init(void)
     }
 
     /* get PCI memory mapped I/O space base address from BAR1(should be 2 according to the manual ) */
+    mmio_start = 0;
     for (i=BAR_1; i <= BAR_5; i++){
         mmio_len = pci_resource_len(pdev, i);
-        mmio_start = pci_resource_start(pdev, i);
-        //mmio_end = pci_resource_end(pdev, i);
         mmio_flags = pci_resource_flags(pdev, i);
         /* make sure above region is MMI/O */
-        printk(KERN_INFO "IORESOURCE_IO=%d", IORESOURCE_IO);
         if(mmio_len != 0 && (mmio_flags & IORESOURCE_IO)) {
-            printk(KERN_INFO "mmio_len = %lu, mmio_flags = %lu", mmio_len, mmio_flags);
+            mmio_start = pci_resource_start(pdev, i);
+            printk(KERN_INFO "i=%d", i);
             break;
-        }
-        else{
-            printk(KERN_INFO "mmio_len = %lu, mmio_flags = %lu", mmio_len, mmio_flags);
         }
     }
 
-    if (mmio_len == 0){
-        printk(KERN_INFO "mmio_len == 0");
+    if (mmio_start == 0){
+        printk(KERN_INFO "get mmio_start failed!");
         return -2;
     }
 
     printk(KERN_INFO "[mmio_start:%ld\t]",mmio_start);
-    printk(KERN_INFO "[mmio_end:%ld\t]",mmio_end);
     printk(KERN_INFO "[mmio_len:%ld\t\t]",mmio_len);
     printk(KERN_INFO "[mmio_flags:%ld\t]",mmio_flags);
 
 
     /* get PCI memory space */
-    printk(KERN_INFO "pci_request_regions()");
-    if(pci_request_regions(pdev, "E1000")) {
-        printk(KERN_INFO "Could not get PCI region");
-        return -2;
-    }
+    //printk(KERN_INFO "pci_request_regions()");
+    //if(pci_request_regions(pdev, "E1000")) {
+    //    printk(KERN_INFO "Could not get PCI region");
+    //    return -2;
+    //}
     printk(KERN_INFO "pci_set_master()");
     pci_set_master(pdev);
     printk(KERN_INFO "pci_save_state()");
