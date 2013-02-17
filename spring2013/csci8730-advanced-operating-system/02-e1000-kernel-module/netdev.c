@@ -12,6 +12,10 @@
 #include <linux/etherdevice.h>
 #include <linux/pci.h>
 
+#define BAR_0       0
+#define BAR_1       1
+#define BAR_5       5
+
 MODULE_LICENSE("GPL");
 
 char modname[] = "netdev";
@@ -55,7 +59,7 @@ static struct pci_dev* ethx_probe(struct pci_dev *pdev)
     //unsigned char pci_rev;
     printk(KERN_INFO "-->INSIDE ethx_probe");
     printk(KERN_INFO "---->pci_get_device");
-    pdev = pci_get_device (0x8086, 0x100F, pdev);
+    pdev = pci_get_device (0x8086, 0x100E, pdev);
     if (!pdev)
     {
         printk (KERN_INFO "---->e1000 card not present");
@@ -186,27 +190,39 @@ static int __init my_netdev_init(void)
     if (my_netdev) {
         printk(KERN_INFO "netdev_priv()");
         pp =  netdev_priv(my_netdev);
+        printk(KERN_INFO "netdev_priv() finished");
         pp->pdev = pdev;
-    } else { 
+    } else {
         printk(KERN_INFO "alloc etherdev failed");
     }
 
     /* get PCI memory mapped I/O space base address from BAR1(should be 2 according to the manual ) */
-    mmio_start = pci_resource_start(pdev, 2);
-    mmio_end = pci_resource_end(pdev, 2);
-    mmio_len = pci_resource_len(pdev, 2);
-    mmio_flags = pci_resource_flags(pdev, 2);
+    for (i=BAR_1; i <= BAR_5; i++){
+        mmio_len = pci_resource_len(pdev, i);
+        mmio_start = pci_resource_start(pdev, i);
+        //mmio_end = pci_resource_end(pdev, i);
+        mmio_flags = pci_resource_flags(pdev, i);
+        /* make sure above region is MMI/O */
+        printk(KERN_INFO "IORESOURCE_IO=%d", IORESOURCE_IO);
+        if(mmio_len != 0 && (mmio_flags & IORESOURCE_IO)) {
+            printk(KERN_INFO "mmio_len = %lu, mmio_flags = %lu", mmio_len, mmio_flags);
+            break;
+        }
+        else{
+            printk(KERN_INFO "mmio_len = %lu, mmio_flags = %lu", mmio_len, mmio_flags);
+        }
+    }
+
+    if (mmio_len == 0){
+        printk(KERN_INFO "mmio_len == 0");
+        return -2;
+    }
 
     printk(KERN_INFO "[mmio_start:%ld\t]",mmio_start);
     printk(KERN_INFO "[mmio_end:%ld\t]",mmio_end);
     printk(KERN_INFO "[mmio_len:%ld\t\t]",mmio_len);
     printk(KERN_INFO "[mmio_flags:%ld\t]",mmio_flags);
 
-    /* make sure above region is MMI/O */
-    if(!(mmio_flags & IORESOURCE_MEM)) {
-        printk(KERN_INFO "region not MMI/O region");
-        return -2;
-    }
 
     /* get PCI memory space */
     printk(KERN_INFO "pci_request_regions()");
