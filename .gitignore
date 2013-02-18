@@ -18,3 +18,11 @@
 
 lex.yy.c
 tjc
+
+# kernel module temp files
+*.ko
+*.mod.c
+modules.order
+Module.symvers
+*.cmd
+.tmp_versions
