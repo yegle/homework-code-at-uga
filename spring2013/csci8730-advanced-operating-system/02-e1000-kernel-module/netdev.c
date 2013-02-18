@@ -127,6 +127,7 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
 	struct e1000_context_desc *context_desc;
 	struct e1000_buffer *buffer_info;
 	unsigned int i;
+    unsigned int tx_flags = 0;
 	u32 cmd_length = 0;
 	u16 ipcse = 0, tucse, mss;
 	u8 ipcss, ipcso, tucss, tucso, hdr_len;
@@ -151,6 +152,11 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     //    dev_kfree_skb(skb);
 
     //return NETDEV_TX_OK;
+
+    if (!skb_is_gso(skb)){
+        dev_kfree_skb_any(skb);
+        return NETDEV_TX_OK;
+    }
 
     hdr_len = skb_transport_offset(skb) + tcp_hdrlen(skb);
     mss = skb_shinfo(skb)->gso_size;
@@ -200,8 +206,11 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
 
     if (++i == tx_ring->count) i = 0;
     tx_ring->next_to_use = i;
+    tx_ring->last_tx_tso = true;
+    tx_flags |= E1000_TX_FLAGS_TSO;
+    tx_flags |= E1000_TX_FLAGS_IPV4;
 
-    return true;
+    //XXX: merge e1000_tx_map function here
 }
 
 static int ethx_change_mtu(struct net_device *net_dev, int new_mtu)
