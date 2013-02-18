@@ -185,7 +185,9 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     context_desc = E1000_CONTEXT_DESC(*tx_ring, i);
     buffer_info = &tx_ring->buffer_info[i];
 
-    context_desc->lower_setup.ip_fields.ipcss  = ipcss;
+    printk(KERN_INFO "test = %d", context_desc);
+
+    //context_desc->lower_setup.ip_fields.ipcss  = ipcss;
     //context_desc->lower_setup.ip_fields.ipcso  = ipcso;
     //context_desc->lower_setup.ip_fields.ipcse  = cpu_to_le16(ipcse);
     //context_desc->upper_setup.tcp_fields.tucss = tucss;
@@ -399,14 +401,18 @@ static int __devinit ethx_alloc_queues(struct ethx_priv *pp)
     int size;
     printk(KERN_INFO "-->ALLOCATING ring");
 	pp->tx_ring = kcalloc(1, sizeof(struct e1000_tx_ring), GFP_KERNEL);
-	if (pp->tx_ring)
+	if (!pp->tx_ring){
+        printk(KERN_INFO "tx_ring allocation failed");
 		return -ENOMEM;
+    }
 
 	pp->rx_ring = kcalloc(1, sizeof(struct e1000_rx_ring), GFP_KERNEL);
 	if (!pp->rx_ring) {
-		kfree(pp->tx_ring);
+        printk(KERN_INFO "rx_ring allocation failed");
 		return -ENOMEM;
 	}
+
+    printk(KERN_INFO "-->ring allcation succeed");
 
     size = sizeof(struct e1000_buffer) * pp->tx_ring->count;
 
@@ -415,6 +421,13 @@ static int __devinit ethx_alloc_queues(struct ethx_priv *pp)
         printk(KERN_INFO "cannot allocate tx_ring buffer");
         return -ENOMEM;
     }
+	pp->tx_ring->size = pp->tx_ring->count * sizeof(struct e1000_tx_desc);
+	pp->tx_ring->size = ALIGN(pp->tx_ring->size, 4096);
+
+    printk(KERN_INFO "----------before allocating desc");
+	pp->tx_ring->desc = dma_alloc_coherent(&pdev->dev,
+            pp->tx_ring->size, &pp->tx_ring->dma, GFP_KERNEL);
+    printk(KERN_INFO "----------after allocating desc");
     memset(pp->tx_ring->desc, 0, pp->tx_ring->size);
     pp->tx_ring->next_to_use = 0;
     pp->tx_ring->next_to_clean = 0;
