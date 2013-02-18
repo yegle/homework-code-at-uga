@@ -185,23 +185,21 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     context_desc = E1000_CONTEXT_DESC(*tx_ring, i);
     buffer_info = &tx_ring->buffer_info[i];
 
-    printk(KERN_INFO "test = %d", context_desc);
+    context_desc->lower_setup.ip_fields.ipcss  = ipcss;
+    context_desc->lower_setup.ip_fields.ipcso  = ipcso;
+    context_desc->lower_setup.ip_fields.ipcse  = cpu_to_le16(ipcse);
+    context_desc->upper_setup.tcp_fields.tucss = tucss;
+    context_desc->upper_setup.tcp_fields.tucso = tucso;
+    context_desc->upper_setup.tcp_fields.tucse = cpu_to_le16(tucse);
+    context_desc->tcp_seg_setup.fields.mss     = cpu_to_le16(mss);
+    context_desc->tcp_seg_setup.fields.hdr_len = hdr_len;
+    context_desc->cmd_and_length = cpu_to_le32(cmd_length);
 
-    //context_desc->lower_setup.ip_fields.ipcss  = ipcss;
-    //context_desc->lower_setup.ip_fields.ipcso  = ipcso;
-    //context_desc->lower_setup.ip_fields.ipcse  = cpu_to_le16(ipcse);
-    //context_desc->upper_setup.tcp_fields.tucss = tucss;
-    //context_desc->upper_setup.tcp_fields.tucso = tucso;
-    //context_desc->upper_setup.tcp_fields.tucse = cpu_to_le16(tucse);
-    //context_desc->tcp_seg_setup.fields.mss     = cpu_to_le16(mss);
-    //context_desc->tcp_seg_setup.fields.hdr_len = hdr_len;
-    //context_desc->cmd_and_length = cpu_to_le32(cmd_length);
+    buffer_info->time_stamp = jiffies;
+    buffer_info->next_to_watch = i;
 
-    //buffer_info->time_stamp = jiffies;
-    //buffer_info->next_to_watch = i;
-
-    //if (++i == tx_ring->count) i = 0;
-    //tx_ring->next_to_use = i;
+    if (++i == tx_ring->count) i = 0;
+    tx_ring->next_to_use = i;
 
     return true;
 }
@@ -412,15 +410,22 @@ static int __devinit ethx_alloc_queues(struct ethx_priv *pp)
 		return -ENOMEM;
 	}
 
+    pp->tx_ring->count = 256;
+    pp->rx_ring->count = 256;
+
     printk(KERN_INFO "-->ring allcation succeed");
 
+    printk(KERN_INFO "%d", pp->tx_ring->count);
+
     size = sizeof(struct e1000_buffer) * pp->tx_ring->count;
+    printk(KERN_INFO "NEEDS %d memory", size);
 
     pp->tx_ring->buffer_info = vzalloc(size);
     if (!pp->tx_ring->buffer_info){
         printk(KERN_INFO "cannot allocate tx_ring buffer");
         return -ENOMEM;
     }
+
 	pp->tx_ring->size = pp->tx_ring->count * sizeof(struct e1000_tx_desc);
 	pp->tx_ring->size = ALIGN(pp->tx_ring->size, 4096);
 
