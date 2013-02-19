@@ -135,6 +135,8 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
 	unsigned int bytecount, segs;
     struct ethx_priv *pp;
     struct e1000_tx_ring *tx_ring;
+	u32 txd_upper = 0, txd_lower = E1000_TXD_CMD_IFCS;
+	struct e1000_tx_desc *tx_desc = NULL;
 
     printk(KERN_INFO "-->INSIDE ethx_xmit_frame");
 
@@ -226,6 +228,33 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     skb_tx_timestamp(skb);
 
     //e1000_tx_queue(adapter, tx_ring, tx_flags, count);
+
+
+	i = tx_ring->next_to_use;
+
+	//while (count--) {
+		buffer_info = &tx_ring->buffer_info[i];
+		tx_desc = E1000_TX_DESC(*tx_ring, i);
+		tx_desc->buffer_addr = cpu_to_le64(buffer_info->dma);
+		tx_desc->lower.data =
+			cpu_to_le32(txd_lower | buffer_info->length);
+		tx_desc->upper.data = cpu_to_le32(txd_upper);
+//		if (unlikely(++i == tx_ring->count)) i = 0;
+//	}
+
+	//tx_desc->lower.data |= cpu_to_le32(adapter->txd_cmd);
+
+	/* Force memory writes to complete before letting h/w
+	 * know there are new descriptors to fetch.  (Only
+	 * applicable for weak-ordered memory model archs,
+	 * such as IA-64). */
+	wmb();
+
+	tx_ring->next_to_use = i;
+	writel(i, pp->mmio_addr + tx_ring->tdt);
+	/* we need this if more than one processor can write to our tail
+	 * at a time, it syncronizes IO on IA64/Altix systems */
+	mmiowb();
     return 0;
 }
 
