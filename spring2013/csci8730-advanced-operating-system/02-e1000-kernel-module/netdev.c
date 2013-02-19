@@ -132,6 +132,7 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
 	u16 ipcse = 0, tucse, mss;
 	u8 ipcss, ipcso, tucss, tucso, hdr_len;
 	//int err;
+	unsigned int bytecount, segs;
     struct ethx_priv *pp;
     struct e1000_tx_ring *tx_ring;
 
@@ -211,6 +212,20 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     tx_flags |= E1000_TX_FLAGS_IPV4;
 
     //XXX: merge e1000_tx_map function here
+
+	i = tx_ring->next_to_use;
+	segs = 1;
+	/* multiply data chunks by size of headers */
+	bytecount = ((segs - 1) * skb_headlen(skb)) + skb->len;
+
+	tx_ring->buffer_info[i].skb = skb;
+	tx_ring->buffer_info[i].segs = segs;
+	tx_ring->buffer_info[i].bytecount = bytecount;
+	tx_ring->buffer_info[i].next_to_watch = i;
+    netdev_sent_queue(net_dev, skb->len);
+    skb_tx_timestamp(skb);
+
+    //e1000_tx_queue(adapter, tx_ring, tx_flags, count);
     return 0;
 }
 
