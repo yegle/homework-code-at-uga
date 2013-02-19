@@ -232,7 +232,7 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
 
 
 	i = tx_ring->next_to_use;
-    count = skb_headlen(skb)/ (1<<12);
+    count = skb_headlen(skb)/ (1<<12) + skb_shinfo(skb)->nr_frags;
 
         while (count--) {
             buffer_info = &tx_ring->buffer_info[i];
