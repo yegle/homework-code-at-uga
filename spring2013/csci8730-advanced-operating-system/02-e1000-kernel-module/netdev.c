@@ -132,8 +132,12 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
 	u16 ipcse = 0, tucse, mss;
 	u8 ipcss, ipcso, tucss, tucso, hdr_len;
 	//int err;
+	unsigned int bytecount, segs;
     struct ethx_priv *pp;
     struct e1000_tx_ring *tx_ring;
+	u32 txd_upper = 0, txd_lower = E1000_TXD_CMD_IFCS;
+	struct e1000_tx_desc *tx_desc = NULL;
+    int count;
 
     printk(KERN_INFO "-->INSIDE ethx_xmit_frame");
 
@@ -211,6 +215,48 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     tx_flags |= E1000_TX_FLAGS_IPV4;
 
     //XXX: merge e1000_tx_map function here
+
+	i = tx_ring->next_to_use;
+	segs = 1;
+	/* multiply data chunks by size of headers */
+	bytecount = ((segs - 1) * skb_headlen(skb)) + skb->len;
+
+	tx_ring->buffer_info[i].skb = skb;
+	tx_ring->buffer_info[i].segs = segs;
+	tx_ring->buffer_info[i].bytecount = bytecount;
+	tx_ring->buffer_info[i].next_to_watch = i;
+    netdev_sent_queue(net_dev, skb->len);
+    skb_tx_timestamp(skb);
+
+    //e1000_tx_queue(adapter, tx_ring, tx_flags, count);
+
+
+	i = tx_ring->next_to_use;
+    count = skb_headlen(skb)/ (1<<12) + skb_shinfo(skb)->nr_frags;
+
+        while (count--) {
+            buffer_info = &tx_ring->buffer_info[i];
+            tx_desc = E1000_TX_DESC(*tx_ring, i);
+            tx_desc->buffer_addr = cpu_to_le64(buffer_info->dma);
+            tx_desc->lower.data = cpu_to_le32(txd_lower | buffer_info->length);
+            tx_desc->upper.data = cpu_to_le32(txd_upper);
+            if (unlikely(++i == tx_ring->count)) i = 0;
+        }
+
+	//tx_desc->lower.data |= cpu_to_le32(adapter->txd_cmd);
+
+	/* Force memory writes to complete before letting h/w
+	 * know there are new descriptors to fetch.  (Only
+	 * applicable for weak-ordered memory model archs,
+	 * such as IA-64). */
+	wmb();
+
+	tx_ring->next_to_use = i;
+	writel(i, pp->mmio_addr + tx_ring->tdt);
+	/* we need this if more than one processor can write to our tail
+	 * at a time, it syncronizes IO on IA64/Altix systems */
+	mmiowb();
+    return 0;
 }
 
 static int ethx_change_mtu(struct net_device *net_dev, int new_mtu)
