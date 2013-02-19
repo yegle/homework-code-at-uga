@@ -3,7 +3,7 @@ CC      = gcc
 CFLAGS  = -std=c99 -fPIC
 
 # object files needed for the project
-OBJS    = lex.yy.o check_filename.o
+OBJS    = lex.yy.o check_filename.o 
 
 all: tjc libtjlex.so parser libtjparse.so
 
@@ -11,6 +11,9 @@ parser: $(OBJS) y.tab.o parser.o
 	$(CC) $(CFLAGS) -o $@ $^ -lfl
 
 parser.o: parser.c
+
+test: parser
+	./test.sh
 
 lex.yy.o: lex.yy.c
 
@@ -44,4 +47,4 @@ lex.yy.c: TinyJava.l
 	$(LEX) TinyJava.l
 
 clean:
-	$(RM) $(OBJS) lex.yy.c tjc libtjlex.so y.tab.c libtjparse.so parser
+	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.*
