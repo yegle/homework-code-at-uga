@@ -211,6 +211,7 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     tx_flags |= E1000_TX_FLAGS_IPV4;
 
     //XXX: merge e1000_tx_map function here
+    return 0;
 }
 
 static int ethx_change_mtu(struct net_device *net_dev, int new_mtu)
