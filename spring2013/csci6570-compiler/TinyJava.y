@@ -5,12 +5,17 @@
 %{
 
 #include <stdio.h>
+#include <errno.h>
+#include "y.tab.h"
 
 void free(void *ptr);
 void yyerror( const char *msg );
+void error( const char *msg );
 int yylex( void );
 
 extern int yylineno;
+extern int yyin;
+int yyerrstatus;
 int yydebug=1;
 
 %}
@@ -145,6 +150,10 @@ statement: IDENT ASSIGN expression SEMI
 return_statement: RETURN expression SEMI
                 |
                 RETURN SEMI
+                |
+                RETURN error {
+                    error("Expecting a SEMI");
+                }
                 ;
 
 method_invocation: qualified_name LPAR argument_list RPAR
@@ -153,6 +162,10 @@ method_invocation: qualified_name LPAR argument_list RPAR
                  ;
 
 qualified_name: IDENT DOT IDENT
+              |
+              IDENT DOT error {
+                error("Expecting an IDENT after DOT");
+              }
               |
               IDENT
               ;
@@ -250,4 +263,8 @@ yyerror( const char *msg )
   printf("Line %d: %s\n", yylineno, msg);
 }
 
-
+void error(const char *msg){
+  printf("Line %d: %s\n", yylineno, msg);
+  yyclearin;
+  yyerrok;
+}

@@ -7,6 +7,8 @@ int yywrap(void){
     return 1;
 }
 
+char* reason;
+
 int set_file(char* filename){
     yyin = fopen(filename, "r");
     if (yyin==NULL){
@@ -19,7 +21,6 @@ int set_file(char* filename){
     }
 }
 
-char* reason;
 %}
 Letter                  [a-zA-Z_]
 Digit                   [0-9]
