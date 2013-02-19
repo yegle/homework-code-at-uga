@@ -137,6 +137,7 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
     struct e1000_tx_ring *tx_ring;
 	u32 txd_upper = 0, txd_lower = E1000_TXD_CMD_IFCS;
 	struct e1000_tx_desc *tx_desc = NULL;
+    int count;
 
     printk(KERN_INFO "-->INSIDE ethx_xmit_frame");
 
@@ -231,16 +232,16 @@ static int ethx_xmit_frame(struct sk_buff *skb, struct net_device *net_dev)
 
 
 	i = tx_ring->next_to_use;
+    count = skb_headlen(skb)/ (1<<12);
 
-	//while (count--) {
-		buffer_info = &tx_ring->buffer_info[i];
-		tx_desc = E1000_TX_DESC(*tx_ring, i);
-		tx_desc->buffer_addr = cpu_to_le64(buffer_info->dma);
-		tx_desc->lower.data =
-			cpu_to_le32(txd_lower | buffer_info->length);
-		tx_desc->upper.data = cpu_to_le32(txd_upper);
-//		if (unlikely(++i == tx_ring->count)) i = 0;
-//	}
+        while (count--) {
+            buffer_info = &tx_ring->buffer_info[i];
+            tx_desc = E1000_TX_DESC(*tx_ring, i);
+            tx_desc->buffer_addr = cpu_to_le64(buffer_info->dma);
+            tx_desc->lower.data = cpu_to_le32(txd_lower | buffer_info->length);
+            tx_desc->upper.data = cpu_to_le32(txd_upper);
+            if (unlikely(++i == tx_ring->count)) i = 0;
+        }
 
 	//tx_desc->lower.data |= cpu_to_le32(adapter->txd_cmd);
 
