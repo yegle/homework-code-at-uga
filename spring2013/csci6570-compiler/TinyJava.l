@@ -93,7 +93,6 @@ Class                   class
 <BlockComment>\*[^\/]               /*ignored*/;
 <BlockComment>{BlockCommentEnd}     BEGIN(INITIAL);
 <*>{Newline}                        yylineno++;
-{Return}                            return RETURN;
 {Identifier}                        return IDENT;
 {FloatingPointLiteral}              BEGIN(TokenNotAllowed); return FLOATLITERAL;
 {DecimalIntegerLiteral}             BEGIN(TokenNotAllowed); return INTLITERAL;

@@ -144,8 +144,15 @@ statement: IDENT ASSIGN expression SEMI
          |
          LBRACE statement_list RBRACE
          |
+         expression SEMI
+         |
          SEMI
          ;
+
+inc_dec_operator: INCREMENT
+                |
+                DECREMENT
+                ;
 
 return_statement: RETURN expression SEMI
                 |
@@ -223,6 +230,10 @@ primary_expression: literal
                   method_invocation
                   |
                   LPAR expression RPAR
+                  |
+                  inc_dec_operator IDENT
+                  |
+                  IDENT inc_dec_operator
                   ;
 
 literal: INTLITERAL
