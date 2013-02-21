@@ -29,10 +29,9 @@ class DNSLabel(object):
             Create label instance from elements in list/tuple. If label
             argument is a string split into components (separated by '.')
         """
-        try:
-            t = [x for x in label]
+        if isinstance(label, tuple) or isinstance(label, list):
             self.label = tuple(label)
-        except TypeError:
+        else:
             self.label = tuple(label.split("."))
 
     def __str__(self):
