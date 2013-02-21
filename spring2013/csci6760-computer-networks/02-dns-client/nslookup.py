@@ -6,10 +6,16 @@ from __future__ import (unicode_literals, absolute_import,
 
 import sys
 import socket
-from client.timeout import timeout
+from client.timeout import timeout, TimeoutError
 from client.utils import MyParser
 from client.packet import ARecordQuery, DNSAnswer
 
+@timeout(5)
+def receive_response(s):
+    while True:
+        result, ignored = s.recvfrom(1024)
+        answer = DNSAnswer(result).parse()
+        return answer
 
 if __name__ == '__main__':
     args = MyParser(sys.argv[1:])()
@@ -22,7 +28,19 @@ if __name__ == '__main__':
     s.bind(('', 10240))
     s.sendto(message, (server, 53))
 
-    while True:
-        result, data = s.recvfrom(1024)
-        a = DNSAnswer(result).parse()
-        print(a)
+    try:
+        answer = receive_response(s)
+        if answer.rr:
+            for r in answer.rr:
+                print(dir(r))
+                print(r)
+                print(type(r.rtype))
+                print("%s\tIN\t%s\t%s" % (
+                    r.get_rname(),
+                    r.rtype,
+                    r.rdata))
+        else:
+            print("ERROR: NXDOMAIN")
+    except TimeoutError:
+        print("Error: timeout querying %s on server %s" % (domain,
+                                                           server))
