@@ -5,14 +5,14 @@ CFLAGS  = -std=c99 -fPIC
 # object files needed for the project
 OBJS    = lex.yy.o check_filename.o 
 
-all: tjc libtjlex.so parser libtjparse.so
+all: tjc libtjlex.so tjc lexer libtjparse.so
 
-parser: $(OBJS) y.tab.o parser.o
+tjc: $(OBJS) y.tab.o parser.o
 	$(CC) $(CFLAGS) -o $@ $^ -lfl
 
 parser.o: parser.c
 
-test: parser
+test: tjc
 	./test.sh
 
 lex.yy.o: lex.yy.c
@@ -20,7 +20,7 @@ lex.yy.o: lex.yy.c
 y.tab.o: y.tab.c y.tab.h
 
 # the main target
-tjc: $(OBJS) tjc.o
+lexer: $(OBJS) tjc.o
 	$(CC) $(CFLAGS) -o $@ $^ -lfl
 
 check_filename.o: check_filename.c
