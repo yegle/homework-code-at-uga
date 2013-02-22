@@ -15,6 +15,7 @@ from client.dnslib.dns import QTYPE, RCODE
 def receive_response(s):
     while True:
         result, ignored = s.recvfrom(1024)
+        print("Response string: %s" % (result,))
         try:
             answer = DNSAnswer(result).parse()
             return answer
@@ -23,12 +24,12 @@ def receive_response(s):
                   + "received. Waiting for more answers...")
 
 if __name__ == '__main__':
-    args = MyParser(sys.argv[1:])()
-    domain, server = args.domain_name, args.dns_server
-    server = server.strip('@')
+    domain, server = MyParser(sys.argv[1:])()
 
     q = ARecordQuery(domain)
     message = q.pack()
+
+    print('Query string: %s' % (message))
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('', 10240))
@@ -36,6 +37,7 @@ if __name__ == '__main__':
 
     try:
         answer = receive_response(s)
+        print('='*50)
         if answer.rr:
             for r in answer.rr:
                 print("%-40s\t%s\t%s" % (

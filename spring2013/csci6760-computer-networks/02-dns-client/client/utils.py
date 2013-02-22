@@ -9,15 +9,12 @@ import argparse
 class MyParser(object):
 
     def __init__(self, args):
-        p = argparse.ArgumentParser(description='My DNS query client')
-        p.add_argument('domain_name', help='Domain name to be queried')
-        p.add_argument(
-            'dns_server',
-            help='DNS server to be used. Default: @8.8.8.8',
-            default='@8.8.8.8',
-            nargs='?',
-        )
-        self.p = p
+        self.server = '8.8.8.8'
+        for arg in args:
+            if arg.startswith('@'):
+                self.server = arg.strip('@')
+            else:
+                self.domain = arg.strip('.')
 
     def __call__(self):
-        return self.p.parse_args()
+        return self.domain, self.server
