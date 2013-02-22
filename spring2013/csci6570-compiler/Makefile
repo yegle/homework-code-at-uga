@@ -47,4 +47,4 @@ lex.yy.c: TinyJava.l
 	$(LEX) TinyJava.l
 
 clean:
-	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.*
+	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.* y.output
