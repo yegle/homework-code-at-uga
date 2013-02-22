@@ -26,10 +26,10 @@ tjc: $(OBJS) tjc.o
 check_filename.o: check_filename.c
 
 y.tab.c: TinyJava.y
-	bison --report=all -b y $<
+	bison --report=all --report-file=y.output -b y $<
 
 y.tab.h: TinyJava.y
-	bison -d --debug -b y $<
+	bison -d --debug -b y --report=all --report-file=y.output $<
 
 # dependencies
 tjc.o: tjc.c y.tab.h
