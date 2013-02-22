@@ -20,6 +20,7 @@ void clear_error();
 extern int yylineno;
 extern int yyin;
 extern char* yytext;
+extern int yychar;
 int yyerrstatus;
 int yydebug=1;
 
