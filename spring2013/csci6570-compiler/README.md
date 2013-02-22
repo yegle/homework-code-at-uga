@@ -26,10 +26,4 @@ Run `make parser` or simply run `make` in the source code root directory
 
 ### Run
 
-I wrote two different parser, one in C, one in Python
-
-For the C version: run `./parser XXX.java` at the source code root
-directory.
-
-For the Python version: run `python pyparser.py` at the source code root
-directory.
+Run `./parser XXX.java` at the source code root directory.
