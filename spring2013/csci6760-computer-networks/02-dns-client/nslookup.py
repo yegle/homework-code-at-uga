@@ -24,6 +24,9 @@ def receive_response(s):
                   + "received. Waiting for more answers...")
 
 if __name__ == '__main__':
+    if len(sys.argv) <2:
+        print("Usage: %s domain_name [@dns_server]" % sys.argv[0])
+        sys.exit(1)
     domain, server = MyParser(sys.argv[1:])()
 
     q = ARecordQuery(domain)
