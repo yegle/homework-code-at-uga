@@ -13,8 +13,8 @@ class MyParser(object):
         p.add_argument('domain_name', help='Domain name to be queried')
         p.add_argument(
             'dns_server',
-            help='DNS server to be used. Default: 8.8.8.8',
-            default='8.8.8.8',
+            help='DNS server to be used. Default: @8.8.8.8',
+            default='@8.8.8.8',
             nargs='?',
         )
         self.p = p

@@ -1,6 +1,6 @@
 
 import struct
-import six
+#import six
 
 class Buffer(object):
 
@@ -62,7 +62,7 @@ class Buffer(object):
             Append s to end of data & increment offset
         """
         self.offset += len(s)
-        self.data += six.b(s)
+        self.data += s.encode('utf-8')
 
     def update(self,ptr,fmt,*args):
         """

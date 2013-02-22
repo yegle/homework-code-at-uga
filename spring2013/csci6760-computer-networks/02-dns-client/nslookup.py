@@ -9,17 +9,23 @@ import socket
 from client.timeout import timeout, TimeoutError
 from client.utils import MyParser
 from client.packet import ARecordQuery, DNSAnswer
+from client.dnslib.dns import QTYPE, RCODE
 
 @timeout(5)
 def receive_response(s):
     while True:
         result, ignored = s.recvfrom(1024)
-        answer = DNSAnswer(result).parse()
-        return answer
+        try:
+            answer = DNSAnswer(result).parse()
+            return answer
+        except Exception:
+            print("ERROR: failed to parse the answer. Illegal response"
+                  + "received. Waiting for more answers...")
 
 if __name__ == '__main__':
     args = MyParser(sys.argv[1:])()
     domain, server = args.domain_name, args.dns_server
+    server = server.strip('@')
 
     q = ARecordQuery(domain)
     message = q.pack()
@@ -32,15 +38,14 @@ if __name__ == '__main__':
         answer = receive_response(s)
         if answer.rr:
             for r in answer.rr:
-                print(dir(r))
-                print(r)
-                print(type(r.rtype))
-                print("%s\tIN\t%s\t%s" % (
+                print("%-40s\t%s\t%s" % (
                     r.get_rname(),
-                    r.rtype,
+                    QTYPE[r.rtype],
                     r.rdata))
         else:
             print("ERROR: NXDOMAIN")
+            print('Reason: %s' % (RCODE[answer.header.rcode]))
+
     except TimeoutError:
-        print("Error: timeout querying %s on server %s" % (domain,
-                                                           server))
+        print("Error: timeout querying domain '%s' on server %s" % (domain,
+                                                                    server))

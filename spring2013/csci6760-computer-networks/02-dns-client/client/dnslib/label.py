@@ -35,7 +35,7 @@ class DNSLabel(object):
             self.label = tuple(label.split("."))
 
     def __str__(self):
-        return str(b".".join(self.label))
+        return (b".".join(self.label)).decode('utf-8')
 
     def __repr__(self):
         return "%r" % b".".join(self.label)
