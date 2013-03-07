@@ -86,6 +86,7 @@ static void
 bcm5752_mmio_write(void *opaque, hwaddr addr, uint64_t val,
                  unsigned size)
 {
+    trace_bcm5752_mmio_write(addr, val, size);
     BCM5752State *s = opaque;
     unsigned int index = (addr & 0x1ffff) >> 2;
 
@@ -95,6 +96,7 @@ bcm5752_mmio_write(void *opaque, hwaddr addr, uint64_t val,
 static uint64_t
 bcm5752_mmio_read(void *opaque, hwaddr addr, unsigned size)
 {
+    trace_bcm5752_mmio_read(addr, size);
     BCM5752State *s = opaque;
     unsigned int index = (addr & 0x1ffff) >> 2;
 
@@ -112,6 +114,7 @@ static const MemoryRegionOps bcm5752_mmio_ops = {
 };
 
 static void bcm5752_mmio_setup(BCM5752State *s){
+    trace_bcm5752_mmio_setup(0);
     //int i;
     //const uint32_t excluded_regs[] = {
     //    E1000_MDIC, E1000_ICR, E1000_ICS, E1000_IMS,
@@ -137,6 +140,12 @@ static int pci_bcm5752_init(PCIDevice *pci_dev) {
 
     BCM5752State *s = DO_UPCAST(BCM5752State, dev, pci_dev);
     bcm5752_mmio_setup(s);
+    pci_register_bar(&s->dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->mmio);
+    pci_register_bar(&s->dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &s->io);
+    /* PCI-X capabilities */
+    cfg_offset = 0x40;
+    pci_add_capability(pci_dev, PCI_CAP_ID_PCIX,
+            cfg_offset, 8);
     return 0;
 }
 
@@ -171,7 +180,7 @@ static const VMStateDescription vmstate_bcm5752 = {
     }
 };
 
-static Property e1000_properties[] = {
+static Property bcm5752_properties[] = {
     DEFINE_NIC_PROPERTIES(BCM5752State, conf),
     DEFINE_PROP_END_OF_LIST(),
 };
@@ -193,7 +202,7 @@ static void bcm5752_class_init(ObjectClass *klass, void *data)
     dc->desc = "Broadcom BCM series";
     dc->reset = qdev_bcm5752_reset;
     dc->vmsd = &vmstate_bcm5752;
-    dc->props = e1000_properties;
+    dc->props = bcm5752_properties;
 }
 
 static const TypeInfo bcm5752_info = {
