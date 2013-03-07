@@ -12,6 +12,9 @@
 #define PCI_VENDOR_ID_BROADCOM 0x14E4
 #define BCM5752_DEVICE_ID 0x1600
 
+#define PNPMMIO_SIZE 0x20000
+#define IOPORT_SIZE       0x40
+
 typedef struct BCM5752State_st {
     PCIDevice dev;
     NICState *nic;
@@ -61,8 +64,79 @@ typedef struct BCM5752State_st {
     QEMUTimer *autoneg_timer;
 } BCM5752State;
 
-static int pci_bcm5752_init(PCIDevice *dev) {
+static uint64_t bcm5752_io_read(void *opaque, hwaddr addr,
+                              unsigned size)
+{
+    return 0;
+}
+
+static void bcm5752_io_write(void *opaque, hwaddr addr,
+                           uint64_t val, unsigned size)
+{
+    return;
+}
+
+static const MemoryRegionOps bcm5752_io_ops = {
+    .read = bcm5752_io_read,
+    .write = bcm5752_io_write,
+    .endianness = DEVICE_LITTLE_ENDIAN,
+};
+
+static void
+bcm5752_mmio_write(void *opaque, hwaddr addr, uint64_t val,
+                 unsigned size)
+{
+    BCM5752State *s = opaque;
+    unsigned int index = (addr & 0x1ffff) >> 2;
+
+    s->mac_reg[index] = val;
+}
+
+static uint64_t
+bcm5752_mmio_read(void *opaque, hwaddr addr, unsigned size)
+{
+    BCM5752State *s = opaque;
+    unsigned int index = (addr & 0x1ffff) >> 2;
+
+    return s->mac_reg[index];
+}
+
+static const MemoryRegionOps bcm5752_mmio_ops = {
+    .read = bcm5752_mmio_read,
+    .write = bcm5752_mmio_write,
+    .endianness = DEVICE_LITTLE_ENDIAN,
+    .impl = {
+        .min_access_size = 4,
+        .max_access_size = 4,
+    },
+};
+
+static void bcm5752_mmio_setup(BCM5752State *s){
+    //int i;
+    //const uint32_t excluded_regs[] = {
+    //    E1000_MDIC, E1000_ICR, E1000_ICS, E1000_IMS,
+    //    E1000_IMC, E1000_TCTL, E1000_TDT, PNPMMIO_SIZE
+    //};
+
+    memory_region_init_io(&s->mmio, &bcm5752_mmio_ops, s, "bcm5752-mmio",
+                          PNPMMIO_SIZE);
+    //memory_region_add_coalescing(&d->mmio, 0, excluded_regs[0]);
+    //for (i = 0; excluded_regs[i] != PNPMMIO_SIZE; i++)
+    //    memory_region_add_coalescing(&d->mmio, excluded_regs[i] + 4,
+    //                                 excluded_regs[i+1] - excluded_regs[i] - 4);
+    memory_region_init_io(&s->io, &bcm5752_io_ops, s, "bcm5752-io", IOPORT_SIZE);
+}
+
+
+static int pci_bcm5752_init(PCIDevice *pci_dev) {
     trace_pci_bcm5752_init(0);
+    /* Power Management Capabilities */
+    int cfg_offset = 0x48;
+    pci_add_capability(pci_dev, PCI_CAP_ID_PM,
+            cfg_offset, PCI_PM_SIZEOF);
+
+    BCM5752State *s = DO_UPCAST(BCM5752State, dev, pci_dev);
+    bcm5752_mmio_setup(s);
     return 0;
 }
 
