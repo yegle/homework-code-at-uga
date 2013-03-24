@@ -1,0 +1,44 @@
+diff -ru qemu-1.4.0/hw/pci/pci.c qemu-1.4.0-mod/hw/pci/pci.c
+--- qemu-1.4.0/hw/pci/pci.c	2013-02-15 18:05:35.000000000 -0500
++++ qemu-1.4.0-mod/hw/pci/pci.c	2013-03-03 23:02:04.000000000 -0500
+@@ -1480,6 +1480,7 @@
+     "e1000",
+     "pcnet",
+     "virtio",
++    "bcm5752",
+     NULL
+ };
+ 
+@@ -1492,6 +1493,7 @@
+     "e1000",
+     "pcnet",
+     "virtio-net-pci",
++    "bcm5752",
+     NULL
+ };
+
+diff -ru qemu-1.4.0/trace-events qemu-1.4.0-mod/trace-events
+--- qemu-1.4.0/trace-events	2013-02-15 18:05:35.000000000 -0500
++++ qemu-1.4.0-mod/trace-events	2013-03-03 21:45:24.000000000 -0500
+@@ -1090,3 +1090,11 @@
+ # hw/s390x/virtio-ccw.c
+ virtio_ccw_interpret_ccw(int cssid, int ssid, int schid, int cmd_code) "VIRTIO-CCW: %x.%x.%04x: interpret command %x"
+ virtio_ccw_new_device(int cssid, int ssid, int schid, int devno, const char *devno_mode) "VIRTIO-CCW: add subchannel %x.%x.%04x, devno %04x (%s)"
++
++# hw/bcm5752.c
++pci_bcm5752_init(int i) "dummy value %d"
++pci_bcm5752_uninit(int i) "dummy value %d"
++qdev_bcm5752_reset(int i) "dummy value %d"
++bcm5752_pre_save(int i) "dummy value %d"
++bcm5752_post_load(int i) "dummy value %d"
++bcm5752_class_init(int i) "dummy value %d"
+--- qemu-1.4.0/hw/Makefile.objs	2013-02-15 18:05:35.000000000 -0500
++++ qemu-1.4.0-mod/hw/Makefile.objs	2013-03-03 21:16:45.000000000 -0500
+@@ -2,6 +2,7 @@
+ common-obj-y += qdev.o qdev-properties.o
+ # irq.o needed for qdev GPIO handling:
+ common-obj-y += irq.o
++common-obj-y += bcm5752.o
+ 
+ ifeq ($(CONFIG_SOFTMMU),y)
+ common-obj-y += usb/ ide/ pci/
