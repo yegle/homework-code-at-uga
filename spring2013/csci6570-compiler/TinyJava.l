@@ -1,7 +1,8 @@
 /*
 scanner for TinyJava language
-*/
 %option yylineno 
+*/
+
 
 %{
 
@@ -124,7 +125,7 @@ Class                   class
 {Greater}                           return GREATER;
 {LeftBracket}                       return LBRACKET;
 {RightBracket}                      return RBRACKET;
-{StringLiteral}                     return STRING;
+{StringLiteral}                     yylval.sval = strdup(yytext); return STRING;
 {Space}+                            /* ignored character */
 {Minus}                             return MINUS;
 {Plus}                              return PLUS;

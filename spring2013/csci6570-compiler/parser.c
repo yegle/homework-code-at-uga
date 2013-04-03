@@ -4,12 +4,14 @@
 
 #include "Ast.h"
 #include "y.tab.h"
+#include "AstPrinter.h"
 #include "check_filename.h"
 
 extern FILE *yyin;
 extern int yydebug;
 
 int yyparse (void);
+Declaration *declTree = NULL;
 
 void usage(){
     fprintf(stderr, "Usage: prog TinyJavaProgram.java\n");
@@ -33,6 +35,13 @@ int main(int argc, char* argv[]){
         usage();
         return -2;
     }
-    yydebug = 1;
+    //yydebug = 1;
+    declTree = NULL;
     yyparse();
+    if(declTree == NULL){
+        printf("declTree is NULL\n");
+    }
+    else{
+        declTree->accept( new AstPrinter( 0 ) );
+    }
 }

@@ -29,6 +29,7 @@ extern char* yytext;
 extern int yychar;
 int yyerrstatus;
 extern int yydebug;
+extern Declaration *declTree;
 
 MethodDeclaration *methodDecl = NULL;
 ClassDeclaration *classDecl = NULL;
@@ -122,10 +123,18 @@ ClassDeclaration *classDecl = NULL;
 %type <vdval>  formal_param_list
 %type <sval>   IDENT
 %type <xval>   class_decl
+%type <dval>   member_decl
+%type <vdval>  member_decl_list
+%type <dval>   method_decl
+%type <dval>   field_decl
+%type <tval>   opt_else
 
 %%
 
 tiny_java_program: class_decl
+                 {
+                    declTree = classDecl;
+                 }
                  ;
 
 class_decl: class_decl PUBLIC CLASS IDENT
@@ -137,13 +146,27 @@ class_decl: class_decl PUBLIC CLASS IDENT
           ;
 
 member_decl_list: member_decl
+                {
+                    $$ = new vector<Declaration *>();
+                    $$->push_back($1);
+                }
                 |
                 member_decl member_decl_list
+                {
+                    $$ = $2;
+                    $$->push_back($1);
+                }
                 ;
 
 member_decl: field_decl
+           {
+            $$ = $1;
+           }
            |
            method_decl
+           {
+            $$ = $1;
+           }
            ;
 
 field_decl: STATIC FLOAT IDENT ASSIGN literal SEMI
@@ -153,11 +176,9 @@ field_decl: STATIC FLOAT IDENT ASSIGN literal SEMI
 	        classDecl->addMember( new FieldDeclaration( yylineno, $3, AstNode::TINT, $5 ) );
           }
           |
-          STATIC type LBRACKET RBRACKET IDENT ASSIGN NEW type array_define_index SEMI
+          STATIC FLOAT LBRACKET RBRACKET IDENT ASSIGN NEW type array_define_index SEMI
           |
-          STATIC type LBRACKET RBRACKET IDENT ASSIGN NEW type array_define_index err {
-            error_semi();
-          }
+          STATIC INT LBRACKET RBRACKET IDENT ASSIGN NEW type array_define_index SEMI
           |
           STATIC type LBRACKET RBRACKET IDENT ASSIGN NEW type array_define_index list_literal SEMI
           |
@@ -218,8 +239,14 @@ array_index: LBRACKET INTLITERAL RBRACKET
            ;
 
 type: INT
+    {
+        $$ = AstNode::TINT;
+    }
     |
     FLOAT
+    {
+        $$ = AstNode::TFLOAT;
+    }
     |
     INT LBRACKET RBRACKET
     |
@@ -236,13 +263,27 @@ formal_param: type IDENT
             ;
 
 method_body: local_decl_list method_statement_list
+           {
+            methodDecl->setVariables( $1 );
+            methodDecl->setBody( $2 );
+           }
            ;
 
 local_decl_list: local_decl local_decl_list
+               {
+                $$ = $2;
+                $$->push_back($1);
+               }
                | empty
+               {
+	            $$ = new vector<Declaration*>();
+               }
                ;
 
 local_decl: type IDENT ASSIGN literal SEMI
+          {
+            $$ = new VariableDeclaration( yylineno, $2, $1, $4);
+          }
           |
           type IDENT ASSIGN literal {
             error_semi();
@@ -262,12 +303,27 @@ local_decl: type IDENT ASSIGN literal SEMI
           ;
 
 method_statement_list: statement method_statement_list
+                     {
+                        $$ = $2;
+                        $$->prependStatement($1);
+                     }
                      |
                      return_statement
+                     {
+                        $$ = new BlockStatement(yylineno);
+                        $$->prependStatement($1);
+                     }
                      ;
 
 statement_list: statement statement_list
+              {
+                $$ = $2;
+                $$->prependStatement($1);
+              }
               | empty
+              {
+	            $$ = new BlockStatement( yylineno );
+              }
               ;
 
 opt_else: ELSE statement
@@ -275,7 +331,11 @@ opt_else: ELSE statement
         empty
         ;
 
+
 statement: IDENT ASSIGN expression SEMI
+         {
+	        $$ = new AssignStatement( yylineno, $1, $3 );
+         }
          |
          IDENT ASSIGN expression err {
             error_semi();
@@ -300,18 +360,30 @@ statement: IDENT ASSIGN expression SEMI
          }
          |
          IF LPAR expression RPAR statement opt_else
+         {
+	        $$ = new IfStatement( yylineno, $3, $5, $6 );
+         }
          |
          WHILE LPAR expression RPAR statement
+         {
+	        $$ = new WhileStatement( yylineno, $3, $5 );
+         }
          |
          FOR LPAR for_part_1 for_part_2 for_part_3 RPAR statement
          |
          method_invocation SEMI
+         {
+	        $$ = new MethodCallStatement( yylineno, $1 );
+         }
          |
          method_invocation err {
             error_semi();
          }
          |
          LBRACE statement_list RBRACE
+         {
+	        $$ = $2;
+         }
          |
          expression SEMI
          |
@@ -320,6 +392,9 @@ statement: IDENT ASSIGN expression SEMI
          }
          |
          SEMI
+         {
+	        $$ = new EmptyStatement( yylineno );
+         }
          ;
 
 for_part_1: expression SEMI
@@ -347,21 +422,33 @@ inc_dec_operator: INCREMENT
                 ;
 
 return_statement: RETURN expression SEMI
+                {
+	                $$ = new ReturnStatement( yylineno, NULL, $2 );
+                }
                 |
                 RETURN expression err {
                     error_semi();
                 }
                 |
                 RETURN SEMI
+                {
+	                $$ = new ReturnStatement( yylineno, NULL, NULL );
+                }
                 |
                 RETURN err {
                     error_semi();
                 }
                 ;
 
-method_invocation: qualified_name LPAR argument_list RPAR
+method_invocation: IDENT LPAR argument_list RPAR
+                 {
+	                $$ = new MethodCallExpression( yylineno, NULL, $1, $3 );
+                 }
                  |
-                 qualified_name LPAR RPAR
+                 IDENT LPAR RPAR
+                 {
+	                $$ = new MethodCallExpression( yylineno, NULL, $1, (vector<Expression *> *) NULL );
+                 }
                  ;
 
 qualified_name: IDENT DOT IDENT
@@ -369,14 +456,26 @@ qualified_name: IDENT DOT IDENT
               IDENT
               ;
 
+
 argument_list: expression
+             {
+              $$ = new vector<Expression *>();
+              $$->push_back( $1 );
+             }
              |
-             expression COMMA argument_list
+             argument_list COMMA expression
+             {
+              $$ = $1;
+              $$->push_back( $3 );
+             }
              ;
 
 expression: relational_expression
           |
           relational_expression EQUAL relational_expression
+          {
+              $$ = new BinaryExpression( yylineno, AstNode::EQOP, $1, $3 );
+          }
           |
           relational_expression NOTEQUAL relational_expression
           ;
@@ -386,6 +485,9 @@ relational_expression: additive_expression
                      additive_expression GREATER additive_expression
                      |
                      additive_expression LESS additive_expression
+                     {
+                          $$ = new BinaryExpression( yylineno, AstNode::LTOP, $1, $3 );
+                     }
                      |
                      additive_expression GREATEREQUAL additive_expression
                      |
@@ -395,6 +497,9 @@ relational_expression: additive_expression
 additive_expression: multiplicative_expression
                    |
                    additive_expression PLUS multiplicative_expression
+                      {
+                          $$ = new BinaryExpression( yylineno, AstNode::ADDOP, $1, $3 );
+                      }
                    |
                    additive_expression MINUS multiplicative_expression
                    ;
@@ -413,6 +518,9 @@ unary_expression: primary_expression
                 MINUS unary_expression
                 |
                 LPAR type RPAR unary_expression
+                {
+                    $$ = new CastExpression(yylineno, $2, $4);
+                }
                 ;
 
 primary_expression: literal
@@ -435,10 +543,19 @@ primary_expression: literal
                   ;
 
 literal: INTLITERAL
+       {
+       $$ = $1;
+       }
        |
        FLOATLITERAL
+       {
+       $$ = $1;
+       }
        |
        STRING
+       {
+       $$ = $1;
+       }
        |
        list_literal
        |

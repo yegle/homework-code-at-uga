@@ -15,7 +15,7 @@ LDLIBS = -lAst -lfl
 
 all: tjc libtjlex.so tjc libtjparse.so
 
-tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o
+tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o AstPrinter.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 parser.o: parser.c
@@ -51,6 +51,9 @@ libtjparse.so: y.tab.o
 
 lex.yy.c: TinyJava.l
 	$(LEX) TinyJava.l
+
+AstPrinter.o: AstPrinter.cpp
+	$(CXX) -c $(CXXFLAGS) -o $@ $^
 
 clean:
 	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.* y.output
