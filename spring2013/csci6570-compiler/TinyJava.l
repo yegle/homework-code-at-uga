@@ -1,11 +1,18 @@
 /*
 scanner for TinyJava language
 */
+%option yylineno 
+
 %{
+
+#include "Ast.h"
 #include "y.tab.h"
-int yywrap(void){
-    return 1;
-}
+
+//int yywrap(void){
+//    return 1;
+//}
+
+int yylex(void);
 
 char* reason;
 

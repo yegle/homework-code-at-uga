@@ -6,7 +6,13 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <vector>
+#include <string.h>
+#include <iostream>
+#include "Ast.h"
 #include "y.tab.h"
+
+using namespace std;
 
 #define YYERROR_VERBOSE
 
@@ -22,9 +28,28 @@ extern int yyin;
 extern char* yytext;
 extern int yychar;
 int yyerrstatus;
-int yydebug=1;
+extern int yydebug;
 
+MethodDeclaration *methodDecl = NULL;
+ClassDeclaration *classDecl = NULL;
 %}
+
+%union {
+  int	          	 ival;    //e.g., type representation
+  char           	*sval;    //e.g., lexemes (idents, literals)
+  Entry          	*eval;    //symbol table entry
+  Statement      	*tval;    //a Statement object reference
+  BlockStatement 	*bval;    //a BlockStatement reference
+  Expression     	*xval;    //an Expression reference
+  MethodCallExpression  *mval;    //a MethodCallExpression reference
+  Declaration           *dval;    //a Declaration reference
+  std::vector<int>    	*vival;     //a reference to a vector of type representations
+  std::vector<Expression *>  *aval;  //a reference to a vector of Expression references
+                                //        (actual arguments of a method call)
+  std::vector<Declaration *>  *vdval; //  a reference to a vector of Declaration references
+                                //        (a list of local declarations
+                                //         or formal paramater declarations)
+}
 
 %token IDENT
 %token FLOATLITERAL
@@ -72,12 +97,42 @@ int yydebug=1;
 %token WHILE
 %token CLASS
 
+%type <sval>   INTLITERAL
+%type <sval>   FLOATLITERAL
+%type <sval>   STRING
+%type <sval>   NULL_
+%type <sval>   literal
+%type <ival>   type
+%type <xval>   primary_expression
+%type <xval>   unary_expression
+%type <xval>   multiplicative_expression
+%type <xval>   additive_expression
+%type <xval>   relational_expression
+%type <xval>   expression
+%type <tval>   statement
+%type <tval>   return_statement
+%type <tval>   method_body
+%type <xval>   method_invocation
+%type <bval>   statement_list
+%type <bval>   method_statement_list
+%type <aval>   argument_list
+%type <dval>   local_decl
+%type <vdval>  local_decl_list
+%type <dval>   formal_param
+%type <vdval>  formal_param_list
+%type <sval>   IDENT
+%type <xval>   class_decl
+
 %%
 
 tiny_java_program: class_decl
                  ;
 
-class_decl: class_decl PUBLIC CLASS IDENT LBRACE member_decl_list RBRACE
+class_decl: class_decl PUBLIC CLASS IDENT
+          {
+            classDecl = new ClassDeclaration( yylineno, $4 );
+          }
+          LBRACE member_decl_list RBRACE
           | empty
           ;
 
@@ -91,10 +146,11 @@ member_decl: field_decl
            method_decl
            ;
 
-field_decl: STATIC type IDENT ASSIGN literal SEMI
+field_decl: STATIC FLOAT IDENT ASSIGN literal SEMI
           |
-          STATIC type IDENT ASSIGN literal err {
-            error_semi();
+          STATIC INT IDENT ASSIGN literal SEMI
+          {
+	        classDecl->addMember( new FieldDeclaration( yylineno, $3, AstNode::TINT, $5 ) );
           }
           |
           STATIC type LBRACKET RBRACKET IDENT ASSIGN NEW type array_define_index SEMI
@@ -115,16 +171,45 @@ array_define_index: array_index
                   LBRACKET RBRACKET
                   ;
 
-
-method_decl: STATIC type IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
-           |
+method_decl:
            STATIC VOID IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
            |
-           STATIC type IDENT LPAR RPAR LBRACE method_body RBRACE
+           STATIC INT IDENT LPAR
+           {
+              methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TINT );
+              classDecl->addMember( methodDecl );
+           }
+           formal_param_list RPAR
+           {
+            methodDecl->setParameters( $6 );
+           }
+           LBRACE method_body RBRACE
+           |
+           STATIC FLOAT IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
            |
            STATIC VOID IDENT LPAR RPAR LBRACE method_body RBRACE
            |
-           PUBLIC STATIC VOID IDENT LPAR IDENT LBRACKET RBRACKET IDENT RPAR LBRACE method_body RBRACE
+           STATIC INT IDENT LPAR RPAR LBRACE method_body RBRACE
+           |
+           STATIC FLOAT IDENT LPAR RPAR LBRACE method_body RBRACE
+           |
+           PUBLIC STATIC VOID IDENT LPAR IDENT LBRACKET RBRACKET IDENT RPAR
+           {
+              ParameterDeclaration *pd = NULL;
+              if( strcmp( $6, "String" ) == 0 ) {
+                pd = new ParameterDeclaration( yylineno, $9, AstNode::TSTRINGA );
+              }
+              else {
+                pd = new ParameterDeclaration( yylineno, $9, 0 );
+              }
+              vector<Declaration*> *pv = new vector<Declaration*>();
+              pv->push_back( pd );
+              methodDecl = new MethodDeclaration( yylineno, $4, AstNode::TVOID );
+              methodDecl->setParameters( pv );
+              methodDecl->setPublicMethod( true );
+              classDecl->addMember(methodDecl);
+           }
+           LBRACE method_body RBRACE
            ;
 
 array_index: LBRACKET INTLITERAL RBRACKET
@@ -185,6 +270,11 @@ statement_list: statement statement_list
               | empty
               ;
 
+opt_else: ELSE statement
+        |
+        empty
+        ;
+
 statement: IDENT ASSIGN expression SEMI
          |
          IDENT ASSIGN expression err {
@@ -209,9 +299,7 @@ statement: IDENT ASSIGN expression SEMI
             error_semi();
          }
          |
-         IF LPAR expression RPAR statement
-         |
-         IF LPAR expression RPAR statement ELSE statement
+         IF LPAR expression RPAR statement opt_else
          |
          WHILE LPAR expression RPAR statement
          |

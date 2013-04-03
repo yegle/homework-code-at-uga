@@ -2,11 +2,14 @@
 #include<string.h>
 #include<errno.h>
 
+#include "Ast.h"
 #include "y.tab.h"
 #include "check_filename.h"
 
 extern FILE *yyin;
 extern int yydebug;
+
+int yyparse (void);
 
 void usage(){
     fprintf(stderr, "Usage: prog TinyJavaProgram.java\n");

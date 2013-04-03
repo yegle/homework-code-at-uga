@@ -2,6 +2,7 @@
 #include<errno.h>
 #include<string.h>
 
+#include "Ast.h"
 #include "y.tab.h"
 #include "check_filename.h"
 
@@ -10,6 +11,8 @@ extern FILE *yyin;
 extern int yylineno;
 extern char *yytext;
 extern char *reason;
+
+int yylex(void);
 
 void usage(){
     fprintf(stderr, "Usage: prog TinyJavaProgram.java\n");

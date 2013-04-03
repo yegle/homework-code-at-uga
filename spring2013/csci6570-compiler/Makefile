@@ -1,41 +1,47 @@
 # compiler to use
-CC      = gcc
-CFLAGS  = -std=c99 -fPIC
+CC = /usr/bin/gcc
+CXX = /usr/bin/g++
+CFLAGS = -std=c99 -fPIC -I./ast
+CXXFLAGS = -fPIC -I./ast
 
 # object files needed for the project
 OBJS    = lex.yy.o check_filename.o 
 
-all: tjc libtjlex.so tjc lexer libtjparse.so
+LEX = /usr/bin/flex
+BISON = /usr/bin/bison
 
-tjc: $(OBJS) y.tab.o parser.o
-	$(CC) $(CFLAGS) -o $@ $^ -lfl
+LDFLAGS = -L./ast
+LDLIBS = -lAst -lfl
+
+all: tjc libtjlex.so tjc libtjparse.so
+
+tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 parser.o: parser.c
+	$(CXX) -c $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 test: tjc
 	./test.sh
 
-lex.yy.o: lex.yy.c
-
-y.tab.o: y.tab.c y.tab.h
-
-# the main target
-lexer: $(OBJS) tjc.o
-	$(CC) $(CFLAGS) -o $@ $^ -lfl
+y.tab.o: y.tab.c y.tab.h ast/Ast.h
+	$(CXX) -c $(CXXFLAGS) -o $@ y.tab.c $(LDFLAGS) $(LDLIBS)
 
 check_filename.o: check_filename.c
+	$(CXX) -c $(CXXFLAGS) -o $@ $^
 
 y.tab.c: TinyJava.y
-	bison --report=all --report-file=y.output -b y $<
+	$(BISON) --report=all --report-file=y.output -b y $<
 
 y.tab.h: TinyJava.y
-	bison -d --debug -b y --report=all --report-file=y.output $<
+	$(BISON) -d --debug -b y --report=all --report-file=y.output $<
 
 # dependencies
 tjc.o: tjc.c y.tab.h
+	$(CXX) -c $(CXXFLAGS) -o $@ tjc.c
 
-lex.yy.o: lex.yy.c y.tab.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+lex.yy.o: lex.yy.c y.tab.h ast/Ast.h
+	$(CXX) -c $(CXXFLAGS) -o $@ lex.yy.c
 
 libtjlex.so: lex.yy.o
 	$(CC) $(CFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
