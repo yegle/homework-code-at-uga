@@ -169,7 +169,11 @@ member_decl: field_decl
            }
            ;
 
-field_decl: STATIC FLOAT IDENT ASSIGN literal SEMI
+field_decl: STATIC type IDENT ASSIGN literal SEMI
+          {
+            classDecl->addMember(new FieldDeclaration(yylineno, $3, $2, $5));
+          }
+          /*
           |
           STATIC INT IDENT ASSIGN literal SEMI
           {
@@ -185,6 +189,7 @@ field_decl: STATIC FLOAT IDENT ASSIGN literal SEMI
           STATIC type LBRACKET RBRACKET IDENT ASSIGN NEW type array_define_index list_literal err {
             error_semi();
           }
+          */
           ;
 
 array_define_index: array_index
@@ -193,7 +198,16 @@ array_define_index: array_index
                   ;
 
 method_decl:
-           STATIC VOID IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
+           STATIC VOID IDENT LPAR
+           {
+              methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TVOID );
+              classDecl->addMember( methodDecl );
+           }
+           formal_param_list RPAR
+           {
+            methodDecl->setParameters( $6 );
+           }
+           LBRACE method_body RBRACE
            |
            STATIC INT IDENT LPAR
            {
@@ -206,13 +220,37 @@ method_decl:
            }
            LBRACE method_body RBRACE
            |
-           STATIC FLOAT IDENT LPAR formal_param_list RPAR LBRACE method_body RBRACE
+           STATIC FLOAT IDENT LPAR
+           {
+              methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TFLOAT );
+              classDecl->addMember( methodDecl );
+           }
+           formal_param_list RPAR
+           {
+            methodDecl->setParameters( $6 );
+           }
+           LBRACE method_body RBRACE
            |
-           STATIC VOID IDENT LPAR RPAR LBRACE method_body RBRACE
+           STATIC VOID IDENT LPAR RPAR
+           {
+            methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TVOID);
+            classDecl->addMember(methodDecl);
+           }
+           LBRACE method_body RBRACE
            |
-           STATIC INT IDENT LPAR RPAR LBRACE method_body RBRACE
+           STATIC INT IDENT LPAR RPAR
+           {
+            methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TINT);
+            classDecl->addMember(methodDecl);
+           }
+           LBRACE method_body RBRACE
            |
-           STATIC FLOAT IDENT LPAR RPAR LBRACE method_body RBRACE
+           STATIC FLOAT IDENT LPAR RPAR
+           {
+            methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TFLOAT);
+            classDecl->addMember(methodDecl);
+           }
+           LBRACE method_body RBRACE
            |
            PUBLIC STATIC VOID IDENT LPAR IDENT LBRACKET RBRACKET IDENT RPAR
            {
@@ -247,19 +285,31 @@ type: INT
     {
         $$ = AstNode::TFLOAT;
     }
-    |
-    INT LBRACKET RBRACKET
-    |
-    FLOAT LBRACKET RBRACKET
     ;
 
 
 formal_param_list: formal_param
+                 {
+                 $$ = new vector<Declaration *>();
+                 $$->push_back($1);
+                 }
                  |
                  formal_param COMMA formal_param_list
+                 {
+                 $$ = $3;
+                 $$->insert($$->begin(), $1);
+                 }
                  ;
 
 formal_param: type IDENT
+            {
+                $$ = new ParameterDeclaration(yylineno, $2, $1);
+            }
+            |
+            type LBRACKET RBRACKET IDENT
+            {
+                $$ = new ParameterDeclaration(yylineno, $4, $1);
+            }
             ;
 
 method_body: local_decl_list method_statement_list
@@ -285,9 +335,14 @@ local_decl: type IDENT ASSIGN literal SEMI
             $$ = new VariableDeclaration( yylineno, $2, $1, $4);
           }
           |
-          type IDENT ASSIGN expression SEMI
+          type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
+          {
+            $$ = new VariableDeclaration( yylineno, $4, $1, $6);
+          }
+          /*
           |
           type IDENT array_index ASSIGN literal SEMI
+          */
           ;
 
 method_statement_list: statement method_statement_list
@@ -315,8 +370,14 @@ statement_list: statement statement_list
               ;
 
 opt_else: ELSE statement
+        {
+        $$ = new BlockStatement(yylineno);
+        }
         |
         empty
+        {
+        $$ = new EmptyStatement(yylineno);
+        }
         ;
 
 
@@ -325,26 +386,9 @@ statement: IDENT ASSIGN expression SEMI
 	        $$ = new AssignStatement( yylineno, $1, $3 );
          }
          |
-         IDENT ASSIGN expression err {
-            error_semi();
-         }
-         |
-         IDENT ASSIGN NEW type expression SEMI
-         |
-         IDENT ASSIGN NEW type expression err {
-            error_semi();
-         }
-         |
-         IDENT array_index ASSIGN expression SEMI
-         |
-         IDENT array_index ASSIGN expression err {
-            error_semi();
-         }
-         |
-         IDENT array_index ASSIGN expression list_literal SEMI
-         |
-         IDENT array_index ASSIGN expression list_literal err {
-            error_semi();
+         IDENT LBRACKET primary_expression RBRACKET ASSIGN expression SEMI
+         {
+	        $$ = new AssignStatement( yylineno, $1, $3, $6);
          }
          |
          IF LPAR expression RPAR statement opt_else
@@ -357,15 +401,19 @@ statement: IDENT ASSIGN expression SEMI
 	        $$ = new WhileStatement( yylineno, $3, $5 );
          }
          |
-         FOR LPAR for_part_1 for_part_2 for_part_3 RPAR statement
+         FOR LPAR IDENT ASSIGN expression SEMI expression SEMI expression RPAR statement
+         {
+            $$ = new ForStatement(yylineno, $3, $5, $7, $9, $11);
+         }
+         |
+         FOR LPAR IDENT LBRACKET expression RBRACKET ASSIGN expression SEMI expression SEMI expression RPAR statement
+         {
+            $$ = new ForStatement(yylineno, $3, $5, $8, $10, $12, $14);
+         }
          |
          method_invocation SEMI
          {
 	        $$ = new MethodCallStatement( yylineno, $1 );
-         }
-         |
-         method_invocation err {
-            error_semi();
          }
          |
          LBRACE statement_list RBRACE
@@ -374,10 +422,6 @@ statement: IDENT ASSIGN expression SEMI
          }
          |
          expression SEMI
-         |
-         expression err {
-            error_semi();
-         }
          |
          SEMI
          {
@@ -414,17 +458,9 @@ return_statement: RETURN expression SEMI
 	                $$ = new ReturnStatement( yylineno, NULL, $2 );
                 }
                 |
-                RETURN expression err {
-                    error_semi();
-                }
-                |
                 RETURN SEMI
                 {
 	                $$ = new ReturnStatement( yylineno, NULL, NULL );
-                }
-                |
-                RETURN err {
-                    error_semi();
                 }
                 ;
 
@@ -469,6 +505,9 @@ argument_list: expression
              ;
 
 expression: relational_expression
+          {
+            $$ = $1;
+          }
           |
           relational_expression EQUAL relational_expression
           {
@@ -476,11 +515,20 @@ expression: relational_expression
           }
           |
           relational_expression NOTEQUAL relational_expression
+          {
+              $$ = new BinaryExpression( yylineno, AstNode::NEOP, $1, $3 );
+          }
           ;
 
 relational_expression: additive_expression
+                     {
+                     $$ = $1;
+                     }
                      |
                      additive_expression GREATER additive_expression
+                     {
+                          $$ = new BinaryExpression( yylineno, AstNode::GTOP, $1, $3 );
+                     }
                      |
                      additive_expression LESS additive_expression
                      {
@@ -488,11 +536,20 @@ relational_expression: additive_expression
                      }
                      |
                      additive_expression GREATEREQUAL additive_expression
+                     {
+                          $$ = new BinaryExpression( yylineno, AstNode::GEOP, $1, $3 );
+                     }
                      |
                      additive_expression LESSEQUAL additive_expression
+                     {
+                          $$ = new BinaryExpression( yylineno, AstNode::LEOP, $1, $3 );
+                     }
                      ;
 
 additive_expression: multiplicative_expression
+                   {
+                   $$ = $1;
+                   }
                    |
                    additive_expression PLUS multiplicative_expression
                       {
@@ -500,20 +557,51 @@ additive_expression: multiplicative_expression
                       }
                    |
                    additive_expression MINUS multiplicative_expression
+                      {
+                          $$ = new BinaryExpression( yylineno, AstNode::SUBOP, $1, $3 );
+                      }
                    ;
 
 multiplicative_expression: unary_expression
+                         {
+                         $$ = $1;
+                         }
                          |
                          multiplicative_expression MUL unary_expression
+                         {
+                            $$ = new BinaryExpression( yylineno, AstNode::MULOP, $1, $3 );
+                         }
                          |
                          multiplicative_expression DIVIDE unary_expression
+                         {
+                            $$ = new BinaryExpression( yylineno, AstNode::DIVOP, $1, $3 );
+                         }
                          ;
 
 unary_expression: primary_expression
+                {
+                $$ = $1;
+                }
                 |
                 PLUS unary_expression
+                {
+                    $$ = new UnaryExpression(yylineno, AstNode::ADDOP, $2);
+                }
+                |
+                unary_expression INCREMENT
+                {
+                    $$ = new UnaryExpression(yylineno, AstNode::INCOP, $1, true);
+                }
                 |
                 MINUS unary_expression
+                {
+                    $$ = new UnaryExpression(yylineno, AstNode::SUBOP, $2);
+                }
+                |
+                unary_expression DECREMENT
+                {
+                    $$ = new UnaryExpression(yylineno, AstNode::DECOP, $1, true);
+                }
                 |
                 LPAR type RPAR unary_expression
                 {
@@ -521,23 +609,55 @@ unary_expression: primary_expression
                 }
                 ;
 
-primary_expression: literal
+primary_expression: INTLITERAL
+                   {
+                   $$ = new LiteralExpression(yylineno, $1, AstNode::TINT);
+                   }
+                   |
+                   FLOATLITERAL
+                   {
+                   $$ = new LiteralExpression(yylineno, $1, AstNode::TFLOAT);
+                   }
+                   |
+                   STRING
+                   {
+                   $$ = new LiteralExpression(yylineno, $1, AstNode::TSTRING);
+                   }
+                   |
+                   NULL_
+                   {
+                   $$ = new LiteralExpression(yylineno, $1, AstNode::TREF);
+                   }
                   |
                   IDENT
+                  {
+                  $$ = new ReferenceExpression(yylineno, $1);
+                  }
+                  |
+                  IDENT LBRACKET primary_expression RBRACKET
+                  {
+                    $$ = new ReferenceExpression(yylineno, $1, $3);
+                  }
                   |
                   method_invocation
+                  {
+                  $$ = $1;
+                  }
                   |
                   LPAR expression RPAR
+                  {
+                  $$ = $2;
+                  }
                   |
-                  inc_dec_operator IDENT
+                  NEW INT LBRACKET primary_expression RBRACKET
+                  {
+                  $$ = new NewExpression(yylineno, AstNode::TINT, $4);
+                  }
                   |
-                  IDENT inc_dec_operator
-                  |
-                  IDENT array_index
-                  |
-                  NEW INT array_index
-                  |
-                  NEW FLOAT array_index
+                  NEW FLOAT LBRACKET primary_expression RBRACKET
+                  {
+                  $$ = new NewExpression(yylineno, AstNode::TFLOAT, $4);
+                  }
                   ;
 
 literal: INTLITERAL
@@ -555,9 +675,10 @@ literal: INTLITERAL
        $$ = $1;
        }
        |
-       list_literal
-       |
        NULL_
+       {
+       $$ = $1;
+       }
        ;
 
 list_literal: LBRACE int_list RBRACE
