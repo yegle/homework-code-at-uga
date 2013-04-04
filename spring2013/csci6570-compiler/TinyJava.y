@@ -285,21 +285,9 @@ local_decl: type IDENT ASSIGN literal SEMI
             $$ = new VariableDeclaration( yylineno, $2, $1, $4);
           }
           |
-          type IDENT ASSIGN literal {
-            error_semi();
-          }
-          |
           type IDENT ASSIGN expression SEMI
           |
-          type IDENT ASSIGN expression err {
-            error_semi();
-          }
-          |
           type IDENT array_index ASSIGN literal SEMI
-          |
-          type IDENT array_index ASSIGN literal {
-            error_semi();
-          }
           ;
 
 method_statement_list: statement method_statement_list
@@ -448,6 +436,16 @@ method_invocation: IDENT LPAR argument_list RPAR
                  IDENT LPAR RPAR
                  {
 	                $$ = new MethodCallExpression( yylineno, NULL, $1, (vector<Expression *> *) NULL );
+                 }
+                 |
+                 IDENT DOT IDENT LPAR argument_list RPAR
+                 {
+	                $$ = new MethodCallExpression( yylineno, $1, $3, $5 );
+                 }
+                 |
+                 IDENT DOT IDENT LPAR RPAR
+                 {
+	                $$ = new MethodCallExpression( yylineno, $1, $3, (vector<Expression *> *) NULL );
                  }
                  ;
 

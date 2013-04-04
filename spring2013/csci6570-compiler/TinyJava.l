@@ -89,8 +89,8 @@ Class                   class
 {For}                               return FOR;
 {New}                               return NEW;
 {Null}                              return NULL_;
-{Int}                               return INT;
-{Float}                             return FLOAT;
+{Int}                               yylval.sval = strdup(yytext); return INT;
+{Float}                             yylval.sval = strdup(yytext); return FLOAT;
 {Void}                              return VOID;
 {Public}                            return PUBLIC;
 {Static}                            return STATIC;
@@ -101,9 +101,9 @@ Class                   class
 <BlockComment>\*[^\/]               /*ignored*/;
 <BlockComment>{BlockCommentEnd}     BEGIN(INITIAL);
 <*>{Newline}                        yylineno++;
-{Identifier}                        return IDENT;
-{FloatingPointLiteral}              BEGIN(TokenNotAllowed); return FLOATLITERAL;
-{DecimalIntegerLiteral}             BEGIN(TokenNotAllowed); return INTLITERAL;
+{Identifier}                        yylval.sval = strdup(yytext); return IDENT;
+{FloatingPointLiteral}              yylval.sval = strdup(yytext); BEGIN(TokenNotAllowed); return FLOATLITERAL;
+{DecimalIntegerLiteral}             yylval.sval = strdup(yytext); BEGIN(TokenNotAllowed); return INTLITERAL;
 <TokenNotAllowed>[_a-zA-Z0-9]       {
     reason = "This token is not allowed right after the previous token";
     return ERROR;
