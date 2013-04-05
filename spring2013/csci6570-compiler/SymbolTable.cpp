@@ -6,25 +6,10 @@ using namespace std;
 #include <cstdlib>
 #include "SymbolTable.h"
 
-string ParameterEntry::getKind(){
-    return string("ParameterEntry");
-}
 
-string VariableEntry::getKind(){
-    return string("VariableEntry");
+Kind Entry::get_kind(){
+    return this->kind;
 }
-
-string MethodEntry::getKind(){
-    return string("MethodEntry");
-}
-
-string ClassEntry::getKind(){
-    return string("ClassEntry");
-}
-
-string FieldEntry::getKind(){
-    return string("FieldEntry");
-};
 
 string Entry::get_name(){
     return this->name;
@@ -37,6 +22,7 @@ Scope::Scope(){
 ParameterEntry::ParameterEntry(const char* name, const char* parameter_type){
     this->name = string(name);
     this->parameter_type = string(parameter_type);
+    this->kind = PARAMETER;
 }
 
 SymbolTable::SymbolTable(){

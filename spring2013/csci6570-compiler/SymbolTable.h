@@ -9,7 +9,7 @@ enum Kind {
 
 class Entry {
     public:
-        string getKind();
+        Kind get_kind();
         string get_name();
     protected:
         Kind kind;
