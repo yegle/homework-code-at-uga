@@ -13,9 +13,11 @@ BISON = /usr/bin/bison
 LDFLAGS = -L./ast
 LDLIBS = -lAst -lfl
 
-all: tjc libtjlex.so tjc libtjparse.so
+.PHONY: symboltable
 
-tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o AstPrinter.o
+all: tjc libtjlex.so tjc libtjparse.so symboltable
+
+tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o AstPrinter.o SymbolTable.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 parser.o: parser.c
@@ -57,3 +59,6 @@ AstPrinter.o: AstPrinter.cpp
 
 clean:
 	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.* y.output
+
+SymbolTable.o: SymbolTable.h SymbolTable.cpp
+	$(CXX) $(CXXFLAGS) -g -c -o $@ SymbolTable.cpp
