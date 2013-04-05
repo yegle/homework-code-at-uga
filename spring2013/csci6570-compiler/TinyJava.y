@@ -7,10 +7,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include <vector>
-#include <string.h>
 #include <iostream>
+#include "string.h"
 #include "Ast.h"
 #include "y.tab.h"
+
+#include "SymbolTable.h"
 
 using namespace std;
 
@@ -33,12 +35,13 @@ extern Declaration *declTree;
 
 MethodDeclaration *methodDecl = NULL;
 ClassDeclaration *classDecl = NULL;
+SymbolTable* table = new SymbolTable();
 %}
 
 %union {
   int	          	 ival;    //e.g., type representation
   char           	*sval;    //e.g., lexemes (idents, literals)
-  Entry          	*eval;    //symbol table entry
+  Entry*          	 eval;    //symbol table entry
   Statement      	*tval;    //a Statement object reference
   BlockStatement 	*bval;    //a BlockStatement reference
   Expression     	*xval;    //an Expression reference
@@ -267,6 +270,9 @@ method_decl:
               methodDecl->setParameters( pv );
               methodDecl->setPublicMethod( true );
               classDecl->addMember(methodDecl);
+              // SymbolTable
+              ParameterEntry* e = new ParameterEntry($9, INT);
+              table->install(e);
            }
            LBRACE method_body RBRACE
            ;
@@ -333,6 +339,8 @@ local_decl_list: local_decl local_decl_list
 local_decl: type IDENT ASSIGN literal SEMI
           {
             $$ = new VariableDeclaration( yylineno, $2, $1, $4);
+            //VariableEntry* v = new VariableEntry($2, $1, $4);
+            //table->install(v);
           }
           |
           type LBRACKET RBRACKET IDENT ASSIGN literal SEMI

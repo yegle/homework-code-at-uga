@@ -4,6 +4,7 @@ using namespace std;
 #include <iostream>
 #include <map>
 #include <cstdlib>
+
 #include "SymbolTable.h"
 
 
@@ -19,10 +20,10 @@ Scope::Scope(){
     this->entry_list = new vector<Entry*>();
 }
 
-ParameterEntry::ParameterEntry(const char* name, const char* parameter_type){
+ParameterEntry::ParameterEntry(const char* name, yytokentype parameter_type){
     this->name = string(name);
-    this->parameter_type = string(parameter_type);
-    this->kind = PARAMETER;
+    this->parameter_type = parameter_type;
+    this->kind = KPARAMETER;
 }
 
 SymbolTable::SymbolTable(){
@@ -101,16 +102,34 @@ Entry* SymbolTable::lookup(const char* name){
     }
 }
 
+VariableEntry::VariableEntry(const char* name, yytokentype variable_type, string init_value){
+    this->name = string(name);
+    this->variable_type = variable_type;
+    this->init_value = init_value;
+}
+
+MethodEntry::MethodEntry(const char* name, yytokentype return_type){
+    this->name = string(name);
+    this->return_type = return_type;
+}
+
+ClassEntry::ClassEntry(const char* name){
+    this->name = string(name);
+}
+
+/*
 int main(){
     SymbolTable* table = new SymbolTable();
     table->open_scope();
 
-    ParameterEntry* e = new ParameterEntry("name", "test_type");
-    ParameterEntry* f = new ParameterEntry("name", "test_type");
+    ParameterEntry* e = new ParameterEntry("name", INT);
+    ParameterEntry* f = new ParameterEntry("name", INT);
+
+    ClassEntry* c = new ClassEntry("ClassName");
 
     try{
         table->install(e);
-        table->install(f);
+        table->install(c);
     }
     catch(string e){
         cerr << "ERROR: " << e << endl;
@@ -118,4 +137,7 @@ int main(){
     }
     Entry* entry = table->lookup("name");
     cout << entry->get_name() << endl;
+    entry = table->lookup("ClassName");
+    cout << entry->get_name() << endl;
 }
+*/

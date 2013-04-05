@@ -1,15 +1,22 @@
+#include <string>
+
+#include "Ast.h"
+#include "y.tab.h"
+
+
+using namespace std;
 
 enum Kind {
-    CLASS,
-    VARIABLE,
-    METHOD,
-    FIELD,
-    PARAMETER,
+    KCLASS,
+    KVARIABLE,
+    KMETHOD,
+    KFIELD,
+    KPARAMETER,
 };
 
 class Entry {
     public:
-        Kind get_kind();
+        virtual Kind get_kind();
         string get_name();
     protected:
         Kind kind;
@@ -18,48 +25,42 @@ class Entry {
 
 class ParameterEntry: public Entry {
     public:
-        string getKind();
-
-        ParameterEntry(const char*, const char*);
+        ParameterEntry(const char*, yytokentype);
     private:
-        string parameter_type;
+        yytokentype parameter_type;
 };
 
-class VariableEntry: Entry {
+class VariableEntry: public Entry {
     public:
-        string getKind();
+        VariableEntry(const char*, yytokentype, string);
     private:
-        char* variable_name;
-        char* variable_type;
-        char* init_value;
+        yytokentype variable_type;
+        string init_value;
 };
 
-class MethodEntry: Entry {
+class MethodEntry: public Entry {
     public:
-        string getKind();
+        MethodEntry(const char*, yytokentype);
     private:
-        char* method_name;
-        char* return_type;
+        yytokentype return_type;
         vector<ParameterEntry *>* parameter_list;
         vector<VariableEntry *> variable_list;
 };
 
-class ClassEntry: Entry {
+class ClassEntry: public Entry {
     public:
-        string getKind();
+        ClassEntry(const char*);
     private:
         vector<Entry *> field_list;
         vector<MethodEntry *> method_list;
-        char* class_name;
 };
 
-class FieldEntry: Entry {
+class FieldEntry: public Entry {
     public:
-        string getKind();
+        FieldEntry(const char*, yytokentype, string);
     private:
-        char* field_name;
-        char* init_value;
-        char* type;
+        yytokentype type;
+        string init_value;
 };
 
 class Scope {
