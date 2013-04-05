@@ -4,9 +4,11 @@ using namespace std;
 #include <iostream>
 #include <map>
 #include <cstdlib>
+#include <sstream>
 
 #include "SymbolTable.h"
 
+extern int yylineno;
 
 Kind Entry::get_kind(){
     return this->kind;
@@ -26,11 +28,31 @@ ParameterEntry::ParameterEntry(const char* name, yytokentype parameter_type){
     this->kind = KPARAMETER;
 }
 
+ParameterEntry::ParameterEntry(ParameterDeclaration* param_d){
+    this->name = string(param_d->getName());
+    switch(param_d->getType()){
+        case AstNode::TINT:
+            this->parameter_type = INT;
+            break;
+        case AstNode::TFLOAT:
+            this->parameter_type = FLOAT;
+            break;
+        case AstNode::TSTRINGA:
+            this->parameter_type = STRING;
+            break;
+        default:
+            cout<< "asdf" <<param_d->getType() << "asdf"<< endl;
+            throw string("Wrong type initing from ParameterDeclaration.");
+            break;
+    }
+    this->kind = KPARAMETER;
+}
+
 SymbolTable::SymbolTable(){
     this->current_scope = NULL;
-    this->package_scope = new Scope();
-    this->class_scope = new Scope();
-    this->method_scope = new Scope();
+    this->package_scope = new Scope("package");
+    this->class_scope = new Scope("class");
+    this->method_scope = new Scope("method");
 }
 
 void SymbolTable::install(Entry* entry){
@@ -38,9 +60,21 @@ void SymbolTable::install(Entry* entry){
     current_scope->install(entry);
 }
 
+Scope::Scope(const char* name){
+    this->name = string(name);
+    this->entry_list = new vector<Entry *>();
+    return;
+}
+
+string Scope::get_name(){
+    return this->name;
+}
+
 void Scope::install(Entry* entry){
-    if(this->lookup(entry->get_name())){
-        throw string("Duplicate entry when installing entry in scope");
+    cout << entry->get_name() << endl;
+    if(this->lookup(entry->get_name())!=NULL){
+        string message  = string("Duplciate entry when installing entry " + entry->get_name()+ " in scope " + this->name + ".");
+        throw message;
     }
 
     this->entry_list->push_back(entry);
@@ -82,6 +116,25 @@ void SymbolTable::open_scope(){
     return;
 }
 
+void SymbolTable::use_scope(const char* scope_name){
+    string scope_name_string = string(scope_name);
+
+    if(scope_name_string == string("package")){
+        this->current_scope = this->package_scope;
+    }
+    else if(scope_name_string == string("class")){
+        this->current_scope = this->class_scope;
+    }
+    else if(scope_name_string == string("method")){
+        this->method_scope->clear();
+        this->current_scope = this->method_scope;
+    }
+    else {
+        throw string("Unknown scope");
+    }
+    return;
+}
+
 Entry* SymbolTable::lookup(const char* name){
     string name_string = string(name);
     Entry* method_entry = this->method_scope->lookup(name_string);
@@ -111,6 +164,26 @@ VariableEntry::VariableEntry(const char* name, yytokentype variable_type, string
 MethodEntry::MethodEntry(const char* name, yytokentype return_type){
     this->name = string(name);
     this->return_type = return_type;
+}
+
+MethodEntry::MethodEntry(const char* name,
+        yytokentype return_type,
+        vector<ParameterEntry*>* parameter_list = NULL,
+        vector<VariableEntry*>* variable_list = NULL){
+    this->name = string(name);
+    this->return_type = return_type;
+    this->parameter_list = parameter_list;
+    this->variable_list = variable_list;
+}
+
+void MethodEntry::setParameters(vector<Declaration*>* declaration_list){
+    vector<ParameterEntry*>* parameter_list = new vector<ParameterEntry*>();
+    for(int i=0; i<declaration_list->size(); i++){
+        Declaration* d = declaration_list->at(i);
+        ParameterEntry* parameter_e = new ParameterEntry((ParameterDeclaration*)d);
+        parameter_list->push_back(parameter_e);
+    }
+    this->parameter_list = parameter_list;
 }
 
 ClassEntry::ClassEntry(const char* name){

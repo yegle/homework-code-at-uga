@@ -26,6 +26,7 @@ class Entry {
 class ParameterEntry: public Entry {
     public:
         ParameterEntry(const char*, yytokentype);
+        ParameterEntry(ParameterDeclaration*);
     private:
         yytokentype parameter_type;
 };
@@ -41,10 +42,12 @@ class VariableEntry: public Entry {
 class MethodEntry: public Entry {
     public:
         MethodEntry(const char*, yytokentype);
+        MethodEntry(const char*, yytokentype, vector<ParameterEntry*>*, vector<VariableEntry*>*);
+        void setParameters(vector<Declaration*>*);
     private:
         yytokentype return_type;
         vector<ParameterEntry *>* parameter_list;
-        vector<VariableEntry *> variable_list;
+        vector<VariableEntry *>* variable_list;
 };
 
 class ClassEntry: public Entry {
@@ -68,10 +71,15 @@ class Scope {
         Scope();
         ~Scope();
 
+        Scope(const char*);
+
         void install(Entry*);
         Entry* lookup(string);
         void clear();
+
+        string get_name();
     private:
+        string name;
         vector<Entry *>* entry_list;
 };
 
@@ -79,8 +87,9 @@ class SymbolTable {
     public:
         void open_scope();
         void install(Entry*);
-        void close_scope();
         Entry* lookup(const char*);
+
+        void use_scope(const char*);
 
         Scope* get_scope();
 

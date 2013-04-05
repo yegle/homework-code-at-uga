@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<errno.h>
+#include<cstdlib>
 
 #include "Ast.h"
 #include "y.tab.h"
@@ -37,7 +38,13 @@ int main(int argc, char* argv[]){
     }
     //yydebug = 1;
     declTree = NULL;
-    yyparse();
+    try{
+        yyparse();
+    }
+    catch(string reason){
+        cerr << "ERROR: " << reason << endl;
+        exit(1);
+    }
     if(declTree == NULL){
         printf("declTree is NULL\n");
     }
