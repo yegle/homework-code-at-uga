@@ -205,6 +205,12 @@ method_decl:
            {
               methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TVOID );
               classDecl->addMember( methodDecl );
+
+
+              table->open_scope();
+              MethodEntry* m = new MethodEntry($3, VOID);
+              table->install(m);
+              methodDecl->setEntry(m);
            }
            formal_param_list RPAR
            {
@@ -272,6 +278,7 @@ method_decl:
               classDecl->addMember(methodDecl);
               // SymbolTable
               ParameterEntry* e = new ParameterEntry($9, INT);
+              table->open_scope();
               table->install(e);
            }
            LBRACE method_body RBRACE
