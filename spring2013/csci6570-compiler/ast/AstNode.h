@@ -92,13 +92,13 @@
  * - #AstNode::ADDOP, which represents the "+" operator (prefix or infix)
  * - #AstNode::SUBOP, which represents the "-" operator (prefix or infix)
  * - #AstNode::MULOP, which represents the "*" operator
- * - #AstNode::DIVOP, which represents the "*" operator
+ * - #AstNode::DIVOP, which represents the "/" operator
  * - #AstNode::EQOP, which represents the "==" operator
  * - #AstNode::NEOP, which represents the "!=" operator
  * - #AstNode::LTOP, which represents the "<" operator
  * - #AstNode::GTOP, which represents the ">" operator
  * - #AstNode::LEOP, which represents the "<=" operator
- * - #AstNode::GEOP, which represents the ">=*" operator
+ * - #AstNode::GEOP, which represents the ">=" operator
  * - #AstNode::INCOP, which represents the "++" operator (postfix), and
  * - #AstNode::DECOP, which represents the "--" operator (postfix).
  *
@@ -236,7 +236,7 @@ public:
   static const int LTOP  = 6;	/**< '<' operator */
   static const int GTOP  = 7;	/**< '>' operator */
   static const int LEOP  = 8;	/**< '<=' operator */
-  static const int GEOP  = 9;	/**< '>=*' operator */
+  static const int GEOP  = 9;	/**< '>=' operator */
   static const int INCOP = 10;	/**< '++' operator (postfix) */
   static const int DECOP = 11;	/**< '--' operator (postfix) */
 

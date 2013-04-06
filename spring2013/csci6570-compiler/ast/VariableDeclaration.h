@@ -10,6 +10,7 @@
 #include "Declaration.h"
 #include "AstVisitor.h"
 #include "AstException.h"
+#include "LiteralExpression.h"
 
 
 class ENTRY;
@@ -23,7 +24,7 @@ class ENTRY;
  * A variable is represented by:
  * - #variable name - a string
  * - #type - an integer value, as defined in the AstNode class
- * - #initial value - a string representing the initial value (a literal)
+ * - #initial value - either a string representing the initial value literal or a LiteralExpression node
  * - #a pointer to the symbol table ENTRY for the variable (which may be initially undefined). 
  *
  * ENTRY should be defined as a macro, and its value should be a class, which is 
@@ -34,10 +35,11 @@ class ENTRY;
 class VariableDeclaration: public Declaration {
 
 private:
-  const char  *name;
-  int          type;
-  const char  *initVal;
-  ENTRY	      *entry;     // variable's symtab entry
+  const char  		*name;		// variable's name
+  int          		 type;		// variable's type
+  const char  		*initVal;	// initial value as a string (lexeme)
+  LiteralExpression 	*initLit;   	// initial value as a LiteralExpression
+  ENTRY	      		*entry;     	// variable's symtab entry
 
 public:
 
@@ -63,6 +65,33 @@ public:
       throw AstException( "VariableDeclaration::VariableDeclaration: variable initial value is NULL\n" );
     else
       initVal = iv;
+    initLit = NULL;
+    entry = NULL;
+  }
+
+  /** 
+   * Create a new VariableDeclaration object.
+   * 
+   * @param lno a source code line number with the variable declaration.
+   * @param nm a string with the variable name
+   * @param tp an integer representing the type, as defined in the AstNode class
+   * @param il a reference to a LiteralExpression representing the initial value literal
+   * @throws AstException if the variable name or the initial value is NULL
+   */  
+  VariableDeclaration( int lno, const char *nm, int tp, LiteralExpression *il )
+  {
+    setKind( DVARIABLE );
+    setLineNo( lno );
+    if( nm == NULL )
+      throw AstException( "VariableDeclaration::VariableDeclaration: variable name is NULL\n" );
+    else
+      name = nm;
+    type = tp;
+    if( il == NULL )
+      throw AstException( "VariableDeclaration::VariableDeclaration: variable initial value LiteralExpression is NULL\n" );
+    else
+      initLit = il;
+    initVal = il->getLiteral();
     entry = NULL;
   }
 
@@ -133,6 +162,30 @@ public:
       throw AstException( "VariableDeclaration::setInitValue: variable initial value is NULL\n" );
     else
       initVal  = iv;
+  }
+
+  /** 
+   * Return the initialization literal of this VariableDeclaration.
+   * 
+   * @return a reference to a LiteralExpression representing the initial literal of the variable.
+   */
+  LiteralExpression *getInitLiteral()
+  {
+    return initLit;
+  }
+
+  /** 
+   * Set the new initialization literal of this VariableDeclaration.
+   * 
+   * @param il a LiteralExpression reference representing the initialization literal.
+   * @throws AstException if the initial value is NULL
+   */
+  void setInitLiteral( LiteralExpression *il )
+  {
+    if( il == NULL )
+      throw AstException( "FieldDeclaration::setInitValue: variable initialization literal is NULL\n" );
+    else
+      initLit  = il;
   }
 
   /** 
