@@ -1,4 +1,5 @@
 #include <string>
+#include <map>
 
 #include "Ast.h"
 #include "y.tab.h"
@@ -44,6 +45,7 @@ class MethodEntry: public Entry {
         MethodEntry(const char*, yytokentype);
         MethodEntry(const char*, yytokentype, vector<ParameterEntry*>*, vector<VariableEntry*>*);
         void setParameters(vector<Declaration*>*);
+        void setParameters(vector<ParameterEntry *>*);
     private:
         yytokentype return_type;
         vector<ParameterEntry *>* parameter_list;
@@ -60,7 +62,7 @@ class ClassEntry: public Entry {
 
 class FieldEntry: public Entry {
     public:
-        FieldEntry(const char*, yytokentype, string);
+        FieldEntry(const char*, yytokentype, const char*);
     private:
         yytokentype type;
         string init_value;
@@ -78,9 +80,11 @@ class Scope {
         void clear();
 
         string get_name();
+        void set_name(const char*);
     private:
         string name;
         vector<Entry *>* entry_list;
+        map<string, Entry*>* list;
 };
 
 class SymbolTable {
@@ -92,6 +96,7 @@ class SymbolTable {
         void use_scope(const char*);
 
         Scope* get_scope();
+        Scope* get_scope(const char*);
 
         SymbolTable();
         ~SymbolTable();
@@ -99,6 +104,7 @@ class SymbolTable {
         Scope* package_scope;
         Scope* class_scope;
         Scope* method_scope;
+        Scope* simpleio_scope;
         Scope* current_scope;
 };
 

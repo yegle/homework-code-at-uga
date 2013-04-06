@@ -41,7 +41,6 @@ ParameterEntry::ParameterEntry(ParameterDeclaration* param_d){
             this->parameter_type = STRING;
             break;
         default:
-            cout<< "asdf" <<param_d->getType() << "asdf"<< endl;
             throw string("Wrong type initing from ParameterDeclaration.");
             break;
     }
@@ -53,16 +52,47 @@ SymbolTable::SymbolTable(){
     this->package_scope = new Scope("package");
     this->class_scope = new Scope("class");
     this->method_scope = new Scope("method");
+    this->simpleio_scope = new Scope("simpleio");
+
+    MethodEntry* readInt_entry = new MethodEntry("readInt", INT);
+    MethodEntry* readFloat_entry = new MethodEntry("readFloat", FLOAT);
+    MethodEntry* println_entry = new MethodEntry("println", VOID);
+    MethodEntry* printInt_entry = new MethodEntry("printInt", VOID);
+    MethodEntry* printFloat_entry = new MethodEntry("printFloat", FLOAT);
+    MethodEntry* printString_entry = new MethodEntry("printString", FLOAT);
+
+    vector<ParameterEntry*>* pe_list_1 = new vector<ParameterEntry*>();
+    pe_list_1->push_back(new ParameterEntry("ival", INT));
+    printInt_entry->setParameters(pe_list_1);
+
+    vector<ParameterEntry*>* pe_list_2 = new vector<ParameterEntry*>();
+    pe_list_2->push_back(new ParameterEntry("fval", FLOAT));
+    printFloat_entry->setParameters(pe_list_2);
+
+    vector<ParameterEntry*>* pe_list_3 = new vector<ParameterEntry*>();
+    pe_list_3->push_back(new ParameterEntry("sval", STRING));
+    printString_entry->setParameters(pe_list_3);
+
+    this->use_scope("simpleio");
+    this->install(readInt_entry);
+    this->install(readFloat_entry);
+    this->install(println_entry);
+    this->install(printInt_entry);
+    this->install(printFloat_entry);
+    this->install(printString_entry);
 }
 
 void SymbolTable::install(Entry* entry){
     Scope* current_scope = this->get_scope();
     current_scope->install(entry);
+
+    //cout << "install: " << entry->get_name() << " to scope " << current_scope->get_name() << endl;
 }
 
 Scope::Scope(const char* name){
     this->name = string(name);
     this->entry_list = new vector<Entry *>();
+    this->list = new map<string, Entry*>();
     return;
 }
 
@@ -70,33 +100,55 @@ string Scope::get_name(){
     return this->name;
 }
 
+void Scope::set_name(const char* name){
+    this->name = string(name);
+}
+
 void Scope::install(Entry* entry){
-    cout << entry->get_name() << endl;
-    if(this->lookup(entry->get_name())!=NULL){
-        string message  = string("Duplciate entry when installing entry " + entry->get_name()+ " in scope " + this->name + ".");
+    this->list->find(string("test"));
+    if(this->list->find(entry->get_name()) != this->list->end()){
+        string message = string("Duplciate entry when installing entry " + entry->get_name()+ " in scope " + this->name + ".");
         throw message;
     }
-
-    this->entry_list->push_back(entry);
+    this->list->insert(this->list->end(), pair<string, Entry*>(entry->get_name(), entry));
 }
 
 void Scope::clear(){
     this->entry_list->clear();
+    this->list->clear();
 }
 
 Entry* Scope::lookup(string name){
-    Entry* entry;
-    for(int i=0; i < this->entry_list->size(); i++){
-        entry = this->entry_list->at(i);
-        if(entry->get_name() == name){
-            return entry;
-        }
+    map<string, Entry*>::iterator ret = this->list->find(name);
+    if (ret == this->list->end()){
+        return NULL;
     }
-    return NULL;
+    else{
+        return ret->second;
+    }
 }
 
 Scope* SymbolTable::get_scope(){
     return this->current_scope;
+}
+
+Scope* SymbolTable::get_scope(const char* scope_name){
+    string scope_name_string = string(scope_name);
+    if (scope_name_string == string("simpleio")){
+        return this->simpleio_scope;
+    }
+    else if (scope_name_string == string("package")){
+        return this->package_scope;
+    }
+    else if (scope_name_string == string("class")){
+        return this->class_scope;
+    }
+    else if (scope_name_string == string("method")){
+        return this->method_scope;
+    }
+    else{
+        throw string("unknow scope name in SymbolTable::get_scope");
+    }
 }
 
 void SymbolTable::open_scope(){
@@ -125,6 +177,9 @@ void SymbolTable::use_scope(const char* scope_name){
     else if(scope_name_string == string("class")){
         this->current_scope = this->class_scope;
     }
+    else if(scope_name_string == string("simpleio")){
+        this->current_scope = this->simpleio_scope;
+    }
     else if(scope_name_string == string("method")){
         this->method_scope->clear();
         this->current_scope = this->method_scope;
@@ -140,19 +195,25 @@ Entry* SymbolTable::lookup(const char* name){
     Entry* method_entry = this->method_scope->lookup(name_string);
     Entry* class_entry = this->class_scope->lookup(name_string);
     Entry* package_entry = this->package_scope->lookup(name_string);
+    Entry* simpleio_entry = this->simpleio_scope->lookup(name_string);
 
     Scope* cs = this->current_scope;
+    Entry* ret = NULL;
     if(cs == this->method_scope){
-        return (method_entry!=NULL) ? method_entry : (
+        ret = (method_entry!=NULL) ? method_entry : (
                     (class_entry!=NULL) ? class_entry : package_entry
                 );
     }
     else if(cs == this->class_scope){
-        return (class_entry!=NULL) ? class_entry : package_entry;
+        ret = (class_entry!=NULL) ? class_entry : package_entry;
     }
     else if(cs == this->package_scope){
-        return package_entry;
+        ret = package_entry;
     }
+    //if (ret == NULL){
+    //    cout<< "lookup: " << name << " not found !!!! scope searched: " << this->current_scope->get_name() << endl;
+    //}
+    return ret;
 }
 
 VariableEntry::VariableEntry(const char* name, yytokentype variable_type, string init_value){
@@ -186,8 +247,18 @@ void MethodEntry::setParameters(vector<Declaration*>* declaration_list){
     this->parameter_list = parameter_list;
 }
 
+void MethodEntry::setParameters(vector<ParameterEntry *>* parameter_list){
+    this->parameter_list = parameter_list;
+}
+
 ClassEntry::ClassEntry(const char* name){
     this->name = string(name);
+}
+
+FieldEntry::FieldEntry(const char* name, yytokentype type, const char* init_value){
+    this->name = string(name);
+    this->type = type;
+    this->init_value = string(init_value);
 }
 
 /*
