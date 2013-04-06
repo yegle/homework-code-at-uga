@@ -794,30 +794,6 @@ literal: INTLITERAL
        }
        ;
 
-list_literal: LBRACE int_list RBRACE
-            |
-            LBRACE float_list RBRACE
-            |
-            LBRACE string_list RBRACE
-            |
-            LBRACE RBRACE
-            ;
-
-int_list: INTLITERAL
-        |
-        INTLITERAL COMMA int_list
-        ;
-
-float_list: FLOATLITERAL
-          |
-          FLOATLITERAL COMMA float_list
-          ;
-
-string_list: STRING
-           |
-           STRING COMMA string_list
-           ;
-
 empty: ;
 
 %%
