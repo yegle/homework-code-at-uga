@@ -22,7 +22,7 @@ Scope::Scope(){
     this->entry_list = new vector<Entry*>();
 }
 
-ParameterEntry::ParameterEntry(const char* name, yytokentype parameter_type){
+ParameterEntry::ParameterEntry(const char* name, int parameter_type){
     this->name = string(name);
     this->parameter_type = parameter_type;
     this->kind = KPARAMETER;
@@ -86,7 +86,7 @@ void SymbolTable::install(Entry* entry){
     Scope* current_scope = this->get_scope();
     current_scope->install(entry);
 
-    //cout << "install: " << entry->get_name() << " to scope " << current_scope->get_name() << endl;
+    cout << " install: " << entry->get_name() << " to scope " << current_scope->get_name() << endl;
 }
 
 Scope::Scope(const char* name){
@@ -216,19 +216,19 @@ Entry* SymbolTable::lookup(const char* name){
     return ret;
 }
 
-VariableEntry::VariableEntry(const char* name, yytokentype variable_type, string init_value){
+VariableEntry::VariableEntry(const char* name, int variable_type, string init_value){
     this->name = string(name);
     this->variable_type = variable_type;
     this->init_value = init_value;
 }
 
-MethodEntry::MethodEntry(const char* name, yytokentype return_type){
+MethodEntry::MethodEntry(const char* name, int return_type){
     this->name = string(name);
     this->return_type = return_type;
 }
 
 MethodEntry::MethodEntry(const char* name,
-        yytokentype return_type,
+        int return_type,
         vector<ParameterEntry*>* parameter_list = NULL,
         vector<VariableEntry*>* variable_list = NULL){
     this->name = string(name);

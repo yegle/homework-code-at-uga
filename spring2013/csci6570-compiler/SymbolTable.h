@@ -26,28 +26,28 @@ class Entry {
 
 class ParameterEntry: public Entry {
     public:
-        ParameterEntry(const char*, yytokentype);
+        ParameterEntry(const char*, int);
         ParameterEntry(ParameterDeclaration*);
     private:
-        yytokentype parameter_type;
+        int parameter_type;
 };
 
 class VariableEntry: public Entry {
     public:
-        VariableEntry(const char*, yytokentype, string);
+        VariableEntry(const char*, int, string);
     private:
-        yytokentype variable_type;
+        int variable_type;
         string init_value;
 };
 
 class MethodEntry: public Entry {
     public:
-        MethodEntry(const char*, yytokentype);
-        MethodEntry(const char*, yytokentype, vector<ParameterEntry*>*, vector<VariableEntry*>*);
+        MethodEntry(const char*, int);
+        MethodEntry(const char*, int, vector<ParameterEntry*>*, vector<VariableEntry*>*);
         void setParameters(vector<Declaration*>*);
         void setParameters(vector<ParameterEntry *>*);
     private:
-        yytokentype return_type;
+        int return_type;
         vector<ParameterEntry *>* parameter_list;
         vector<VariableEntry *>* variable_list;
 };

@@ -17,7 +17,7 @@ LDLIBS = -lAst -lfl
 
 all: tjc libtjlex.so tjc libtjparse.so symboltable
 
-tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o AstPrinter.o SymbolTable.o
+tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o AstPrinter.o SymbolTable.o SymbolTableBuilder.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 parser.o: parser.c
@@ -62,3 +62,6 @@ clean:
 
 SymbolTable.o: SymbolTable.h SymbolTable.cpp
 	$(CXX) $(CXXFLAGS) -g -c -o $@ SymbolTable.cpp
+
+SymbolTableBuilder.o: SymbolTableBuilder.h SymbolTableBuilder.cpp
+	$(CXX) $(CXXFLAGS) -g -c -o $@ SymbolTableBuilder.cpp

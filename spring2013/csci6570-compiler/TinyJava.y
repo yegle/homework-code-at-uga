@@ -220,18 +220,18 @@ method_decl:
               classDecl->addMember( methodDecl );
 
 
-              table->use_scope("class");
-              method_e = new MethodEntry($3, VOID);
-              table->install(method_e);
-              methodDecl->setEntry(method_e);
-              table->use_scope("method");
-              table->get_scope()->set_name($3);
+              //table->use_scope("class");
+              //method_e = new MethodEntry($3, VOID);
+              //table->install(method_e);
+              //methodDecl->setEntry(method_e);
+              //table->use_scope("method");
+              //table->get_scope()->set_name($3);
            }
            formal_param_list RPAR
            {
             //table->use_scope("method");
             methodDecl->setParameters( $6 );
-            method_e->setParameters($6);
+            //method_e->setParameters($6);
            }
            LBRACE method_body RBRACE
            |
@@ -250,7 +250,7 @@ method_decl:
            formal_param_list RPAR
            {
             methodDecl->setParameters( $6 );
-            method_e->setParameters($6);
+            //method_e->setParameters($6);
            }
            LBRACE method_body RBRACE
            |
@@ -269,7 +269,7 @@ method_decl:
            formal_param_list RPAR
            {
             methodDecl->setParameters( $6 );
-            method_e->setParameters($6);
+            //method_e->setParameters($6);
            }
            LBRACE method_body RBRACE
            |
@@ -332,17 +332,17 @@ method_decl:
               classDecl->addMember(methodDecl);
 
               // SymbolTable
-              parameter_e = new ParameterEntry($9, INT);
-              method_e = new MethodEntry($4, VOID);
-              method_e->setParameters(pv);
-              table->use_scope("class");
-              table->install(method_e);
-              table->use_scope("method");
-              table->install(parameter_e);
-              table->get_scope()->set_name($4);
+              //parameter_e = new ParameterEntry($9, INT);
+              //method_e = new MethodEntry($4, VOID);
+              //method_e->setParameters(pv);
+              //table->use_scope("class");
+              //table->install(method_e);
+              //table->use_scope("method");
+              //table->install(parameter_e);
+              //table->get_scope()->set_name($4);
 
-              pd->setEntry(parameter_e);
-              methodDecl->setEntry(method_e);
+              //pd->setEntry(parameter_e);
+              //methodDecl->setEntry(method_e);
               // end of symbol table
            }
            LBRACE method_body RBRACE
@@ -375,36 +375,36 @@ formal_param_list: formal_param
 
 formal_param: type IDENT
             {
-                ParameterDeclaration* pd = new ParameterDeclaration(yylineno, $2, $1);
-                if($1 == 1){
-                    parameter_e = new ParameterEntry($2, INT);
-                }
-                else if ($1 == 2){
-                    parameter_e = new ParameterEntry($2, FLOAT);
-                }
-                else {
-                    throw string("Unkown type in formal_param");
-                }
-                table->install(parameter_e);
-                pd->setEntry(parameter_e);
-                $$ = pd;
+                $$ = new ParameterDeclaration(yylineno, $2, $1);
+                //ParameterDeclaration* pd = new ParameterDeclaration(yylineno, $2, $1);
+                //if($1 == 1){
+                //    parameter_e = new ParameterEntry($2, INT);
+                //}
+                //else if ($1 == 2){
+                //    parameter_e = new ParameterEntry($2, FLOAT);
+                //}
+                //else {
+                //    throw string("Unkown type in formal_param");
+                //}
+                //table->install(parameter_e);
+                //pd->setEntry(parameter_e);
+                //$$ = pd;
             }
             |
             type LBRACKET RBRACKET IDENT
             {
                 $$ = new ParameterDeclaration(yylineno, $4, $1);
-                if($1 == 1){
-                    parameter_e = new ParameterEntry($4, INT);
-                }
-                else if ($1==2){
-                    parameter_e = new ParameterEntry($4, FLOAT);
-                }
-                else {
-                    throw string("Unkown type in formal_param");
-                }
-                cerr << parameter_e->get_name() << endl;
-                table->install(parameter_e);
-                ((ParameterDeclaration*)$$)->setEntry(parameter_e);
+                //if($1 == 1){
+                //    parameter_e = new ParameterEntry($4, INT);
+                //}
+                //else if ($1==2){
+                //    parameter_e = new ParameterEntry($4, FLOAT);
+                //}
+                //else {
+                //    throw string("Unkown type in formal_param");
+                //}
+                //table->install(parameter_e);
+                //((ParameterDeclaration*)$$)->setEntry(parameter_e);
             }
             ;
 
@@ -430,31 +430,31 @@ local_decl: type IDENT ASSIGN literal SEMI
           {
             VariableDeclaration* vd = new VariableDeclaration( yylineno, $2, $1, $4);
             $$ = vd;
-            if ($1 == 1){
-                variable_e = new VariableEntry($2, INT, $4);
-            }
-            else if ($1 == 2){
-                variable_e = new VariableEntry($2, FLOAT, $4);
-            }
-            else{
-                throw string("Unkown type in local_decl");
-            }
-            table->install(variable_e);
-            vd->setEntry(variable_e);
+            //if ($1 == 1){
+            //    variable_e = new VariableEntry($2, INT, $4);
+            //}
+            //else if ($1 == 2){
+            //    variable_e = new VariableEntry($2, FLOAT, $4);
+            //}
+            //else{
+            //    throw string("Unkown type in local_decl");
+            //}
+            //table->install(variable_e);
+            //vd->setEntry(variable_e);
           }
           |
           type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
           {
             VariableDeclaration* vd = new VariableDeclaration( yylineno, $4, $1, $6);
             $$ = vd;
-            if ($1 == 1){
-                variable_e = new VariableEntry($4, INT, $6);
-            }
-            else if ($1 == 2){
-                variable_e = new VariableEntry($4, FLOAT, $6);
-            }
-            table->install(variable_e);
-            vd->setEntry(variable_e);
+            //if ($1 == 1){
+            //    variable_e = new VariableEntry($4, INT, $6);
+            //}
+            //else if ($1 == 2){
+            //    variable_e = new VariableEntry($4, FLOAT, $6);
+            //}
+            //table->install(variable_e);
+            //vd->setEntry(variable_e);
           }
           ;
 

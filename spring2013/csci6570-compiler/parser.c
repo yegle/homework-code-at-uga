@@ -6,6 +6,7 @@
 #include "Ast.h"
 #include "y.tab.h"
 #include "AstPrinter.h"
+#include "SymbolTableBuilder.h"
 #include "check_filename.h"
 
 extern FILE *yyin;
@@ -49,6 +50,12 @@ int main(int argc, char* argv[]){
         printf("declTree is NULL\n");
     }
     else{
-        declTree->accept( new AstPrinter( 0 ) );
+        try{
+            declTree->accept( new SymbolTableBuilder() );
+        }
+        catch(string reason){
+            cerr << "ERROR: " << reason << endl;
+            exit(1);
+        }
     }
 }
