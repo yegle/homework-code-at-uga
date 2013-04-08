@@ -7,20 +7,13 @@
 
 using namespace std;
 
-enum Kind {
-    KCLASS,
-    KVARIABLE,
-    KMETHOD,
-    KFIELD,
-    KPARAMETER,
-};
 
 class Entry {
     public:
-        virtual Kind get_kind();
+        virtual AstNode::AstNodeKind get_kind();
         string get_name();
     protected:
-        Kind kind;
+        AstNode::AstNodeKind kind;
         string name;
 };
 

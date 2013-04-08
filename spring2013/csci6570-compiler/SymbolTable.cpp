@@ -10,7 +10,7 @@ using namespace std;
 
 extern int yylineno;
 
-Kind Entry::get_kind(){
+AstNode::AstNodeKind Entry::get_kind(){
     return this->kind;
 }
 
@@ -25,7 +25,7 @@ Scope::Scope(){
 ParameterEntry::ParameterEntry(const char* name, int parameter_type){
     this->name = string(name);
     this->parameter_type = parameter_type;
-    this->kind = KPARAMETER;
+    this->kind = AstNode::DPARAMETER;
 }
 
 ParameterEntry::ParameterEntry(ParameterDeclaration* param_d){
@@ -44,7 +44,7 @@ ParameterEntry::ParameterEntry(ParameterDeclaration* param_d){
             throw string("Wrong type initing from ParameterDeclaration.");
             break;
     }
-    this->kind = KPARAMETER;
+    this->kind = AstNode::DPARAMETER;
 }
 
 SymbolTable::SymbolTable(){

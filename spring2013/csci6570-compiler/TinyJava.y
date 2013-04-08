@@ -745,15 +745,15 @@ primary_expression: /*INTLITERAL
                   IDENT
                   {
                   $$ = new ReferenceExpression(yylineno, $1);
-                  Entry* e = table->lookup($1);
-                  ((ReferenceExpression*)$$)->setEntry(e);
+                  //Entry* e = table->lookup($1);
+                  //((ReferenceExpression*)$$)->setEntry(e);
                   }
                   |
                   IDENT LBRACKET primary_expression RBRACKET
                   {
                     $$ = new ReferenceExpression(yylineno, $1, $3);
-                    Entry* e = table->lookup($1);
-                    ((ReferenceExpression*)$$)->setEntry(e);
+                    //Entry* e = table->lookup($1);
+                    //((ReferenceExpression*)$$)->setEntry(e);
                   }
                   |
                   method_invocation
