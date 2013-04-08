@@ -1,8 +1,8 @@
-public class test
+public class general
 {
     public static void main(String[] args){
         int i = 0;
-        i = i + 1;
+        a();
         return;
     }
 }

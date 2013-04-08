@@ -187,6 +187,7 @@ void SymbolTable::use_scope(const char* scope_name){
     else {
         throw string("Unknown scope");
     }
+    cout << ">>> Change to scope " << scope_name << endl;
     return;
 }
 
@@ -210,16 +211,25 @@ Entry* SymbolTable::lookup(const char* name){
     else if(cs == this->package_scope){
         ret = package_entry;
     }
+    cout << " lookup: " << name << endl;
     //if (ret == NULL){
     //    cout<< "lookup: " << name << " not found !!!! scope searched: " << this->current_scope->get_name() << endl;
     //}
     return ret;
 }
 
-VariableEntry::VariableEntry(const char* name, int variable_type, string init_value){
+VariableEntry::VariableEntry(
+        const char* name,
+        int variable_type,
+        LiteralExpression* init_expression
+        ){
     this->name = string(name);
     this->variable_type = variable_type;
-    this->init_value = init_value;
+    this->init_expression = init_expression;
+}
+
+int VariableEntry::get_variable_type(){
+    return this->variable_type;
 }
 
 MethodEntry::MethodEntry(const char* name, int return_type){

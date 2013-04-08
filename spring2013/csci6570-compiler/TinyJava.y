@@ -111,7 +111,7 @@ FieldEntry* field_e = NULL;
 %type <sval>   FLOATLITERAL
 %type <sval>   STRING
 %type <sval>   NULL_
-%type <sval>   literal
+%type <xval>   literal
 %type <ival>   type
 %type <xval>   primary_expression
 %type <xval>   unary_expression
@@ -180,19 +180,19 @@ member_decl: field_decl
 
 field_decl: STATIC type IDENT ASSIGN literal SEMI
           {
-            $$ = new FieldDeclaration(yylineno, $3, $2, $5);
+            $$ = new FieldDeclaration(yylineno, $3, $2, (LiteralExpression*) $5);
             classDecl->addMember($$);
-            if ($2 == 1){
-                field_e = new FieldEntry($3, INT, $5);
-            }
-            else if ($2 == 2){
-                field_e = new FieldEntry($3, FLOAT, $5);
-            }
-            else {
-                throw string("unkown type in field_decl");
-            }
-            table->install(field_e);
-            ((FieldDeclaration*)$$)->setEntry(field_e);
+            //if ($2 == 1){
+            //    field_e = new FieldEntry($3, INT, $5);
+            //}
+            //else if ($2 == 2){
+            //    field_e = new FieldEntry($3, FLOAT, $5);
+            //}
+            //else {
+            //    throw string("unkown type in field_decl");
+            //}
+            //table->install(field_e);
+            //((FieldDeclaration*)$$)->setEntry(field_e);
           }
           /*
           |
@@ -428,7 +428,7 @@ local_decl_list: local_decl local_decl_list
 
 local_decl: type IDENT ASSIGN literal SEMI
           {
-            VariableDeclaration* vd = new VariableDeclaration( yylineno, $2, $1, $4);
+            VariableDeclaration* vd = new VariableDeclaration( yylineno, $2, $1, (LiteralExpression*) $4);
             $$ = vd;
             //if ($1 == 1){
             //    variable_e = new VariableEntry($2, INT, $4);
@@ -445,7 +445,7 @@ local_decl: type IDENT ASSIGN literal SEMI
           |
           type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
           {
-            VariableDeclaration* vd = new VariableDeclaration( yylineno, $4, $1, $6);
+            VariableDeclaration* vd = new VariableDeclaration( yylineno, $4, $1, (LiteralExpression*)$6);
             $$ = vd;
             //if ($1 == 1){
             //    variable_e = new VariableEntry($4, INT, $6);
@@ -497,15 +497,15 @@ opt_else: ELSE statement
 statement: IDENT ASSIGN expression SEMI
          {
 	        $$ = new AssignStatement( yylineno, $1, $3 );
-            Entry* e = table->lookup($1);
-            ((AssignStatement*)$$)->setEntry(e);
+            //Entry* e = table->lookup($1);
+            //((AssignStatement*)$$)->setEntry(e);
          }
          |
          IDENT LBRACKET primary_expression RBRACKET ASSIGN expression SEMI
          {
 	        $$ = new AssignStatement( yylineno, $1, $3, $6);
-            Entry* e = table->lookup($1);
-            ((AssignStatement*)$$)->setEntry(e);
+            //Entry* e = table->lookup($1);
+            //((AssignStatement*)$$)->setEntry(e);
          }
          |
          IF LPAR expression RPAR statement opt_else
@@ -521,19 +521,18 @@ statement: IDENT ASSIGN expression SEMI
          FOR LPAR IDENT ASSIGN expression SEMI expression SEMI expression RPAR statement
          {
             $$ = new ForStatement(yylineno, $3, $5, $7, $9, $11);
-            Entry* e = table->lookup($3);
-            ((ForStatement*)$$)->setEntry(e);
+            //Entry* e = table->lookup($3);
+            //((ForStatement*)$$)->setEntry(e);
          }
          |
          FOR LPAR IDENT LBRACKET expression RBRACKET ASSIGN expression SEMI expression SEMI expression RPAR statement
          {
             $$ = new ForStatement(yylineno, $3, $5, $8, $10, $12, $14);
-            Entry* e = table->lookup($3);
-            ((ForStatement*)$$)->setEntry(e);
+            //Entry* e = table->lookup($3);
+            //((ForStatement*)$$)->setEntry(e);
          }
          |
-         method_invocation SEMI
-         {
+         method_invocation SEMI{
 	        $$ = new MethodCallStatement( yylineno, $1 );
          }
          |
@@ -718,7 +717,7 @@ unary_expression: primary_expression
                 }
                 ;
 
-primary_expression: INTLITERAL
+primary_expression: /*INTLITERAL
                    {
                    $$ = new LiteralExpression(yylineno, $1, AstNode::TINT);
                    }
@@ -737,6 +736,11 @@ primary_expression: INTLITERAL
                    {
                    $$ = new LiteralExpression(yylineno, $1, AstNode::TREF);
                    }
+                   */
+                  literal
+                  {
+                    $$ = $1;
+                  }
                   |
                   IDENT
                   {
@@ -775,29 +779,28 @@ primary_expression: INTLITERAL
 
 literal: INTLITERAL
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TINT);
        }
        |
        FLOATLITERAL
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TFLOAT);
        }
        |
        STRING
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TSTRING);
        }
        |
        NULL_
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TREF);
        }
        ;
 
 empty: ;
 
 %%
-
 
 void
 yyerror( const char *msg )

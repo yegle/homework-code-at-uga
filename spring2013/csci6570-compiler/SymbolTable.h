@@ -34,10 +34,11 @@ class ParameterEntry: public Entry {
 
 class VariableEntry: public Entry {
     public:
-        VariableEntry(const char*, int, string);
+        VariableEntry(const char*, int, LiteralExpression*);
+        int get_variable_type();
     private:
         int variable_type;
-        string init_value;
+        LiteralExpression* init_expression;
 };
 
 class MethodEntry: public Entry {
