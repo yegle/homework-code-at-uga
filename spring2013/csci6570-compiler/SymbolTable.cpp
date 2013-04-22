@@ -315,6 +315,7 @@ MethodEntry::MethodEntry(const char* name, int return_type){
     this->name = string(name);
     this->return_type = return_type;
     this->kind = AstNode::DMETHOD;
+    this->current_index = 0;
 }
 
 MethodEntry::MethodEntry(const char* name,
@@ -326,6 +327,7 @@ MethodEntry::MethodEntry(const char* name,
     this->parameter_list = parameter_list;
     this->variable_list = variable_list;
     this->kind = AstNode::DMETHOD;
+    this->current_index = 0;
 }
 
 void MethodEntry::setParameters(vector<Declaration*>* declaration_list){

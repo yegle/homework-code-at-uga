@@ -69,6 +69,8 @@ void SymbolTableBuilder::visit( ParameterDeclaration *aDeclNode ){
     this->debug(aDeclNode->getLineNo(), "ParameterDeclaration");
 
     ParameterEntry* parameter_e = new ParameterEntry(aDeclNode->getName(), aDeclNode->getType());
+    parameter_e->set_index(this->current_method->get_current_index());
+    this->current_method->inc_current_index();
     table->install(parameter_e);
     return;
 }
@@ -100,6 +102,8 @@ void SymbolTableBuilder::visit( VariableDeclaration *aDeclNode ){
             aDeclNode->getName(),
             aDeclNode->getType(),
             aDeclNode->getInitLiteral());
+    variable_e->set_index(this->current_method->get_current_index());
+    this->current_method->inc_current_index();
     table->install(variable_e);
     return;
 }

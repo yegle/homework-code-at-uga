@@ -23,8 +23,16 @@ class ParameterEntry: public Entry {
         ParameterEntry(ParameterDeclaration*);
         int get_parameter_type();
         int parameter_base_type();
+        int get_index() {
+            return this->index;
+        }
+        void set_index(int index){
+            this->index = index;
+            return;
+        }
     private:
         int parameter_type;
+        int index;
 };
 
 class VariableEntry: public Entry {
@@ -33,9 +41,17 @@ class VariableEntry: public Entry {
         VariableEntry(VariableDeclaration*);
         int get_variable_type();
         int variable_base_type();
+        int get_index(){
+            return this->index;
+        }
+        void set_index(int index){
+            this->index = index;
+            return;
+        }
     private:
         int variable_type;
         LiteralExpression* init_expression;
+        int index;
 };
 
 class MethodEntry: public Entry {
@@ -49,10 +65,17 @@ class MethodEntry: public Entry {
         void setVariables(vector<Declaration*>*);
         void setVariables(vector<VariableEntry*>*);
         vector<VariableEntry*>* getVariables();
+        int get_current_index(){
+            return this->current_index;
+        }
+        void inc_current_index(){
+            this->current_index += 1;
+        }
     private:
         int return_type;
         vector<ParameterEntry *>* parameter_list;
         vector<VariableEntry *>* variable_list;
+        int current_index;
 };
 
 class ClassEntry: public Entry {
