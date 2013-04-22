@@ -30,21 +30,44 @@ ParameterEntry::ParameterEntry(const char* name, int parameter_type){
 
 ParameterEntry::ParameterEntry(ParameterDeclaration* param_d){
     this->name = string(param_d->getName());
-    switch(param_d->getType()){
+    this->parameter_type = param_d->getType();
+    //switch(param_d->getType()){
+    //    case AstNode::TINT:
+    //    case AstNode::TFLOAT:
+    //        this->parameter_type = param_d->getType();
+    //        break;
+    //    case AstNode::TSTRINGA:
+    //        this->parameter_type = AstNode::TSTRING;
+    //        break;
+    //    default:
+    //        throw string("Wrong type initing from ParameterDeclaration.");
+    //        break;
+    //}
+    this->kind = AstNode::DPARAMETER;
+}
+
+
+VariableEntry::VariableEntry(VariableDeclaration* variable_d){
+    this->name = string(variable_d->getName());
+    switch(variable_d->getType()){
         case AstNode::TINT:
-            this->parameter_type = INT;
-            break;
         case AstNode::TFLOAT:
-            this->parameter_type = FLOAT;
-            break;
+        case AstNode::TINTA:
+        case AstNode::TFLOATA:
         case AstNode::TSTRINGA:
-            this->parameter_type = STRING;
+            this->variable_type = variable_d->getType();
             break;
         default:
-            throw string("Wrong type initing from ParameterDeclaration.");
+            cout << AstNode::type2string(variable_d->getType()) <<endl;
+            cout << variable_d->getLineNo();
+            throw string("Wrong type initing from VariableDeclaration.");
             break;
     }
-    this->kind = AstNode::DPARAMETER;
+    this->kind = AstNode::DVARIABLE;
+}
+
+int ParameterEntry::get_parameter_type(){
+    return this->parameter_type;
 }
 
 SymbolTable::SymbolTable(){
@@ -62,15 +85,15 @@ SymbolTable::SymbolTable(){
     MethodEntry* printString_entry = new MethodEntry("printString", FLOAT);
 
     vector<ParameterEntry*>* pe_list_1 = new vector<ParameterEntry*>();
-    pe_list_1->push_back(new ParameterEntry("ival", INT));
+    pe_list_1->push_back(new ParameterEntry("ival", AstNode::TINT));
     printInt_entry->setParameters(pe_list_1);
 
     vector<ParameterEntry*>* pe_list_2 = new vector<ParameterEntry*>();
-    pe_list_2->push_back(new ParameterEntry("fval", FLOAT));
+    pe_list_2->push_back(new ParameterEntry("fval", AstNode::TFLOAT));
     printFloat_entry->setParameters(pe_list_2);
 
     vector<ParameterEntry*>* pe_list_3 = new vector<ParameterEntry*>();
-    pe_list_3->push_back(new ParameterEntry("sval", STRING));
+    pe_list_3->push_back(new ParameterEntry("sval", AstNode::TSTRING));
     printString_entry->setParameters(pe_list_3);
 
     this->use_scope("simpleio");
@@ -86,7 +109,7 @@ void SymbolTable::install(Entry* entry){
     Scope* current_scope = this->get_scope();
     current_scope->install(entry);
 
-    cout << " install: " << entry->get_name() << " to scope " << current_scope->get_name() << endl;
+    //cout << " install: " << entry->get_name() << " to scope " << current_scope->get_name() << endl;
 }
 
 Scope::Scope(const char* name){
@@ -187,16 +210,23 @@ void SymbolTable::use_scope(const char* scope_name){
     else {
         throw string("Unknown scope");
     }
-    cout << ">>> Change to scope " << scope_name << endl;
+    //cout << ">>> Change to scope " << scope_name << endl;
     return;
 }
 
 Entry* SymbolTable::lookup(const char* name){
     string name_string = string(name);
+    string simpleio_prefix = string("SimpleIO.");
+
+    if(!name_string.compare(0,simpleio_prefix.size(), simpleio_prefix)){
+        name_string = name_string.substr(simpleio_prefix.size());
+        Entry* simpleio_entry = this->simpleio_scope->lookup(name_string);
+        return simpleio_entry;
+    }
+
     Entry* method_entry = this->method_scope->lookup(name_string);
     Entry* class_entry = this->class_scope->lookup(name_string);
     Entry* package_entry = this->package_scope->lookup(name_string);
-    Entry* simpleio_entry = this->simpleio_scope->lookup(name_string);
 
     Scope* cs = this->current_scope;
     Entry* ret = NULL;
@@ -211,7 +241,7 @@ Entry* SymbolTable::lookup(const char* name){
     else if(cs == this->package_scope){
         ret = package_entry;
     }
-    cout << " lookup: " << name << endl;
+    //cout << " lookup: " << name << endl;
     //if (ret == NULL){
     //    cout<< "lookup: " << name << " not found !!!! scope searched: " << this->current_scope->get_name() << endl;
     //}
@@ -226,6 +256,55 @@ VariableEntry::VariableEntry(
     this->name = string(name);
     this->variable_type = variable_type;
     this->init_expression = init_expression;
+    this->kind = AstNode::DVARIABLE;
+}
+
+int VariableEntry::variable_base_type(){
+    switch(this->variable_type){
+        case AstNode::TINTA:
+            return AstNode::TINT;
+            break;
+        case AstNode::TFLOATA:
+            return AstNode::TFLOAT;
+            break;
+        case AstNode::TSTRINGA:
+            return AstNode::TSTRING;
+            break;
+        default:
+            return this->variable_type;
+    }
+}
+
+int ParameterEntry::parameter_base_type(){
+    switch(this->parameter_type){
+        case AstNode::TINTA:
+            return AstNode::TINT;
+            break;
+        case AstNode::TFLOATA:
+            return AstNode::TFLOAT;
+            break;
+        case AstNode::TSTRINGA:
+            return AstNode::TSTRING;
+            break;
+        default:
+            return this->parameter_type;
+    }
+}
+
+int FieldEntry::field_base_type(){
+    switch(this->field_type){
+        case AstNode::TINT:
+            return AstNode::TINTA;
+            break;
+        case AstNode::TFLOAT:
+            return AstNode::TFLOATA;
+            break;
+        case AstNode::TSTRING:
+            return AstNode::TSTRINGA;
+            break;
+        default:
+            return this->field_type;
+    }
 }
 
 int VariableEntry::get_variable_type(){
@@ -235,6 +314,7 @@ int VariableEntry::get_variable_type(){
 MethodEntry::MethodEntry(const char* name, int return_type){
     this->name = string(name);
     this->return_type = return_type;
+    this->kind = AstNode::DMETHOD;
 }
 
 MethodEntry::MethodEntry(const char* name,
@@ -245,6 +325,7 @@ MethodEntry::MethodEntry(const char* name,
     this->return_type = return_type;
     this->parameter_list = parameter_list;
     this->variable_list = variable_list;
+    this->kind = AstNode::DMETHOD;
 }
 
 void MethodEntry::setParameters(vector<Declaration*>* declaration_list){
@@ -252,7 +333,9 @@ void MethodEntry::setParameters(vector<Declaration*>* declaration_list){
     for(int i=0; i<declaration_list->size(); i++){
         Declaration* d = declaration_list->at(i);
         ParameterEntry* parameter_e = new ParameterEntry((ParameterDeclaration*)d);
+        ParameterDeclaration* d_p = (ParameterDeclaration*)d;
         parameter_list->push_back(parameter_e);
+        //cout << "type " << AstNode::type2string(d_p->getType())<< ", name " << d_p->getName() << ", function name " << this->get_name()<<endl;
     }
     this->parameter_list = parameter_list;
 }
@@ -261,14 +344,43 @@ void MethodEntry::setParameters(vector<ParameterEntry *>* parameter_list){
     this->parameter_list = parameter_list;
 }
 
-ClassEntry::ClassEntry(const char* name){
-    this->name = string(name);
+void MethodEntry::setVariables(vector<Declaration*>* declaration_list){
+    vector<VariableEntry*>* variable_list = new vector<VariableEntry*>();
+    VariableEntry* variable_e;
+    for(int i=0; i<declaration_list->size(); i++){
+        Declaration* d = declaration_list->at(i);
+        variable_e = new VariableEntry((VariableDeclaration*)d);
+        variable_list->push_back(variable_e);
+    }
+    this->variable_list = variable_list;
 }
 
-FieldEntry::FieldEntry(const char* name, yytokentype type, const char* init_value){
+void MethodEntry::setVariables(vector<VariableEntry *>* variable_list){
+    this->variable_list = variable_list;
+}
+
+ClassEntry::ClassEntry(const char* name){
     this->name = string(name);
-    this->type = type;
+    this->kind = AstNode::DCLASS;
+}
+
+FieldEntry::FieldEntry(const char* name, int type, const char* init_value){
+    this->name = string(name);
+    this->field_type = type;
     this->init_value = string(init_value);
+    this->kind = AstNode::DFIELD;
+}
+
+int FieldEntry::get_field_type(){
+    return this->field_type;
+}
+
+vector<ParameterEntry*>* MethodEntry::getParameters(){
+    return this->parameter_list;
+}
+
+vector<VariableEntry*>* MethodEntry::getVariables(){
+    return this->variable_list;
 }
 
 /*

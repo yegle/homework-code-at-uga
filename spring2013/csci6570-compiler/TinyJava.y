@@ -194,6 +194,20 @@ field_decl: STATIC type IDENT ASSIGN literal SEMI
             //table->install(field_e);
             //((FieldDeclaration*)$$)->setEntry(field_e);
           }
+          |
+          STATIC type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
+          {
+            if ($2 == AstNode::TINT){
+                $$ = new FieldDeclaration(yylineno, $5, AstNode::TINTA, (LiteralExpression*) $7);
+            }
+            else if ($2 == AstNode::TFLOAT){
+                $$ = new FieldDeclaration(yylineno, $5, AstNode::TFLOATA, (LiteralExpression*) $7);
+            }
+            else if ($2 == AstNode::TSTRING){
+                $$ = new FieldDeclaration(yylineno, $5, AstNode::TSTRINGA, (LiteralExpression*) $7);
+            }
+            classDecl->addMember($$);
+          }
           /*
           |
           STATIC INT IDENT ASSIGN literal SEMI
@@ -240,12 +254,12 @@ method_decl:
               methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TINT );
               classDecl->addMember( methodDecl );
 
-              table->use_scope("class");
-              method_e = new MethodEntry($3, INT);
-              table->install(method_e);
-              methodDecl->setEntry(method_e);
-              table->use_scope("method");
-              table->get_scope()->set_name($3);
+              //table->use_scope("class");
+              //method_e = new MethodEntry($3, INT);
+              //table->install(method_e);
+              //methodDecl->setEntry(method_e);
+              //table->use_scope("method");
+              //table->get_scope()->set_name($3);
            }
            formal_param_list RPAR
            {
@@ -259,12 +273,12 @@ method_decl:
               methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TFLOAT );
               classDecl->addMember( methodDecl );
 
-              table->use_scope("class");
-              method_e = new MethodEntry($3, FLOAT);
-              table->install(method_e);
-              methodDecl->setEntry(method_e);
-              table->use_scope("method");
-              table->get_scope()->set_name($3);
+              //table->use_scope("class");
+              //method_e = new MethodEntry($3, FLOAT);
+              //table->install(method_e);
+              //methodDecl->setEntry(method_e);
+              //table->use_scope("method");
+              //table->get_scope()->set_name($3);
            }
            formal_param_list RPAR
            {
@@ -278,12 +292,12 @@ method_decl:
             methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TVOID);
             classDecl->addMember(methodDecl);
 
-            table->use_scope("class");
-            method_e = new MethodEntry($3, VOID);
-            table->install(method_e);
-            methodDecl->setEntry(method_e);
-            table->use_scope("method");
-            table->get_scope()->set_name($3);
+            //table->use_scope("class");
+            //method_e = new MethodEntry($3, VOID);
+            //table->install(method_e);
+            //methodDecl->setEntry(method_e);
+            //table->use_scope("method");
+            //table->get_scope()->set_name($3);
            }
            LBRACE method_body RBRACE
            |
@@ -292,12 +306,12 @@ method_decl:
             methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TINT);
             classDecl->addMember(methodDecl);
 
-            table->use_scope("class");
-            method_e = new MethodEntry($3, INT);
-            table->install(method_e);
-            methodDecl->setEntry(method_e);
-            table->use_scope("method");
-            table->get_scope()->set_name($3);
+            //table->use_scope("class");
+            //method_e = new MethodEntry($3, INT);
+            //table->install(method_e);
+            //methodDecl->setEntry(method_e);
+            //table->use_scope("method");
+            //table->get_scope()->set_name($3);
            }
            LBRACE method_body RBRACE
            |
@@ -306,12 +320,12 @@ method_decl:
             methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TFLOAT);
             classDecl->addMember(methodDecl);
 
-            table->use_scope("class");
-            method_e = new MethodEntry($3, FLOAT);
-            table->install(method_e);
-            methodDecl->setEntry(method_e);
-            table->use_scope("method");
-            table->get_scope()->set_name($3);
+            //table->use_scope("class");
+            //method_e = new MethodEntry($3, FLOAT);
+            //table->install(method_e);
+            //methodDecl->setEntry(method_e);
+            //table->use_scope("method");
+            //table->get_scope()->set_name($3);
            }
            LBRACE method_body RBRACE
            |
@@ -393,7 +407,15 @@ formal_param: type IDENT
             |
             type LBRACKET RBRACKET IDENT
             {
-                $$ = new ParameterDeclaration(yylineno, $4, $1);
+                if($1 == AstNode::TINT){
+                    $$ = new ParameterDeclaration(yylineno, $4, AstNode::TINTA);
+                }
+                else if($1 == AstNode::TFLOAT){
+                    $$ = new ParameterDeclaration(yylineno, $4, AstNode::TFLOATA);
+                }
+                else if($1 == AstNode::TSTRING){
+                    $$ = new ParameterDeclaration(yylineno, $4, AstNode::TSTRINGA);
+                }
                 //if($1 == 1){
                 //    parameter_e = new ParameterEntry($4, INT);
                 //}
@@ -443,10 +465,9 @@ local_decl: type IDENT ASSIGN literal SEMI
             //vd->setEntry(variable_e);
           }
           |
-          type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
+          INT LBRACKET RBRACKET IDENT ASSIGN literal SEMI
           {
-            VariableDeclaration* vd = new VariableDeclaration( yylineno, $4, $1, (LiteralExpression*)$6);
-            $$ = vd;
+            $$ = new VariableDeclaration( yylineno, $4, AstNode::TINTA, (LiteralExpression*)$6);
             //if ($1 == 1){
             //    variable_e = new VariableEntry($4, INT, $6);
             //}
@@ -563,39 +584,39 @@ return_statement: RETURN expression SEMI
 method_invocation: IDENT LPAR argument_list RPAR
                  {
 	                $$ = new MethodCallExpression( yylineno, NULL, $1, $3 );
-                    Entry* e = table->lookup($1);
-                    ((MethodCallExpression*)$$)->setEntry(e);
+                    //Entry* e = table->lookup($1);
+                    //((MethodCallExpression*)$$)->setEntry(e);
                  }
                  |
                  IDENT LPAR RPAR
                  {
 	                $$ = new MethodCallExpression( yylineno, NULL, $1, (vector<Expression *> *) NULL );
-                    Entry* e = table->lookup($1);
-                    ((MethodCallExpression*)$$)->setEntry(e);
+                    //Entry* e = table->lookup($1);
+                    //((MethodCallExpression*)$$)->setEntry(e);
                  }
                  |
                  IDENT DOT IDENT LPAR argument_list RPAR
                  {
 	                $$ = new MethodCallExpression( yylineno, $1, $3, $5 );
-                    if(strcmp($1, "SimpleIO")==0){
-                        Entry* e = table->get_scope("simpleio")->lookup($3);
-                        ((MethodCallExpression*)$$)->setEntry(e);
-                    }
-                    else{
-                        throw string("Class method invocation only supports SimpleIO class");
-                    }
+                    //if(strcmp($1, "SimpleIO")==0){
+                    //    Entry* e = table->get_scope("simpleio")->lookup($3);
+                    //    ((MethodCallExpression*)$$)->setEntry(e);
+                    //}
+                    //else{
+                    //    throw string("Class method invocation only supports SimpleIO class");
+                    //}
                  }
                  |
                  IDENT DOT IDENT LPAR RPAR
                  {
 	                $$ = new MethodCallExpression( yylineno, $1, $3, (vector<Expression *> *) NULL );
-                    if(strcmp($1, "SimpleIO")==0){
-                        Entry* e = table->get_scope("simpleio")->lookup($3);
-                        ((MethodCallExpression*)$$)->setEntry(e);
-                    }
-                    else{
-                        throw string("Class method invocation only supports SimpleIO class");
-                    }
+                    //if(strcmp($1, "SimpleIO")==0){
+                    //    Entry* e = table->get_scope("simpleio")->lookup($3);
+                    //    ((MethodCallExpression*)$$)->setEntry(e);
+                    //}
+                    //else{
+                    //    throw string("Class method invocation only supports SimpleIO class");
+                    //}
                  }
                  ;
 
@@ -768,12 +789,12 @@ primary_expression: /*INTLITERAL
                   |
                   NEW INT LBRACKET primary_expression RBRACKET
                   {
-                  $$ = new NewExpression(yylineno, AstNode::TINT, $4);
+                  $$ = new NewExpression(yylineno, AstNode::TINTA, $4);
                   }
                   |
                   NEW FLOAT LBRACKET primary_expression RBRACKET
                   {
-                  $$ = new NewExpression(yylineno, AstNode::TFLOAT, $4);
+                  $$ = new NewExpression(yylineno, AstNode::TFLOATA, $4);
                   }
                   ;
 

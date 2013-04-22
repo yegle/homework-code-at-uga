@@ -10,7 +10,7 @@ using namespace std;
 
 class Entry {
     public:
-        virtual AstNode::AstNodeKind get_kind();
+        AstNode::AstNodeKind get_kind();
         string get_name();
     protected:
         AstNode::AstNodeKind kind;
@@ -21,6 +21,8 @@ class ParameterEntry: public Entry {
     public:
         ParameterEntry(const char*, int);
         ParameterEntry(ParameterDeclaration*);
+        int get_parameter_type();
+        int parameter_base_type();
     private:
         int parameter_type;
 };
@@ -28,7 +30,9 @@ class ParameterEntry: public Entry {
 class VariableEntry: public Entry {
     public:
         VariableEntry(const char*, int, LiteralExpression*);
+        VariableEntry(VariableDeclaration*);
         int get_variable_type();
+        int variable_base_type();
     private:
         int variable_type;
         LiteralExpression* init_expression;
@@ -40,6 +44,11 @@ class MethodEntry: public Entry {
         MethodEntry(const char*, int, vector<ParameterEntry*>*, vector<VariableEntry*>*);
         void setParameters(vector<Declaration*>*);
         void setParameters(vector<ParameterEntry *>*);
+        vector<ParameterEntry*>* getParameters();
+
+        void setVariables(vector<Declaration*>*);
+        void setVariables(vector<VariableEntry*>*);
+        vector<VariableEntry*>* getVariables();
     private:
         int return_type;
         vector<ParameterEntry *>* parameter_list;
@@ -56,9 +65,11 @@ class ClassEntry: public Entry {
 
 class FieldEntry: public Entry {
     public:
-        FieldEntry(const char*, yytokentype, const char*);
+        FieldEntry(const char*, int, const char*);
+        int get_field_type();
+        int field_base_type();
     private:
-        yytokentype type;
+        int field_type;
         string init_value;
 };
 
@@ -101,4 +112,3 @@ class SymbolTable {
         Scope* simpleio_scope;
         Scope* current_scope;
 };
-

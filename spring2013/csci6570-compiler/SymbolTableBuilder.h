@@ -22,7 +22,13 @@ class SymbolTableBuilder: public AstVisitor {
         void visit( BlockStatement *anStmtNode );
         void visit( MethodCallStatement *anStmtNode );
         void visit( EmptyStatement *anStmtNode );
+        void error(int);
+        void info(int, string);
+        void info(int, const char*);
+        void debug(int, string);
+        void debug(int, const char*);
     private:
         ClassEntry* current_class;
         MethodEntry* current_method;
+        char buf[1024];
 };

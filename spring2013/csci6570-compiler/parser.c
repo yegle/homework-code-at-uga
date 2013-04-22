@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
             declTree->accept( new SymbolTableBuilder() );
             string filename = basename(argv[1]);
             string filename_wo_ext = filename.substr(0, filename.find_last_of("."));
-            table->use_scope("class");
+            table->use_scope("package");
             Entry* e = table->lookup(filename_wo_ext.c_str());
             if(e == NULL){
                 throw string("There should be at least one class whose name matches the filename");
