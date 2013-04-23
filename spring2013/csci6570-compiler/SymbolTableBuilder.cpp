@@ -20,6 +20,7 @@ void SymbolTableBuilder::visit( MethodDeclaration *aDeclNode ){
     MethodEntry* method_e = new MethodEntry(aDeclNode->getName(), aDeclNode->getRetType());
     this->current_method = method_e;
     table->install(method_e);
+    aDeclNode->setEntry(method_e);
 
     table->use_scope("method");
     table->get_scope()->set_name(aDeclNode->getName());
@@ -72,6 +73,7 @@ void SymbolTableBuilder::visit( ParameterDeclaration *aDeclNode ){
     parameter_e->set_index(this->current_method->get_current_index());
     this->current_method->inc_current_index();
     table->install(parameter_e);
+    aDeclNode->setEntry(parameter_e);
     return;
 }
 void SymbolTableBuilder::visit( VariableDeclaration *aDeclNode ){
@@ -105,6 +107,7 @@ void SymbolTableBuilder::visit( VariableDeclaration *aDeclNode ){
     variable_e->set_index(this->current_method->get_current_index());
     this->current_method->inc_current_index();
     table->install(variable_e);
+    aDeclNode->setEntry(variable_e);
     return;
 }
 void SymbolTableBuilder::visit( ClassDeclaration *aDeclNode ){
@@ -141,6 +144,7 @@ void SymbolTableBuilder::visit( ReferenceExpression *anExpNode ){
     }
 
     Entry* a_entry = table->lookup(anExpNode->getName());
+    anExpNode->setEntry(a_entry);
     if(a_entry == NULL){
         snprintf(this->buf, 1024, "No reference to expression %s", anExpNode->getName());
         this->error(anExpNode->getLineNo());
@@ -179,7 +183,6 @@ void SymbolTableBuilder::visit( ReferenceExpression *anExpNode ){
         }
     }
     //cout << AstNode::type2string(anExpNode->getType()) << "asdfasdf"<<endl;
-    anExpNode->setEntry(a_entry);
     return;
 }
 void SymbolTableBuilder::visit( NewExpression *anExpNode ){
@@ -301,6 +304,7 @@ void SymbolTableBuilder::visit( MethodCallExpression *anExpNode ){
     }
 
     e = table->lookup(method_name.c_str());
+    anExpNode->setEntry(e);
 
     if(e == NULL){
         snprintf(this->buf, 1024, "Undefined reference to method %s", method_name.c_str());
@@ -370,6 +374,7 @@ void SymbolTableBuilder::visit( AssignStatement *anStmtNode ){
     right_type = anStmtNode->getExpression()->getType();
 
     VariableEntry* lhs_e = (VariableEntry*) table->lookup(anStmtNode->getLHSName());
+    anStmtNode->setEntry(lhs_e);
 
     if(lhs_e == NULL){
         snprintf(this->buf, 1024, "Undefined reference to variable %s", anStmtNode->getLHSName());
@@ -431,6 +436,9 @@ void SymbolTableBuilder::visit( ForStatement *anStmtNode ){
         anStmtNode->getIndex()->accept( this );
     }
 
+    Entry* e = table->lookup(anStmtNode->getLHSName());
+    anStmtNode->setEntry(e);
+
     anStmtNode->getInit()->accept( this );
     anStmtNode->getTerm()->accept( this );
     anStmtNode->getUpd()->accept( this );
@@ -479,8 +487,8 @@ void SymbolTableBuilder::info(int lineno, const char* message){
     cout << "INFO::[" << lineno << "]: " << string(message) <<endl;
 }
 void SymbolTableBuilder::debug(int lineno, string message){
-    //cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
+    cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
 }
 void SymbolTableBuilder::debug(int lineno, const char* message){
-    //cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
+    cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
 }
