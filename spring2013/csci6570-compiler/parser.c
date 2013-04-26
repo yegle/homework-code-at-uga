@@ -9,6 +9,7 @@
 #include "AstPrinter.h"
 #include "SymbolTable.h"
 #include "SymbolTableBuilder.h"
+#include "CodeGen.h"
 #include "check_filename.h"
 
 extern FILE *yyin;
@@ -55,6 +56,7 @@ int main(int argc, char* argv[]){
         }
         else{
             declTree->accept( new SymbolTableBuilder() );
+            //declTree->accept( new AstPrinter(0) );
             string filename = basename(argv[1]);
             string filename_wo_ext = filename.substr(0, filename.find_last_of("."));
             table->use_scope("package");
@@ -62,6 +64,8 @@ int main(int argc, char* argv[]){
             if(e == NULL){
                 throw string("There should be at least one class whose name matches the filename");
             }
+
+            declTree->accept(new CodeGen());
         }
     }
     catch(string reason){

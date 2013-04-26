@@ -22,8 +22,8 @@ void SymbolTableBuilder::visit( MethodDeclaration *aDeclNode ){
     table->install(method_e);
     aDeclNode->setEntry(method_e);
 
-    table->use_scope("method");
-    table->get_scope()->set_name(aDeclNode->getName());
+    table->use_scope(aDeclNode->getName());
+    //table->get_scope()->set_name(aDeclNode->getName());
     // print (visit) the parameters
     if( aDeclNode->getParameters() != NULL ) {
         for( int i = 0; i < aDeclNode->getParameters()->size(); i++ ) {
@@ -107,6 +107,7 @@ void SymbolTableBuilder::visit( VariableDeclaration *aDeclNode ){
     variable_e->set_index(this->current_method->get_current_index());
     this->current_method->inc_current_index();
     table->install(variable_e);
+    //cout << "install variable " << aDeclNode->getName() << endl;
     aDeclNode->setEntry(variable_e);
     return;
 }
@@ -487,8 +488,8 @@ void SymbolTableBuilder::info(int lineno, const char* message){
     cout << "INFO::[" << lineno << "]: " << string(message) <<endl;
 }
 void SymbolTableBuilder::debug(int lineno, string message){
-    cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
+    //cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
 }
 void SymbolTableBuilder::debug(int lineno, const char* message){
-    cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
+    //cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
 }

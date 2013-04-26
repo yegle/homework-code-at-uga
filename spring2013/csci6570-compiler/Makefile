@@ -5,7 +5,7 @@ CFLAGS = -std=c99 -fPIC -I./ast
 CXXFLAGS = -fPIC -I./ast
 
 # object files needed for the project
-OBJS    = lex.yy.o check_filename.o 
+OBJS    = lex.yy.o check_filename.o y.tab.o AstPrinter.o SymbolTable.o SymbolTableBuilder.o CodeGen.o parser.o
 
 LEX = /usr/bin/flex
 BISON = /usr/bin/bison
@@ -17,7 +17,7 @@ LDLIBS = -lAst -lfl
 
 all: tjc libtjlex.so tjc libtjparse.so symboltable
 
-tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o AstPrinter.o SymbolTable.o SymbolTableBuilder.o
+tjc: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 parser.o: parser.c
@@ -60,8 +60,11 @@ AstPrinter.o: AstPrinter.cpp
 clean:
 	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.* y.output
 
-SymbolTable.o: SymbolTable.h SymbolTable.cpp
-	$(CXX) $(CXXFLAGS) -g -c -o $@ SymbolTable.cpp
+SymbolTable.o: SymbolTable.cpp SymbolTable.h
+	$(CXX) $(CXXFLAGS) -g -c -o $@ $<
 
-SymbolTableBuilder.o: SymbolTableBuilder.h SymbolTableBuilder.cpp
-	$(CXX) $(CXXFLAGS) -g -c -o $@ SymbolTableBuilder.cpp
+SymbolTableBuilder.o: SymbolTableBuilder.cpp SymbolTableBuilder.h
+	$(CXX) $(CXXFLAGS) -g -c -o $@  $<
+
+CodeGen.o: CodeGen.cpp CodeGen.h
+	$(CXX) $(CXXFLAGS) -g -c -o $@ $<

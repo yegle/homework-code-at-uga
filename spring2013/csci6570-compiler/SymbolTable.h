@@ -98,7 +98,7 @@ class FieldEntry: public Entry {
 
 class Scope {
     public:
-        Scope();
+        //Scope();
         ~Scope();
 
         Scope(const char*);
@@ -117,7 +117,7 @@ class Scope {
 
 class SymbolTable {
     public:
-        void open_scope();
+        //void open_scope();
         void install(Entry*);
         Entry* lookup(const char*);
 
@@ -129,9 +129,11 @@ class SymbolTable {
         SymbolTable();
         ~SymbolTable();
     private:
-        Scope* package_scope;
-        Scope* class_scope;
-        Scope* method_scope;
-        Scope* simpleio_scope;
+        //Scope* package_scope;
+        //Scope* class_scope;
+        //Scope* method_scope;
+        //Scope* simpleio_scope;
         Scope* current_scope;
+        map<string, Scope*>* scopes;
+        string current_method_name;
 };

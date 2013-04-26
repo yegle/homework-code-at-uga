@@ -18,10 +18,6 @@ string Entry::get_name(){
     return this->name;
 }
 
-Scope::Scope(){
-    this->entry_list = new vector<Entry*>();
-}
-
 ParameterEntry::ParameterEntry(const char* name, int parameter_type){
     this->name = string(name);
     this->parameter_type = parameter_type;
@@ -72,10 +68,15 @@ int ParameterEntry::get_parameter_type(){
 
 SymbolTable::SymbolTable(){
     this->current_scope = NULL;
-    this->package_scope = new Scope("package");
-    this->class_scope = new Scope("class");
-    this->method_scope = new Scope("method");
-    this->simpleio_scope = new Scope("simpleio");
+    this->current_method_name = string("");
+    //this->package_scope = new Scope("package");
+    //this->class_scope = new Scope("class");
+    //this->method_scope = new Scope("method");
+    //this->simpleio_scope = new Scope("simpleio");
+    this->scopes = new map<string, Scope*>();
+    this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string("package"), new Scope("package")));
+    this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string("class"), new Scope("class")));
+    this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string("simpleio"), new Scope("simpleio")));
 
     MethodEntry* readInt_entry = new MethodEntry("readInt", INT);
     MethodEntry* readFloat_entry = new MethodEntry("readFloat", FLOAT);
@@ -128,9 +129,8 @@ void Scope::set_name(const char* name){
 }
 
 void Scope::install(Entry* entry){
-    this->list->find(string("test"));
     if(this->list->find(entry->get_name()) != this->list->end()){
-        string message = string("Duplciate entry when installing entry " + entry->get_name()+ " in scope " + this->name + ".");
+        string message = string("Duplicate entry when installing entry " + entry->get_name()+ " in scope " + this->name + ".");
         throw message;
     }
     this->list->insert(this->list->end(), pair<string, Entry*>(entry->get_name(), entry));
@@ -142,12 +142,11 @@ void Scope::clear(){
 }
 
 Entry* Scope::lookup(string name){
-    map<string, Entry*>::iterator ret = this->list->find(name);
-    if (ret == this->list->end()){
+    if (this->list->find(name) == this->list->end()){
         return NULL;
     }
     else{
-        return ret->second;
+        return this->list->find(name)->second;
     }
 }
 
@@ -156,60 +155,77 @@ Scope* SymbolTable::get_scope(){
 }
 
 Scope* SymbolTable::get_scope(const char* scope_name){
-    string scope_name_string = string(scope_name);
-    if (scope_name_string == string("simpleio")){
-        return this->simpleio_scope;
-    }
-    else if (scope_name_string == string("package")){
-        return this->package_scope;
-    }
-    else if (scope_name_string == string("class")){
-        return this->class_scope;
-    }
-    else if (scope_name_string == string("method")){
-        return this->method_scope;
-    }
-    else{
-        throw string("unknow scope name in SymbolTable::get_scope");
-    }
-}
-
-void SymbolTable::open_scope(){
-    if (this->current_scope == NULL){
-        this->current_scope = this->package_scope;
-    }
-    else if (this->current_scope == this->package_scope){
-        this->current_scope = this->class_scope;
-    }
-    else if(this->current_scope == this->class_scope){
-        this->current_scope = this->method_scope;
-    }
-    else if(this->current_scope == this->method_scope){
-        this->method_scope->clear();
-        this->current_scope = this->method_scope;
-    }
-    return;
-}
-
-void SymbolTable::use_scope(const char* scope_name){
-    string scope_name_string = string(scope_name);
-
-    if(scope_name_string == string("package")){
-        this->current_scope = this->package_scope;
-    }
-    else if(scope_name_string == string("class")){
-        this->current_scope = this->class_scope;
-    }
-    else if(scope_name_string == string("simpleio")){
-        this->current_scope = this->simpleio_scope;
-    }
-    else if(scope_name_string == string("method")){
-        this->method_scope->clear();
-        this->current_scope = this->method_scope;
+    map<string, Scope*>::iterator ret = this->scopes->find(string(scope_name));
+    if (ret == this->scopes->end()){
+        return NULL;
     }
     else {
-        throw string("Unknown scope");
+        return ret->second;
     }
+    //string scope_name_string = string(scope_name);
+    //if (scope_name_string == string("simpleio")){
+    //    return this->simpleio_scope;
+    //}
+    //else if (scope_name_string == string("package")){
+    //    return this->package_scope;
+    //}
+    //else if (scope_name_string == string("class")){
+    //    return this->class_scope;
+    //}
+    //else if (scope_name_string == string("method")){
+    //    return this->method_scope;
+    //}
+    //else{
+    //    throw string("unknow scope name in SymbolTable::get_scope");
+    //}
+}
+
+//void SymbolTable::open_scope(){
+//    if (this->current_scope == NULL){
+//        this->current_scope = this->scopes->get(string("package"));
+//    }
+//    else if (this->current_scope == this->package_scope){
+//        this->current_scope = this->scopes->get(string("class"));
+//    }
+//    else if(this->current_scope == this->class_scope){
+//        this->current_scope = this->scopes->get(string("method"));
+//    }
+//    else if(this->current_scope == this->method_scope){
+//        //this->method_scope->clear();
+//        this->current_scope = this->method_scope;
+//    }
+//    return;
+//}
+
+void SymbolTable::use_scope(const char* scope_name){
+    map<string, Scope*>::iterator ret = this->scopes->find(string(scope_name));
+    if (ret == this->scopes->end()){
+        this->current_method_name = string(scope_name);
+        //cout << "creating new scope " << string(scope_name) << endl;
+        Scope* s = new Scope(scope_name);
+        this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string(scope_name), s));
+        this->current_scope = s;
+    }
+    else {
+        this->current_scope = ret->second;
+    }
+
+    //if(scope_name_string == string("package")){
+    //    this->current_scope = this->package_scope;
+    //}
+    //else if(scope_name_string == string("class")){
+    //    this->current_scope = this->class_scope;
+    //}
+    //else if(scope_name_string == string("simpleio")){
+    //    this->current_scope = this->simpleio_scope;
+    //}
+    //else if(scope_name_string == string("method")){
+    //    this->method_scope->clear();
+    //    this->current_scope = this->method_scope;
+    //}
+    //else {
+    //    throw string("Unknown scope");
+    //}
     //cout << ">>> Change to scope " << scope_name << endl;
     return;
 }
@@ -220,25 +236,25 @@ Entry* SymbolTable::lookup(const char* name){
 
     if(!name_string.compare(0,simpleio_prefix.size(), simpleio_prefix)){
         name_string = name_string.substr(simpleio_prefix.size());
-        Entry* simpleio_entry = this->simpleio_scope->lookup(name_string);
+        Entry* simpleio_entry = this->scopes->find(string("simpleio"))->second->lookup(name_string);
         return simpleio_entry;
     }
 
-    Entry* method_entry = this->method_scope->lookup(name_string);
-    Entry* class_entry = this->class_scope->lookup(name_string);
-    Entry* package_entry = this->package_scope->lookup(name_string);
+    Entry* method_entry = this->scopes->find(this->current_method_name)->second->lookup(name_string);
+    Entry* class_entry = this->scopes->find(string("class"))->second->lookup(name_string);
+    Entry* package_entry = this->scopes->find(string("package"))->second->lookup(name_string);
 
     Scope* cs = this->current_scope;
     Entry* ret = NULL;
-    if(cs == this->method_scope){
+    if(cs == this->scopes->find(this->current_method_name)->second){
         ret = (method_entry!=NULL) ? method_entry : (
                     (class_entry!=NULL) ? class_entry : package_entry
                 );
     }
-    else if(cs == this->class_scope){
+    else if(cs == this->scopes->find(string("class"))->second){
         ret = (class_entry!=NULL) ? class_entry : package_entry;
     }
-    else if(cs == this->package_scope){
+    else if(cs == this->scopes->find(string("package"))->second){
         ret = package_entry;
     }
     //cout << " lookup: " << name << endl;
