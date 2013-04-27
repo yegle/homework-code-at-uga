@@ -71,11 +71,22 @@ class MethodEntry: public Entry {
         void inc_current_index(){
             this->current_index += 1;
         }
+        int get_return_type(){
+            return this->return_type;
+        }
+        string get_return_type_spec(){
+            return this->return_type_spec;
+        }
+        string get_arg_specs(){
+            return this->arg_specs;
+        }
     private:
         int return_type;
         vector<ParameterEntry *>* parameter_list;
         vector<VariableEntry *>* variable_list;
         int current_index;
+        string return_type_spec;
+        string arg_specs;
 };
 
 class ClassEntry: public Entry {

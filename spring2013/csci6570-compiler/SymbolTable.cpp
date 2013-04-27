@@ -78,12 +78,12 @@ SymbolTable::SymbolTable(){
     this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string("class"), new Scope("class")));
     this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string("simpleio"), new Scope("simpleio")));
 
-    MethodEntry* readInt_entry = new MethodEntry("readInt", INT);
-    MethodEntry* readFloat_entry = new MethodEntry("readFloat", FLOAT);
-    MethodEntry* println_entry = new MethodEntry("println", VOID);
-    MethodEntry* printInt_entry = new MethodEntry("printInt", VOID);
-    MethodEntry* printFloat_entry = new MethodEntry("printFloat", FLOAT);
-    MethodEntry* printString_entry = new MethodEntry("printString", FLOAT);
+    MethodEntry* readInt_entry = new MethodEntry("readInt", AstNode::TINT);
+    MethodEntry* readFloat_entry = new MethodEntry("readFloat", AstNode::TFLOAT);
+    MethodEntry* println_entry = new MethodEntry("println", AstNode::TVOID);
+    MethodEntry* printInt_entry = new MethodEntry("printInt", AstNode::TVOID);
+    MethodEntry* printFloat_entry = new MethodEntry("printFloat", AstNode::TFLOAT);
+    MethodEntry* printString_entry = new MethodEntry("printString", AstNode::TFLOAT);
 
     vector<ParameterEntry*>* pe_list_1 = new vector<ParameterEntry*>();
     pe_list_1->push_back(new ParameterEntry("ival", AstNode::TINT));
@@ -327,11 +327,30 @@ int VariableEntry::get_variable_type(){
     return this->variable_type;
 }
 
-MethodEntry::MethodEntry(const char* name, int return_type){
+MethodEntry::MethodEntry(const char* name, int ret_type){
     this->name = string(name);
-    this->return_type = return_type;
+    //cout << "return_type: " << ret_type << endl;
+    this->return_type = ret_type;
     this->kind = AstNode::DMETHOD;
     this->current_index = 0;
+    switch(ret_type){
+        case AstNode::TVOID:
+            this->return_type_spec = string("V");
+            break;
+        case AstNode::TINT:
+            this->return_type_spec = string("I");
+            break;
+        case AstNode::TFLOAT:
+            this->return_type_spec = string("F");
+            break;
+        case AstNode::TINTA:
+            this->return_type_spec = string("[I");
+            break;
+        case AstNode::TFLOATA:
+            this->return_type_spec = string("[F");
+        default:
+            throw string("unknown return type!!");
+    }
 }
 
 MethodEntry::MethodEntry(const char* name,
@@ -348,18 +367,71 @@ MethodEntry::MethodEntry(const char* name,
 
 void MethodEntry::setParameters(vector<Declaration*>* declaration_list){
     vector<ParameterEntry*>* parameter_list = new vector<ParameterEntry*>();
+
+    string arg_specs = string("");
     for(int i=0; i<declaration_list->size(); i++){
-        Declaration* d = declaration_list->at(i);
-        ParameterEntry* parameter_e = new ParameterEntry((ParameterDeclaration*)d);
-        ParameterDeclaration* d_p = (ParameterDeclaration*)d;
+        ParameterDeclaration* d = (ParameterDeclaration*)(declaration_list->at(i));
+        ParameterEntry* parameter_e = new ParameterEntry(d);
+        ParameterDeclaration* d_p = d;
         parameter_list->push_back(parameter_e);
+        switch(d->getType()){
+            case AstNode::TINT:
+                arg_specs += string("I");
+                break;
+            case AstNode::TFLOAT:
+                arg_specs += string("F");
+                break;
+            case AstNode::TINTA:
+                arg_specs += string("[I");
+                break;
+            case AstNode::TFLOATA:
+                arg_specs += string("[F");
+                break;
+            case AstNode::TSTRING:
+                arg_specs += string("Ljava/lang/String;");
+                break;
+            case AstNode::TSTRINGA:
+                arg_specs += string("[Ljava/lang/String;");
+                break;
+            default:
+                throw string("Unknown parameter type!");
+        }
         //cout << "type " << AstNode::type2string(d_p->getType())<< ", name " << d_p->getName() << ", function name " << this->get_name()<<endl;
     }
     this->parameter_list = parameter_list;
+    this->arg_specs = arg_specs;
 }
 
 void MethodEntry::setParameters(vector<ParameterEntry *>* parameter_list){
     this->parameter_list = parameter_list;
+    string arg_specs = string("");
+    ParameterEntry* e;
+    for(int i=0; i < parameter_list->size(); i++){
+        e = parameter_list->at(i);
+        switch(e->get_parameter_type()){
+            case AstNode::TINT:
+                arg_specs += string("I");
+                break;
+            case AstNode::TFLOAT:
+                arg_specs += string("F");
+                break;
+            case AstNode::TINTA:
+                arg_specs += string("[I");
+                break;
+            case AstNode::TFLOATA:
+                arg_specs += string("[F");
+                break;
+            case AstNode::TSTRING:
+                arg_specs += string("Ljava/lang/String;");
+                break;
+            case AstNode::TSTRINGA:
+                arg_specs += string("[Ljava/lang/String;");
+                break;
+            default:
+                throw string("Unknown parameter type!");
+        }
+    }
+    this->arg_specs = arg_specs;
 }
 
 void MethodEntry::setVariables(vector<Declaration*>* declaration_list){
