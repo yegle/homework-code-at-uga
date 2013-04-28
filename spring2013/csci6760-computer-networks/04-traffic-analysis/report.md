@@ -5,6 +5,7 @@ Please briefly answer the following questions based on the given traces.
 
 
 ## Trace1 (site1.dump)
+
 1. If you know this trace is captured during a time period when a user was visiting a web site, what is the IP address of the web site?
 
     The user was visiting [cnn.com](http://cnn.com)
@@ -65,43 +66,44 @@ Please briefly answer the following questions based on the given traces.
     14
 
 ## Trace2 (site2.dump)
-    1. What is the purpose of the connection to 143.215.203.17
 
-        Loading static resources like CSS/JavaScript/image files. This
-        should be a CDN site.
+1. What is the purpose of the connection to 143.215.203.17
 
-    2. What is the purpose of the connection to 209.234.225.89
+    Loading static resources like CSS/JavaScript/image files. This
+    should be a CDN site.
 
-        The user clicked on the link
-        <http://markets.on.nytimes.com/research/modules/home/home.asp?4>
-        on <http://www.nytimes.com> (or there's an iframe on
-        <http://www.nytimes.com>)
+2. What is the purpose of the connection to 209.234.225.89
 
-    3. What is the purpose of the connection to 4.71.104.187
+    The user clicked on the link
+    <http://markets.on.nytimes.com/research/modules/home/home.asp?4>
+    on <http://www.nytimes.com> (or there's an iframe on
+    <http://www.nytimes.com>)
 
-        Loading nessesary JavaScript files from
-        <http://amch.questionmarket.com>, to display advertisement on
-        <http://www.nytimes.com>
+3. What is the purpose of the connection to 4.71.104.187
+
+    Loading nessesary JavaScript files from
+    <http://amch.questionmarket.com>, to display advertisement on
+    <http://www.nytimes.com>
 
 ## Trace3 (site3.dump)
 
-    1. Please infer the user's activities
+1. Please infer the user's activities
 
-        The user searched "athens, ga" on Google Maps, then tries to
-        search "Galileo"
+    The user searched "athens, ga" on Google Maps, then tries to
+    search "Galileo"
 
-    2. Why some of the packets have a TCP checksum error?
+2. Why some of the packets have a TCP checksum error?
 
-        The underlining IP packet has checksum of 0x0000.
+    The underlining IP packet has checksum of 0x0000.
 
-        According to wiki page of WireShark, it says:
+    According to wiki page of WireShark, it says:
 
-        If you are experiencing network problems and while trying to
-        figure it out with Wireshark you found these checksum errors,
-        you may have a network card with TCP checksum offload enabled
-        and for some reason the packet is not being fixed by the adapter
-        (NAT, bridge or route redirection is sending the packet to
-        another interface). In this case, you may want to check and
-        disable checksum offload for the adapter, if possible.
+    If you are experiencing network problems and while trying to
+    figure it out with Wireshark you found these checksum errors,
+    you may have a network card with TCP checksum offload enabled
+    and for some reason the packet is not being fixed by the adapter
+    (NAT, bridge or route redirection is sending the packet to
+    another interface). In this case, you may want to check and
+    disable checksum offload for the adapter, if possible.
 
-        This maybe the reason of checksum error.
+    This maybe the reason of checksum error.
