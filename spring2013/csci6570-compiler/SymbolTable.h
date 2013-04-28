@@ -56,8 +56,8 @@ class VariableEntry: public Entry {
 
 class MethodEntry: public Entry {
     public:
-        MethodEntry(const char*, int);
-        MethodEntry(const char*, int, vector<ParameterEntry*>*, vector<VariableEntry*>*);
+        MethodEntry(const char*, const char*, int);
+        MethodEntry(const char*, const char*, int, vector<ParameterEntry*>*, vector<VariableEntry*>*);
         void setParameters(vector<Declaration*>*);
         void setParameters(vector<ParameterEntry *>*);
         vector<ParameterEntry*>* getParameters();
@@ -87,6 +87,7 @@ class MethodEntry: public Entry {
         int current_index;
         string return_type_spec;
         string arg_specs;
+        string class_name;
 };
 
 class ClassEntry: public Entry {
@@ -117,6 +118,7 @@ class Scope {
         void install(Entry*);
         Entry* lookup(string);
         void clear();
+        void print();
 
         string get_name();
         void set_name(const char*);
@@ -139,6 +141,9 @@ class SymbolTable {
 
         SymbolTable();
         ~SymbolTable();
+        string get_current_method_name(){
+            return this->current_method_name;
+        }
     private:
         //Scope* package_scope;
         //Scope* class_scope;

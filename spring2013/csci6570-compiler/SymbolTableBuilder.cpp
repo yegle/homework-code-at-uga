@@ -17,7 +17,7 @@ void SymbolTableBuilder::visit( MethodDeclaration *aDeclNode ){
     table->use_scope("class");
     this->debug(aDeclNode->getLineNo(), "MethodDeclaration");
 
-    MethodEntry* method_e = new MethodEntry(aDeclNode->getName(), aDeclNode->getRetType());
+    MethodEntry* method_e = new MethodEntry(this->current_class->get_name().c_str(), aDeclNode->getName(), aDeclNode->getRetType());
     this->current_method = method_e;
     table->install(method_e);
     aDeclNode->setEntry(method_e);
@@ -300,7 +300,7 @@ void SymbolTableBuilder::visit( MethodCallExpression *anExpNode ){
 
     Entry* e = NULL;
 
-    if(anExpNode->getClassName() !=NULL){
+    if(anExpNode->getClassName() != NULL){
         method_name = string(anExpNode->getClassName())+"."+method_name;
     }
 

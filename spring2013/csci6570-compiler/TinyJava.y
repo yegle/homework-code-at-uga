@@ -42,6 +42,7 @@ MethodEntry* method_e = NULL;
 VariableEntry* variable_e = NULL;
 ClassEntry* class_e = NULL;
 FieldEntry* field_e = NULL;
+char current_class_name[1024];
 %}
 
 %union {
@@ -148,6 +149,7 @@ tiny_java_program: class_decl
 
 class_decl: class_decl PUBLIC CLASS IDENT
           {
+            snprintf(current_class_name, 1024, $4);
             classDecl = new ClassDeclaration( yylineno, $4 );
           }
           LBRACE member_decl_list RBRACE
@@ -583,14 +585,14 @@ return_statement: RETURN expression SEMI
 
 method_invocation: IDENT LPAR argument_list RPAR
                  {
-	                $$ = new MethodCallExpression( yylineno, NULL, $1, $3 );
+	                $$ = new MethodCallExpression( yylineno, current_class_name, $1, $3 );
                     //Entry* e = table->lookup($1);
                     //((MethodCallExpression*)$$)->setEntry(e);
                  }
                  |
                  IDENT LPAR RPAR
                  {
-	                $$ = new MethodCallExpression( yylineno, NULL, $1, (vector<Expression *> *) NULL );
+	                $$ = new MethodCallExpression( yylineno, current_class_name, $1, (vector<Expression *> *) NULL );
                     //Entry* e = table->lookup($1);
                     //((MethodCallExpression*)$$)->setEntry(e);
                  }

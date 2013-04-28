@@ -8,6 +8,7 @@ using namespace std;
 #include "SymbolTable.h"
 
 extern SymbolTable* table;
+extern char current_class_name[1024];
 
 
 CodeGen::CodeGen(){
@@ -79,9 +80,10 @@ void CodeGen::visit( MethodDeclaration *aDeclNode ){
     if(e == NULL){
         throw string("Unknown method!! Forget to change scope?");
     }
-    snprintf(buf, 1024, ".method %sstatic class_name/%s(%s)%s",
+    snprintf(buf, 1024, ".method %sstatic %s/%s(%s)%s",
             public_spec.c_str(),
             aDeclNode->getName(),
+            current_class_name,
             e->get_arg_specs().c_str(),
             e->get_return_type_spec().c_str()
     );
@@ -97,7 +99,6 @@ void CodeGen::visit( MethodDeclaration *aDeclNode ){
         }
     }
     aDeclNode->getBody()->accept( this );
-    return;
     this->indent--;
     this->write(string(".end method"));
     return;

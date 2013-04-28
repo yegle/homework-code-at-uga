@@ -78,12 +78,18 @@ SymbolTable::SymbolTable(){
     this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string("class"), new Scope("class")));
     this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string("simpleio"), new Scope("simpleio")));
 
-    MethodEntry* readInt_entry = new MethodEntry("readInt", AstNode::TINT);
-    MethodEntry* readFloat_entry = new MethodEntry("readFloat", AstNode::TFLOAT);
-    MethodEntry* println_entry = new MethodEntry("println", AstNode::TVOID);
-    MethodEntry* printInt_entry = new MethodEntry("printInt", AstNode::TVOID);
-    MethodEntry* printFloat_entry = new MethodEntry("printFloat", AstNode::TFLOAT);
-    MethodEntry* printString_entry = new MethodEntry("printString", AstNode::TFLOAT);
+    MethodEntry* readInt_entry = new MethodEntry("SimpleIO", "readInt",
+            AstNode::TINT);
+    MethodEntry* readFloat_entry = new MethodEntry("SimpleIO", "readFloat",
+            AstNode::TFLOAT);
+    MethodEntry* println_entry = new MethodEntry("SimpleIO", "println",
+            AstNode::TVOID);
+    MethodEntry* printInt_entry = new MethodEntry("SimpleIO", "printInt",
+            AstNode::TVOID);
+    MethodEntry* printFloat_entry = new MethodEntry("SimpleIO", "printFloat",
+            AstNode::TFLOAT);
+    MethodEntry* printString_entry = new MethodEntry("SimpleIO", "printString",
+            AstNode::TFLOAT);
 
     vector<ParameterEntry*>* pe_list_1 = new vector<ParameterEntry*>();
     pe_list_1->push_back(new ParameterEntry("ival", AstNode::TINT));
@@ -139,6 +145,14 @@ void Scope::install(Entry* entry){
 void Scope::clear(){
     this->entry_list->clear();
     this->list->clear();
+}
+
+void Scope::print(){
+    for(map<string, Entry*>::iterator i = this->list->begin(); i != this->list->end(); i++){
+        Entry* e = i->second;
+        //cout << "Entry: " << e->get_name() << endl;
+    }
+    return;
 }
 
 Entry* Scope::lookup(string name){
@@ -198,16 +212,24 @@ Scope* SymbolTable::get_scope(const char* scope_name){
 //}
 
 void SymbolTable::use_scope(const char* scope_name){
+    //cout << "current scope: " << scope_name << endl;
     map<string, Scope*>::iterator ret = this->scopes->find(string(scope_name));
     if (ret == this->scopes->end()){
-        this->current_method_name = string(scope_name);
-        //cout << "creating new scope " << string(scope_name) << endl;
         Scope* s = new Scope(scope_name);
         this->scopes->insert(this->scopes->end(), pair<string, Scope*>(string(scope_name), s));
         this->current_scope = s;
     }
     else {
         this->current_scope = ret->second;
+    }
+    if(string(scope_name) != string("package") and
+            string(scope_name) != string("class") and
+            string(scope_name) != string("simpleio")
+            ){
+        this->current_method_name = string(scope_name);
+    }
+    else{
+        this->current_method_name = string("");
     }
 
     //if(scope_name_string == string("package")){
@@ -232,21 +254,42 @@ void SymbolTable::use_scope(const char* scope_name){
 
 Entry* SymbolTable::lookup(const char* name){
     string name_string = string(name);
-    string simpleio_prefix = string("SimpleIO.");
 
-    if(!name_string.compare(0,simpleio_prefix.size(), simpleio_prefix)){
-        name_string = name_string.substr(simpleio_prefix.size());
-        Entry* simpleio_entry = this->scopes->find(string("simpleio"))->second->lookup(name_string);
-        return simpleio_entry;
+    int dot_pos = name_string.find(".");
+    string class_name;
+    string method_name;
+
+    if(dot_pos != string::npos){
+        // found dot in the name
+        // we are looking for a function
+
+        class_name = name_string.substr(0, dot_pos);
+        method_name = name_string.substr(dot_pos+1);
+
+        if(class_name == string("SimpleIO")){
+            Entry* simpleio_entry = this->scopes->find(string("simpleio"))->second->lookup(method_name);
+            return simpleio_entry;
+        }
+        else{
+            name_string = method_name;
+        }
     }
 
-    Entry* method_entry = this->scopes->find(this->current_method_name)->second->lookup(name_string);
+    //if(!name_string.compare(0,simpleio_prefix.size(), simpleio_prefix)){
+    //    name_string = name_string.substr(simpleio_prefix.size());
+    //    Entry* simpleio_entry = this->scopes->find(string("simpleio"))->second->lookup(name_string);
+    //    return simpleio_entry;
+    //}
+
+    Entry* method_entry;
     Entry* class_entry = this->scopes->find(string("class"))->second->lookup(name_string);
     Entry* package_entry = this->scopes->find(string("package"))->second->lookup(name_string);
 
     Scope* cs = this->current_scope;
     Entry* ret = NULL;
+    //cout << cs->get_name() << endl;
     if(cs == this->scopes->find(this->current_method_name)->second){
+        method_entry = this->scopes->find(this->current_method_name)->second->lookup(name_string);
         ret = (method_entry!=NULL) ? method_entry : (
                     (class_entry!=NULL) ? class_entry : package_entry
                 );
@@ -327,8 +370,9 @@ int VariableEntry::get_variable_type(){
     return this->variable_type;
 }
 
-MethodEntry::MethodEntry(const char* name, int ret_type){
+MethodEntry::MethodEntry(const char* class_name, const char* name, int ret_type){
     this->name = string(name);
+    this->class_name = string(class_name);
     //cout << "return_type: " << ret_type << endl;
     this->return_type = ret_type;
     this->kind = AstNode::DMETHOD;
@@ -353,11 +397,12 @@ MethodEntry::MethodEntry(const char* name, int ret_type){
     }
 }
 
-MethodEntry::MethodEntry(const char* name,
+MethodEntry::MethodEntry(const char* class_name, const char* name,
         int return_type,
         vector<ParameterEntry*>* parameter_list = NULL,
         vector<VariableEntry*>* variable_list = NULL){
     this->name = string(name);
+    this->class_name = string(class_name);
     this->return_type = return_type;
     this->parameter_list = parameter_list;
     this->variable_list = variable_list;
