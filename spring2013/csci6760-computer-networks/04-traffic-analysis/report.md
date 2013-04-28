@@ -8,6 +8,7 @@ Please briefly answer the following questions based on the given traces.
 1. If you know this trace is captured during a time period when a user was visiting a web site, what is the IP address of the web site?
 
     The user was visiting [cnn.com](http://cnn.com)
+
     IP address list:
 
         447 192.221.99.124
@@ -28,6 +29,9 @@ Please briefly answer the following questions based on the given traces.
           5 143.215.203.14
           4 74.125.159.147
           2 74.125.159.104
+
+    Among these IP addresses, 157.166.255.18 is the IP address of the
+    website.
 
 2. How many links did the user click?
 
@@ -60,7 +64,7 @@ Please briefly answer the following questions based on the given traces.
 
     14
 
-* Trace2 (site2.dump)
+## Trace2 (site2.dump)
     1. What is the purpose of the connection to 143.215.203.17
 
         Loading static resources like CSS/JavaScript/image files. This
@@ -79,7 +83,7 @@ Please briefly answer the following questions based on the given traces.
         <http://amch.questionmarket.com>, to display advertisement on
         <http://www.nytimes.com>
 
-* Trace3 (site3.dump)
+## Trace3 (site3.dump)
 
     1. Please infer the user's activities
 
