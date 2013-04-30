@@ -79,20 +79,83 @@ class CodeGen: public AstVisitor {
         void write(const char* line){
             this->write(string(line));
         }
-        void error(int);
-        void info(int, string);
-        void info(int, const char*);
-        void debug(int, string);
-        void debug(int, const char*);
+        void error();
+        void info(string);
+        void info(const char*);
+        void debug(string);
+        void debug(const char*);
         void start_loop(){
-            this->write(string("<again-label>:"));
+            char buf[1024];
+            snprintf(buf, 1024, "loop_start_%d:", this->current_index);
+            this->write(string(buf));
+            this->current_index++;
             this->indent++;
         }
         void end_loop(){
-            this->write(string("<end-label>:"));
+            snprintf(buf, 1024, "loop_end_%d:", this->current_index);
+            this->write(string(buf));
+            this->current_index++;
             this->indent--;
+        }
+
+        void gen_new_index(){
+            this->current_index++;
+        }
+        void write_operator(int op, bool is_int){
+            char buf[1024];
+            if(is_int){
+                switch(op){
+                    case AstNode::NEOP:
+                        snprintf(buf, 1024,
+                                "if_icmpne end_label_%d",
+                                this->current_index);
+                        break;
+                    case AstNode::EQOP:
+                        snprintf(buf, 1024,
+                                "if_icmpeq end_label_%d",
+                                this->current_index);
+                        break;
+                    case AstNode::GEOP:
+                        snprintf(buf, 1024,
+                                "if_icmpge end_label_%d",
+                                this->current_index);
+                        break;
+                    default:
+                        snprintf(this->buf, 1024, "Unrecognized OP!");
+                        this->error();
+                        return;
+                }
+                this->write(string(buf));
+            }
+            else{
+                switch(op){
+                    case AstNode::NEOP:
+                        snprintf(buf, 1024,
+                                "ifne end_label_%d",
+                                this->current_index);
+                        break;
+                    case AstNode::EQOP:
+                        snprintf(buf, 1024,
+                                "ifeq end_label_%d",
+                                this->current_index);
+                        break;
+                    case AstNode::GEOP:
+                        snprintf(buf, 1024,
+                                "ifge end_label_%d",
+                                this->current_index);
+                        break;
+                    default:
+                        snprintf(this->buf, 1024, "Unrecognized OP!");
+                        this->error();
+                        return;
+                }
+                this->write(string("fcmpg"));
+                this->write(string(buf));
+            }
         }
     private:
         char buf[1024];
         int indent;
+        int current_index;
+        int lineno;
 };

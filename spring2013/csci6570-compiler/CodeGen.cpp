@@ -13,10 +13,12 @@ extern char current_class_name[1024];
 
 CodeGen::CodeGen(){
     this->indent = 0;
+    this->lineno = 0;
     return;
 }
 
 void CodeGen::visit( LiteralExpression *anExpNode ){
+    this->lineno = anExpNode->getLineNo();
     string str = string(anExpNode->getLiteral());
     char buf[1024];
     switch(anExpNode->getType()){
@@ -61,13 +63,14 @@ void CodeGen::visit( LiteralExpression *anExpNode ){
             break;
         default:
             snprintf(this->buf, 1024, "error! unknown type %s", AstNode::type2string(anExpNode->getType()));
-            this->error(anExpNode->getLineNo());
+            this->error();
             break;
     }
     return;
 }
 
 void CodeGen::visit( MethodDeclaration *aDeclNode ){
+    this->lineno = aDeclNode->getLineNo();
     //this->debug(aDeclNode->getLineNo(), "MethodDeclaration");
     table->use_scope("class");
     //table->use_scope(aDeclNode->getName());
@@ -104,11 +107,13 @@ void CodeGen::visit( MethodDeclaration *aDeclNode ){
     return;
 }
 void CodeGen::visit( FieldDeclaration *aDeclNode ){
-    this->debug(aDeclNode->getLineNo(), "FieldDeclaration");
+    this->lineno = aDeclNode->getLineNo();
+    this->debug("FieldDeclaration");
     return;
 }
 void CodeGen::visit( ParameterDeclaration *aDeclNode ){
-    this->debug(aDeclNode->getLineNo(), "ParameterDeclaration");
+    this->lineno = aDeclNode->getLineNo();
+    this->debug("ParameterDeclaration");
     ParameterEntry* e = (ParameterEntry*)(aDeclNode->getEntry());
 
     switch(aDeclNode->getType()){
@@ -133,13 +138,14 @@ void CodeGen::visit( ParameterDeclaration *aDeclNode ){
             break;
         default:
             snprintf(this->buf, 1024, "unknown type of parameter_decl %s", AstNode::type2string(aDeclNode->getType()));
-            this->error(aDeclNode->getLineNo());
+            this->error();
             break;
     }
     return;
     return;
 }
 void CodeGen::visit( VariableDeclaration *aDeclNode ){
+    this->lineno = aDeclNode->getLineNo();
     //this->debug(aDeclNode->getLineNo(), "VariableDeclaration");
     aDeclNode->getInitLiteral()->accept(this);
     VariableEntry* e = (VariableEntry*)(aDeclNode->getEntry());
@@ -166,13 +172,14 @@ void CodeGen::visit( VariableDeclaration *aDeclNode ){
             break;
         default:
             snprintf(this->buf, 1024, "unknown type of local_decl %s", AstNode::type2string(aDeclNode->getType()));
-            this->error(aDeclNode->getLineNo());
+            this->error();
             break;
     }
     return;
 }
 void CodeGen::visit( ClassDeclaration *aDeclNode ){
-    this->debug(aDeclNode->getLineNo(), "ClassDeclaration");
+    this->lineno = aDeclNode->getLineNo();
+    this->debug("ClassDeclaration");
     table->use_scope("package");
     char buf[1024];
     snprintf(buf, 1024, "; %s.jsm\n.bytecode 50.0\n.source %s.java\n.class public %s\n.super java/lang/Object\n", aDeclNode->getName(), aDeclNode->getName(), aDeclNode->getName());
@@ -187,6 +194,7 @@ void CodeGen::visit( ClassDeclaration *aDeclNode ){
     return;
 }
 void CodeGen::visit( ReferenceExpression *anExpNode ){
+    this->lineno = anExpNode->getLineNo();
     //this->debug(anExpNode->getLineNo(), "ReferenceExpression");
     VariableEntry* ve;
     ParameterEntry* pe;
@@ -213,14 +221,32 @@ void CodeGen::visit( ReferenceExpression *anExpNode ){
     return;
 }
 void CodeGen::visit( NewExpression *anExpNode ){
-    this->debug(anExpNode->getLineNo(), "NewExpression");
+    this->lineno = anExpNode->getLineNo();
+    //this->debug("NewExpression");
+    anExpNode->getExpression()->accept( this );
+    char buf[1024];
+    switch(anExpNode->getBaseType()){
+        case AstNode::TINTA:
+            snprintf(buf, 1024, "newarray int");
+            break;
+        case AstNode::TFLOATA:
+            snprintf(buf, 1024, "newarray float");
+            break;
+        default:
+            snprintf(this->buf, 1024, "wrong base type of array");
+            this->error();
+            return;
+    }
+    this->write(string(buf));
     return;
 }
 void CodeGen::visit( UnaryExpression *anExpNode ){
-    this->debug(anExpNode->getLineNo(), "UnaryExpression");
+    this->lineno = anExpNode->getLineNo();
+    this->debug("UnaryExpression");
     return;
 }
 void CodeGen::visit( BinaryExpression *anExpNode ){
+    this->lineno = anExpNode->getLineNo();
     //this->debug(anExpNode->getLineNo(), "BinaryExpression");
     Expression* left = anExpNode->getLeftOperand();
     Expression* right = anExpNode->getRightOperand();
@@ -249,15 +275,20 @@ void CodeGen::visit( BinaryExpression *anExpNode ){
         case AstNode::DIVOP:
             output = (is_float) ? string("fdiv") : string("idiv");
             break;
+        default:
+            output += string(AstNode::operator2string(anExpNode->getOperator()));
+            break;
     }
     this->write(output);
     return;
 }
 void CodeGen::visit( CastExpression *anExpNode ){
-    this->debug(anExpNode->getLineNo(), "CastExpression");
+    this->lineno = anExpNode->getLineNo();
+    this->debug("CastExpression");
     return;
 }
 void CodeGen::visit( MethodCallExpression *anExpNode ){
+    this->lineno = anExpNode->getLineNo();
     //this->debug(anExpNode->getLineNo(), "MethodCallExpression");
     char buf[1024];
     string class_name = string(anExpNode->getClassName());
@@ -272,7 +303,7 @@ void CodeGen::visit( MethodCallExpression *anExpNode ){
                 "failed to find method '%s' definition",
                 anExpNode->getMethodName()
                 );
-        this->error(anExpNode->getLineNo());
+        this->error();
         return;
     }
     int size = anExpNode->getNoArguments();
@@ -299,6 +330,7 @@ void CodeGen::visit( MethodCallExpression *anExpNode ){
     return;
 }
 void CodeGen::visit( AssignStatement *anStmtNode ){
+    this->lineno = anStmtNode->getLineNo();
     //this->debug(anStmtNode->getLineNo(), "AssignStatement");
     if( anStmtNode->getIndex() != NULL ) {
         anStmtNode->getIndex()->accept( this );
@@ -330,7 +362,8 @@ void CodeGen::visit( AssignStatement *anStmtNode ){
     return;
 }
 void CodeGen::visit( WhileStatement *anStmtNode ){
-    this->debug(anStmtNode->getLineNo(), "WhileStatement");
+    this->lineno = anStmtNode->getLineNo();
+    this->debug("WhileStatement");
     this->start_loop();
     anStmtNode->getExpression()->accept( this );
     anStmtNode->getBodyStatement()->accept( this );
@@ -338,14 +371,61 @@ void CodeGen::visit( WhileStatement *anStmtNode ){
     return;
 }
 void CodeGen::visit( ForStatement *anStmtNode ){
-    this->debug(anStmtNode->getLineNo(), "ForStatement");
+    this->lineno = anStmtNode->getLineNo();
+    this->debug("ForStatement");
+    Entry* e = table->lookup(anStmtNode->getLHSName());
+
+    if( anStmtNode->getIndex() != NULL ) {
+        anStmtNode->getIndex()->accept( this );
+    }
+    anStmtNode->getInit()->accept( this );
+
+    char buf[1024];
+    VariableEntry* ve;
+    ParameterEntry* pe;
+
+    switch(e->get_kind()){
+        case AstNode::DVARIABLE:
+            ve = (VariableEntry*)e;
+            if(anStmtNode->getTerm()->getType() == AstNode::TINT){
+                snprintf(buf, 1024, "istore %d", ve->get_index());
+            }
+            else{
+                snprintf(buf, 1024, "fstore %d", ve->get_index());
+            }
+            break;
+        case AstNode::DPARAMETER:
+            pe = (ParameterEntry*)e;
+            if(anStmtNode->getTerm()->getType() == AstNode::TINT){
+                snprintf(buf, 1024, "putstatic XXX I");
+            }
+            else{
+                snprintf(buf, 1024, "putstatic XXX F");
+            }
+            break;
+        default:
+            snprintf(this->buf, 1024, "Wrong type of the init expression");
+            this->error();
+            return;
+    }
+
+    this->write(string(buf));
+
+    anStmtNode->getTerm()->accept( this );
+    anStmtNode->getUpd()->accept( this );
+    anStmtNode->getBodyStatement()->accept( this );
     return;
 }
+
 void CodeGen::visit( IfStatement *anStmtNode ){
-    this->debug(anStmtNode->getLineNo(), "IfStatement");
+    this->lineno = anStmtNode->getLineNo();
+    this->debug("IfStatement");
+
+    anStmtNode->getExpression()->accept(this);
     return;
 }
 void CodeGen::visit( ReturnStatement *anStmtNode ){
+    this->lineno = anStmtNode->getLineNo();
     //this->debug(anStmtNode->getLineNo(), "ReturnStatement");
     string return_output = string("return");
     if( anStmtNode->getExpression() != NULL ) {
@@ -363,6 +443,7 @@ void CodeGen::visit( ReturnStatement *anStmtNode ){
     return;
 }
 void CodeGen::visit( BlockStatement *anStmtNode ){
+    this->lineno = anStmtNode->getLineNo();
     //this->debug(anStmtNode->getLineNo(), "BlockStatement");
     for( int i = 0; i < anStmtNode->getStatements()->size(); i++ ) {
         anStmtNode->getStatements()->at( i )->accept( this );
@@ -371,11 +452,13 @@ void CodeGen::visit( BlockStatement *anStmtNode ){
     return;
 }
 void CodeGen::visit( MethodCallStatement *anStmtNode ){
+    this->lineno = anStmtNode->getLineNo();
     //this->debug(anStmtNode->getLineNo(), "MethodCallStatement");
     anStmtNode->getExpression()->accept( this );
     return;
 }
 void CodeGen::visit( EmptyStatement *anStmtNode ){
+    this->lineno = anStmtNode->getLineNo();
     //this->debug(anStmtNode->getLineNo(), "EmptyStatement");
     return;
 }
@@ -385,18 +468,18 @@ void CodeGen::write(string line){
     }
     cout << line <<endl;
 }
-void CodeGen::error(int lineno){
-    cout << "ERROR::[" << lineno << "]: " << string(this->buf) <<endl;
+void CodeGen::error(){
+    cout << "ERROR::[" << this->lineno << "]: " << string(this->buf) <<endl;
 }
-void CodeGen::info(int lineno, string message){
-    cout << "INFO::[" << lineno << "]: " << string(message) <<endl;
+void CodeGen::info(string message){
+    cout << "INFO::[" << this->lineno << "]: " << string(message) <<endl;
 }
-void CodeGen::info(int lineno, const char* message){
-    cout << "INFO::[" << lineno << "]: " << string(message) <<endl;
+void CodeGen::info(const char* message){
+    cout << "INFO::[" << this->lineno << "]: " << string(message) <<endl;
 }
-void CodeGen::debug(int lineno, string message){
-    cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
+void CodeGen::debug(string message){
+    cout << "DEBUG::[" << this->lineno << "]: " << string(message) <<endl;
 }
-void CodeGen::debug(int lineno, const char* message){
-    cout << "DEBUG::[" << lineno << "]: " << string(message) <<endl;
+void CodeGen::debug(const char* message){
+    cout << "DEBUG::[" << this->lineno << "]: " << string(message) <<endl;
 }
