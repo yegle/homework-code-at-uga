@@ -27,6 +27,7 @@ class SymbolTableBuilder: public AstVisitor {
         void info(int, const char*);
         void debug(int, string);
         void debug(int, const char*);
+        bool has_error;
     private:
         ClassEntry* current_class;
         MethodEntry* current_method;

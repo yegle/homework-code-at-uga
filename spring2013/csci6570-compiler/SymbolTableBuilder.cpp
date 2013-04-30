@@ -11,6 +11,7 @@ extern SymbolTable* table;
 SymbolTableBuilder::SymbolTableBuilder(){
     this->current_class = NULL;
     this->current_method = NULL;
+    this->has_error = false;
     return;
 }
 void SymbolTableBuilder::visit( MethodDeclaration *aDeclNode ){
@@ -480,6 +481,7 @@ void SymbolTableBuilder::visit( EmptyStatement *anStmtNode ){
 
 void SymbolTableBuilder::error(int lineno){
     cout << "ERROR::[" << lineno << "]: " << string(this->buf) <<endl;
+    this->has_error = true;
 }
 void SymbolTableBuilder::info(int lineno, string message){
     cout << "INFO::[" << lineno << "]: " << string(message) <<endl;
