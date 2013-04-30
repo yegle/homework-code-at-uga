@@ -55,7 +55,8 @@ int main(int argc, char* argv[]){
             printf("declTree is NULL\n");
         }
         else{
-            declTree->accept( new SymbolTableBuilder() );
+            SymbolTableBuilder* builder = new SymbolTableBuilder();
+            declTree->accept(builder);
             //declTree->accept( new AstPrinter(0) );
             string filename = basename(argv[1]);
             string filename_wo_ext = filename.substr(0, filename.find_last_of("."));
@@ -65,7 +66,9 @@ int main(int argc, char* argv[]){
                 throw string("There should be at least one class whose name matches the filename");
             }
 
-            declTree->accept(new CodeGen());
+            if(not builder->has_error){
+                declTree->accept(new CodeGen());
+            }
         }
     }
     catch(string reason){
