@@ -1,12 +1,13 @@
-#include<string.h>
-#include<stdbool.h>
+#include<string>
+using namespace std;
 
-_Bool check_filename(const char* filename){
-    int check_len = sizeof(".java");
-    char *str = ".java";
+bool check_filename(const char* filename){
+    string str = ".java";
+    string filename_string = string(filename);
+    int check_len = str.size();
 
-    int str_len = strlen(str);
-    int filename_len = strlen(filename);
+    int str_len = str.size();
+    int filename_len = filename_string.size();
 
     if (filename_len < check_len){
         return false;
