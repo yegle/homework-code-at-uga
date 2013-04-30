@@ -1,70 +1,45 @@
 # compiler to use
-CC = /usr/bin/gcc
+CC = /usr/bin/g++
 CXX = /usr/bin/g++
-CFLAGS = -std=c99 -fPIC -I./ast
+CFLAGS = -fPIC -I./ast
 CXXFLAGS = -fPIC -I./ast
+YFLAGS = -yd
 
-# object files needed for the project
-OBJS    = lex.yy.o check_filename.o y.tab.o AstPrinter.o SymbolTable.o SymbolTableBuilder.o CodeGen.o parser.o
+LEXFILE = TinyJava.l
+YACCFILE = TinyJava.y
+
+SRCS	:= $(wildcard *.cpp)
+OBJS	:= $(SRCS:.cpp=.o) y.tab.o lex.yy.o
+
+TEMPFILES := $(wildcard y.tab.*) $(wildcard lex.yy.*) $(wildcard rec*)
 
 LEX = /usr/bin/flex
-BISON = /usr/bin/bison
+YACC = /usr/bin/bison
 
 LDFLAGS = -L./ast
 LDLIBS = -lAst -lfl
 
-.PHONY: symboltable
-
-all: tjc libtjlex.so tjc libtjparse.so symboltable
+all: tjc libtjlex.so tjc libtjparse.so y.tab.h y.tab.c
 
 tjc: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
-parser.o: parser.c
-	$(CXX) -c $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
-
 test: tjc
 	./test.sh
 
-y.tab.o: y.tab.c y.tab.h ast/Ast.h
-	$(CXX) -c $(CXXFLAGS) -o $@ y.tab.c $(LDFLAGS) $(LDLIBS)
-
-check_filename.o: check_filename.c
-	$(CXX) -c $(CXXFLAGS) -o $@ $^
-
-y.tab.c: TinyJava.y
-	$(BISON) --report=all --report-file=y.output -b y $<
-
-y.tab.h: TinyJava.y
-	$(BISON) -d --debug -b y --report=all --report-file=y.output $<
-
-# dependencies
-tjc.o: tjc.c y.tab.h
-	$(CXX) -c $(CXXFLAGS) -o $@ tjc.c
-
-lex.yy.o: lex.yy.c y.tab.h ast/Ast.h
-	$(CXX) -c $(CXXFLAGS) -o $@ lex.yy.c
+y.tab.c y.tab.h: $(YACCFILE)
+	$(YACC) $(YFLAGS) $<
 
 libtjlex.so: lex.yy.o
-	$(CC) $(CFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
+	$(CXX) $(CXXFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
 
 libtjparse.so: y.tab.o
-	$(CC) $(CFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
+	$(CXX) $(CXXFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
 
 lex.yy.c: TinyJava.l
-	$(LEX) TinyJava.l
-
-AstPrinter.o: AstPrinter.cpp
-	$(CXX) -c $(CXXFLAGS) -o $@ $^
+	$(LEX) $<
 
 clean:
-	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.* y.output
+	$(RM) $(OBJS) $(TEMPFILES)
 
-SymbolTable.o: SymbolTable.cpp SymbolTable.h
-	$(CXX) $(CXXFLAGS) -g -c -o $@ $<
-
-SymbolTableBuilder.o: SymbolTableBuilder.cpp SymbolTableBuilder.h
-	$(CXX) $(CXXFLAGS) -g -c -o $@  $<
-
-CodeGen.o: CodeGen.cpp CodeGen.h
-	$(CXX) $(CXXFLAGS) -g -c -o $@ $<
+SymbolTableBuilder.o SymbolTable.o: y.tab.h
