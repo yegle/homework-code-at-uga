@@ -11,7 +11,7 @@ YACCFILE = TinyJava.y
 SRCS	:= $(wildcard *.cpp)
 OBJS	:= $(SRCS:.cpp=.o) tjc_bison.o tjc_flex.o
 
-TEMPFILES := $(wildcard tjc_flex.*) $(wildcard tjc_bison.*) $(wildcard rec*) tjc y.tab.h
+TEMPFILES := tjc_flex.c tjc_bison.c tjc y.tab.h $(wildcard *.o)
 
 LEX = /usr/bin/flex
 YACC = /usr/bin/bison

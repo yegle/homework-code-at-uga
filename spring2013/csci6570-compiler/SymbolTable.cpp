@@ -499,7 +499,8 @@ ClassEntry::ClassEntry(const char* name){
     this->kind = AstNode::DCLASS;
 }
 
-FieldEntry::FieldEntry(const char* name, int type, const char* init_value){
+FieldEntry::FieldEntry(const char* class_name, const char* name, int type, const char* init_value){
+    this->class_name = string(class_name);
     this->name = string(name);
     this->field_type = type;
     this->init_value = string(init_value);

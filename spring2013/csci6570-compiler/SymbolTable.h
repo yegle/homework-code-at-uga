@@ -100,12 +100,16 @@ class ClassEntry: public Entry {
 
 class FieldEntry: public Entry {
     public:
-        FieldEntry(const char*, int, const char*);
+        FieldEntry(const char*, const char*, int, const char*);
         int get_field_type();
         int field_base_type();
+        string get_field_spec(){
+            return this->class_name + "/" + this->name;
+        }
     private:
         int field_type;
         string init_value;
+        string class_name;
 };
 
 class Scope {

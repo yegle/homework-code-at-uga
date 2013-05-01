@@ -59,12 +59,13 @@ void SymbolTableBuilder::visit( FieldDeclaration *aDeclNode ){
         this->error(aDeclNode->getLineNo());
     }
 
-    VariableEntry* variable_e = new VariableEntry(
+    FieldEntry* field_e = new FieldEntry(
+            this->current_class->get_name().c_str(),
             aDeclNode->getName(),
             aDeclNode->getType(),
-            aDeclNode->getInitLiteral()
+            aDeclNode->getInitLiteral()->getLiteral()
             );
-    table->install(variable_e);
+    table->install(field_e);
     return;
 }
 void SymbolTableBuilder::visit( ParameterDeclaration *aDeclNode ){
