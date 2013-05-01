@@ -9,9 +9,9 @@ LEXFILE = TinyJava.l
 YACCFILE = TinyJava.y
 
 SRCS	:= $(wildcard *.cpp)
-OBJS	:= $(SRCS:.cpp=.o) y.tab.o lex.yy.o
+OBJS	:= $(SRCS:.cpp=.o) tjc_bison.o tjc_flex.o
 
-TEMPFILES := $(wildcard y.tab.*) $(wildcard lex.yy.*) $(wildcard rec*)
+TEMPFILES := $(wildcard tjc_flex.*) $(wildcard tjc_bison.*) $(wildcard rec*) tjc y.tab.h
 
 LEX = /usr/bin/flex
 YACC = /usr/bin/bison
@@ -19,7 +19,7 @@ YACC = /usr/bin/bison
 LDFLAGS = -L./ast
 LDLIBS = -lAst -lfl
 
-all: tjc libtjlex.so tjc libtjparse.so y.tab.h y.tab.c
+all: tjc_bison.o tjc_flex.o libtjlex.so tjc libtjparse.so y.tab.h y.tab.c tjc
 
 tjc: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
@@ -27,19 +27,21 @@ tjc: $(OBJS)
 test: tjc
 	./test.sh
 
-y.tab.c y.tab.h: $(YACCFILE)
-	$(YACC) $(YFLAGS) $<
+#y.tab.c y.tab.h: $(YACCFILE)
+#	$(YACC) $(YFLAGS) $<
 
-libtjlex.so: lex.yy.o
+y.tab.c: tjc_flex.c
+
+libtjlex.so: tjc_flex.o
 	$(CXX) $(CXXFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
 
-libtjparse.so: y.tab.o
+libtjparse.so: tjc_bison.o
 	$(CXX) $(CXXFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
 
-lex.yy.c: TinyJava.l
-	$(LEX) $<
+#klex.yy.c: TinyJava.l
+#k	$(LEX) $<
 
 clean:
 	$(RM) $(OBJS) $(TEMPFILES)
 
-SymbolTableBuilder.o SymbolTable.o: y.tab.h
+SymbolTableBuilder.o SymbolTable.o: 
