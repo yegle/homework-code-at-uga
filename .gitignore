@@ -46,4 +46,4 @@ y.tab.c
 
 # Machine learning temp file
 *.dot
-*.png
+*.eps
