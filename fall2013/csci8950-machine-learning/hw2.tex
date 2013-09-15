@@ -1,0 +1,238 @@
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ (\hmwkClassInstructor\ \hmwkClassTime): \hmwkTitle} % Top center head
+\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Perl} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Perl, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=5, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\pythonscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1,language=python]{#1.py}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+    \noindent\framebox[\columnwidth][c]{
+        \begin{minipage}{0.98\columnwidth}
+            \textbf{Answer}
+
+            #1
+        \end{minipage}
+    } % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Assignment \#2} % Assignment title
+\newcommand{\hmwkDueDate}{Tuesday, September 17, 2013} % Due date
+\newcommand{\hmwkClass}{CSCI 8950} % Course/class
+\newcommand{\hmwkClassTime}{} % Class/lecture time
+\newcommand{\hmwkClassInstructor}{Dr. Rasheed} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{Yuchen Ying} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}\large{\textit{\hmwkClassInstructor\ \hmwkClassTime}}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+%\setcounter{tocdepth}{1} % Uncomment this line if you don't want subsections listed in the ToC
+
+\newpage
+\tableofcontents
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+    For this part you will experiment with the \textit{PlayTennis} data from Table 3.2 in the textbook.
+
+    (a) Use your decision tree learner to learn a decision tree based on all 14 instances. Print the tree if your software easily allows this or hand type it if not. Do you get the same decision tree as the one in Figure 3.1 in the textbook? If not, find out why (it may be because the learner is using an information gain measure that is different from the one the book uses).
+
+    \problemAnswer{
+        Code list \ref{code/hw2/p1} shows the code to construct the decision tree, using the \texttt{scikit-learn} Python package.
+
+        The output graph of the tree is like this:
+
+        \begin{center}
+            \includegraphics[width=0.75\columnwidth]{code/hw2/p1.eps}
+        \end{center}
+
+        It doesn't look like the tree on the textbook. The reason might be:
+
+        \begin{itemize}
+            \item The \texttt{scikit-learn} package uses \texttt{CART} (Classification And Regression Trees) algorithm to construct the decision tree, which can only construct a binary tree.
+            \item The \texttt{scikit-learn} package may use a different classification criteria.
+        \end{itemize}
+
+    }
+
+    \pythonscript{code/hw2/p1}{Python code to Problem 1}
+
+    (b) Use the leave-one-out cross-validation method described on page 235 in the text book to estimate the error of the decision tree. You can do this manually by removing one example at a time and training on the remaining 13 and then testing on the one you removed, or you can use the package to do this for you automatically by asking for a 14-fold cross-validation if the package supports cross-validation. The See5/C5.0 package supports cross-validation.
+
+    \problemAnswer{
+        Code list \ref{code/hw2/p1} also contains the cross-validation code. The accuracy was 8 out of 14.
+    }
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+    For this part you should use a data set with at least 100 instances. You should choose one of the data sets in the UCI repository at
+
+    \url{http://archive.ics.uci.edu/ml/}
+
+    You may use any data set from this web page provided that you tell me which one you used! Many of the data sets in the repository have missing attribute values but See5/C5.0 can handle this automatically. For larger datasets, you may pick a subset of instances and use it instead of the full dataset but please try to use as many instances of the set as your software would allow (400 instances if you use See5/C5.0).
+
+    (a) Use your full dataset to learn a decision tree. Give the tree, the error on the training set and the time needed for learning (if your package gives the learning time. \textbf{Do not use pruning}
+
+    \problemAnswer{
+        The dataset I'm using was \textbf{Tic-Tac-Toe Endgame Data Set} (\url{http://archive.ics.uci.edu/ml/datasets/Tic-Tac-Toe+Endgame})
+
+        The tree was too big that I made it available online:
+
+        \url{http://cs.uga.edu/~ying/ml/p2.png}
+
+        Since this is a small dataset (958 lines of training examples), the learning time is less then 1 second.
+    }
+
+    (b) Use 10-fold cross validation to estimate the error (again without pruning)
+
+    \problemAnswer{
+        Code List \ref{code/hw2/p2} was used to run the 10-fold cross-validation. The result score is 0.0313152400835 (3.1\% accuracy)
+    }
+
+    (c) Repeat the learning on the full set and the 10-fold cross-validation with pruning allowed. You may use any pruning method you like but you should describe it. Compare in a \textbf{table} between the error on the training set and the 10-fold cross-validation with and without pruning. Comment on the time needed for learning with and without pruning (if your package gives the learning time)
+
+    \problemAnswer{
+
+    }
+\end{homeworkProblem}
+
+\pythonscript{code/hw2/p2}{Python code to Problem 2}
+
+\end{document}
