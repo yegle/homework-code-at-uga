@@ -1,12 +1,15 @@
-all: p1.png
+SRCS = $(wildcard *.py)
+TARGETS = $(SRCS:.py=.eps)
 
-p1.png: p1.dot
-	dot -Tpng p1.dot -o p1.png
+all: $(TARGETS)
 
-p1.dot: p1.py
-	python p1.py
+%.eps: %.dot
+	dot -Teps $< -o $(<:.dot=.eps)
+
+%.dot: %.py
+	python $<
 
 .PHONY: clean
 
 clean:
-	rm -v *.dot *.png
+	rm -v *.dot *.eps

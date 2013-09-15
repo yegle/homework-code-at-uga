@@ -4,52 +4,57 @@
 from __future__ import (unicode_literals, absolute_import,
                         division, print_function)
 
+
 import csv
-from functools import partial
 from sklearn import tree
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.cross_validation import LeaveOneOut
-
+from sklearn.cross_validation import KFold
 
 def remove_key(d, key):
     ret = dict(d)
     del ret[key]
     return ret
 
-if __name__ == "__main__":
-    remove_play_tennis_field = partial(remove_key, key="play_tennis")
-    with open("p1_training.csv") as f:
-        reader = list(csv.DictReader(f))
-        training_set = [remove_play_tennis_field(x) for x in reader]
-        target_set = [x['play_tennis'] for x in reader]
+if __name__ == '__main__':
+    with open("tic-tac-toe.data") as f:
+        data = list(csv.DictReader(f, fieldnames=[
+            'top-left-square', 'top-middle-square', 'top-right-square',
+            'middle-left-square', 'middle-middle-square', 'middle-right-square',
+            'bottom-left-square', 'bottom-middle-square', 'bottom-right-square',
+            'class'
+        ]))
+
+        training_set = [remove_key(x, 'class') for x in data]
+        target_set = [1 if x['class'] == 'positive' else 0 for x in data]
+
         vec = DictVectorizer()
-        vectorized = vec.fit_transform(training_set)
+        vectorized_training_set = vec.fit_transform(training_set)
+
         clf = tree.DecisionTreeClassifier(criterion='entropy',
                                           random_state=1)
-        clf.fit(vectorized.toarray(), target_set)
+        clf.fit(vectorized_training_set.toarray(),
+                target_set)
 
-        with open("p1.dot", "w") as output_file:
+        with open("p2.dot", "w") as output_file:
             tree.export_graphviz(clf, out_file=output_file,
                                  feature_names=vec.get_feature_names())
 
-        loo = LeaveOneOut(len(training_set))
+        kf = KFold(len(training_set), n_folds=2)
         score = 0
-        count = 0
-        for train_indices, test_index in loo:
+        for train_indices, test_indices in kf:
             clf = tree.DecisionTreeClassifier(criterion='entropy',
                                              random_state=1)
 
             vec = DictVectorizer()
             X_train = [training_set[i] for i in train_indices]
             Y_train = [target_set[i] for i in train_indices]
+
             vectorized_training_set = vec.fit_transform(X_train)
 
-            X_test = [training_set[test_index]]
+            X_test = [training_set[i] for i in test_indices]
             vectorized_X_test = vec.transform(X_test)
-            Y_test = [target_set[test_index]]
+            Y_test = [target_set[i] for i in test_indices]
 
             clf.fit(vectorized_training_set.toarray(), Y_train)
             score += clf.score(vectorized_X_test.toarray(), Y_test)
-            count += 1
-        print(score)
-        print(score/count)
+        print(score/10)
