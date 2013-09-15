@@ -1,8 +1,8 @@
 # compiler to use
 CC = /usr/bin/g++
 CXX = /usr/bin/g++
-CFLAGS = -fPIC -I./ast
-CXXFLAGS = -fPIC -I./ast
+CFLAGS = -fPIC -I./ast -g
+CXXFLAGS = -fPIC -I./ast -g
 YFLAGS = -yd
 
 LEXFILE = TinyJava.l
@@ -11,7 +11,7 @@ YACCFILE = TinyJava.y
 SRCS	:= $(wildcard *.cpp)
 OBJS	:= $(SRCS:.cpp=.o) tjc_bison.o tjc_flex.o
 
-TEMPFILES := tjc_flex.c tjc_bison.c tjc y.tab.h $(wildcard *.o)
+TEMPFILES := tjc_flex.c tjc_bison.c tjc y.tab.h $(wildcard *.o) $(wildcard *.so)
 
 LEX = /usr/bin/flex
 YACC = /usr/bin/bison
@@ -29,6 +29,10 @@ test: tjc
 
 #y.tab.c y.tab.h: $(YACCFILE)
 #	$(YACC) $(YFLAGS) $<
+
+CodeGen.o: CodeGen.h
+SymbolTable.o: SymbolTable.h
+SymbolTableBuilder.o: SymbolTableBuilder.h tjc_bison.o
 
 y.tab.c: tjc_flex.c
 

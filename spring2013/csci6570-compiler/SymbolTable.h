@@ -1,8 +1,12 @@
+#ifndef __SYMBOLTABLE_H__
+#define __SYMBOLTABLE_H__
+
 #include <string>
 #include <map>
 
 #include "Ast.h"
 #include "y.tab.h"
+
 
 
 using namespace std;
@@ -80,6 +84,15 @@ class MethodEntry: public Entry {
         string get_arg_specs(){
             return this->arg_specs;
         }
+        ParameterEntry* getParameter(int i){
+            return this->parameter_list->at(i);
+        }
+        void inc_locals(){
+            this->locals++;
+        }
+        int get_locals(){
+            return this->locals;
+        }
     private:
         int return_type;
         vector<ParameterEntry *>* parameter_list;
@@ -88,11 +101,13 @@ class MethodEntry: public Entry {
         string return_type_spec;
         string arg_specs;
         string class_name;
+        int locals;
 };
 
 class ClassEntry: public Entry {
     public:
         ClassEntry(const char*);
+        bool has_constructor;
     private:
         vector<Entry *> field_list;
         vector<MethodEntry *> method_list;
@@ -104,7 +119,28 @@ class FieldEntry: public Entry {
         int get_field_type();
         int field_base_type();
         string get_field_spec(){
-            return this->class_name + "/" + this->name;
+            char buf[1024];
+            string type_spec;
+            switch(this->field_type){
+                case AstNode::TINT:
+                    type_spec = string("I");
+                    break;
+                case AstNode::TFLOAT:
+                    type_spec = string("F");
+                    break;
+                case AstNode::TINTA:
+                    type_spec = string("[I");
+                    break;
+                case AstNode::TFLOATA:
+                    type_spec = string("[F");
+                    break;
+            }
+            snprintf(buf, 1024, "%s/%s %s",
+                    this->class_name.c_str(),
+                    this->name.c_str(),
+                    type_spec.c_str()
+                    );
+            return string(buf);
         }
     private:
         int field_type;
@@ -157,3 +193,4 @@ class SymbolTable {
         map<string, Scope*>* scopes;
         string current_method_name;
 };
+#endif

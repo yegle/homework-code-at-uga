@@ -3,7 +3,6 @@ using namespace std;
 #include "Ast.h"
 #include "AstNode.h"
 #include "AstPrinter.h"
-#include "SymbolTable.h"
 #include "SymbolTableBuilder.h"
 
 extern SymbolTable* table;
@@ -18,8 +17,14 @@ void SymbolTableBuilder::visit( MethodDeclaration *aDeclNode ){
     table->use_scope("class");
     this->debug(aDeclNode->getLineNo(), "MethodDeclaration");
 
+
+
+
     MethodEntry* method_e = new MethodEntry(this->current_class->get_name().c_str(), aDeclNode->getName(), aDeclNode->getRetType());
     this->current_method = method_e;
+    if(this->current_method->get_name() == this->current_class->get_name()){
+        this->current_class->has_constructor = true;
+    }
     table->install(method_e);
     aDeclNode->setEntry(method_e);
 
@@ -66,10 +71,13 @@ void SymbolTableBuilder::visit( FieldDeclaration *aDeclNode ){
             aDeclNode->getInitLiteral()->getLiteral()
             );
     table->install(field_e);
+    Entry* e = table->lookup(field_e->get_name().c_str());
     return;
 }
 void SymbolTableBuilder::visit( ParameterDeclaration *aDeclNode ){
     this->debug(aDeclNode->getLineNo(), "ParameterDeclaration");
+
+    this->current_method->inc_locals();
 
     ParameterEntry* parameter_e = new ParameterEntry(aDeclNode->getName(), aDeclNode->getType());
     parameter_e->set_index(this->current_method->get_current_index());
@@ -80,6 +88,8 @@ void SymbolTableBuilder::visit( ParameterDeclaration *aDeclNode ){
 }
 void SymbolTableBuilder::visit( VariableDeclaration *aDeclNode ){
     this->debug(aDeclNode->getLineNo(), "VariableDeclaration");
+
+    this->current_method->inc_locals();
 
     if(aDeclNode->getInitLiteral() == NULL){
         throw AstException( string("No InitLiteral in this VaraibleDeclaration! ") + aDeclNode->getName() );

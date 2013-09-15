@@ -15,7 +15,7 @@ scanner for TinyJava language
 
 int yylex(void);
 
-char* reason;
+char reason[1024];
 
 int set_file(char* filename){
     yyin = fopen(filename, "r");
@@ -52,7 +52,7 @@ Dot                     \.
 Assign                  =
 Equal                   ==
 NotEqual                !=
-Space                   " "
+Space                   [ \t]
 Newline                 [\n\r]
 LessEqual               \<=
 GreaterEqual            \>=

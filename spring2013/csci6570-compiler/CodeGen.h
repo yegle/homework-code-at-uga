@@ -1,4 +1,7 @@
 #include <string>
+#include <stack>
+
+#include "SymbolTable.h"
 
 using namespace std;
 
@@ -60,6 +63,14 @@ class CodeGen: public AstVisitor {
             this->write(string(buf));
             return;
         }
+        void astore(bool is_int){
+            if(is_int){
+                this->write(string("iastore"));
+            }
+            else{
+                this->write(string("fastore"));
+            }
+        }
         void aload(int index){
             char buf[1024];
             snprintf(buf, 1024, "aload %d", index);
@@ -75,6 +86,23 @@ class CodeGen: public AstVisitor {
         void i2f(){
             this->write(string("i2f"));
         }
+        void f2i(){
+            this->write(string("f2i"));
+        }
+        void ineg(){
+            this->write(string("ineg"));
+        }
+        void fneg(){
+            this->write(string("fneg"));
+        }
+        void neg(bool is_int){
+            if(is_int){
+                this->ineg();
+            }
+            else{
+                this->fneg();
+            }
+        }
         void write(string line);
         void write(const char* line){
             this->write(string(line));
@@ -84,72 +112,223 @@ class CodeGen: public AstVisitor {
         void info(const char*);
         void debug(string);
         void debug(const char*);
-        void start_loop(){
+        void store(int index, bool is_int){
+            if(is_int){
+                this->istore(index);
+            }
+            else{
+                this->fstore(index);
+            }
+        }
+        void load(int index, bool is_int){
+            if(is_int){
+                this->iload(index);
+            }
+            else{
+                this->fload(index);
+            }
+        }
+        void aload(bool is_int){
+            if(is_int){
+                this->write(string("iaload"));
+            }
+            else{
+                this->write(string("faload"));
+            }
+        }
+        void new_middle_label(){
             char buf[1024];
-            snprintf(buf, 1024, "loop_start_%d:", this->current_index);
-            this->write(string(buf));
             this->current_index++;
+            this->indexes->push(this->current_index);
             this->indent++;
         }
-        void end_loop(){
-            snprintf(buf, 1024, "loop_end_%d:", this->current_index);
-            this->write(string(buf));
-            this->current_index++;
-            this->indent--;
+        string get_middle_label(){
+            char buf[1024];
+            snprintf(buf, 1024, "middle_label_%d", this->current_index);
+            return string(buf);
         }
 
-        void gen_new_index(){
-            this->current_index++;
-        }
-        void write_operator(int op, bool is_int){
+        void middle_label(){
             char buf[1024];
+            snprintf(buf, 1024, "%s:", this->get_middle_label().c_str());
+            this->write(string(buf));
+        }
+        void end_label(){
+            char buf[1024];
+            snprintf(buf, 1024, "%s:", this->get_end_label().c_str());
+            this->write(string(buf));
+            this->indexes->pop();
+            this->indent--;
+        }
+        string get_end_label(){
+            char buf[1024];
+            int index = this->indexes->top();
+            snprintf(buf, 1024, "end_label_%d", index);
+            return string(buf);
+        }
+        void putstatic(string field_spec){
+            char buf[1024];
+            snprintf(buf, 1024, "putstatic %s", field_spec.c_str());
+            this->write(string(buf));
+        }
+        void getstatic(string field_spec){
+            char buf[1024];
+            snprintf(buf, 1024, "getstatic %s", field_spec.c_str());
+            this->write(string(buf));
+        }
+        void iadd(){
+            this->write(string("iadd"));
+        }
+        void fadd(){
+            this->write(string("fadd"));
+        }
+        void add(bool is_int){
+            if(is_int){
+                this->iadd();
+            }
+            else{
+                this->fadd();
+            }
+        }
+        void isub(){
+            this->write(string("isub"));
+        }
+        void fsub(){
+            this->write(string("fsub"));
+        }
+        void sub(bool is_int){
+            if(is_int){
+                this->isub();
+            }
+            else{
+                this->fsub();
+            }
+        }
+        void _goto(string label){
+            char buf[1024];
+            snprintf(buf, 1024, "goto %s", label.c_str());
+            this->write(string(buf));
+        }
+        void inc_dec_ldc(bool is_int){
+            if(is_int){
+                this->ldc("1");
+            }
+            else{
+                this->ldc("1.0f");
+            }
+        }
+        void ireturn(){
+            this->write(string("ireturn"));
+        }
+        void freturn(){
+            this->write(string("freturn"));
+        }
+        void _return(bool is_int){
+            if(is_int){
+                this->ireturn();
+            }
+            else{
+                this->freturn();
+            }
+        }
+        void _return(){
+            this->write(string("return"));
+        }
+        void write_operator(int op, bool is_int, bool is_array, bool is_end_label){
+            char buf[1024];
+            string label;
+            if(is_end_label){
+                label = this->get_end_label();
+            }
+            else{
+                label = this->get_middle_label();
+            }
             if(is_int){
                 switch(op){
                     case AstNode::NEOP:
                         snprintf(buf, 1024,
-                                "if_icmpne end_label_%d",
-                                this->current_index);
+                                "if_icmpne %s", label.c_str());
                         break;
                     case AstNode::EQOP:
                         snprintf(buf, 1024,
-                                "if_icmpeq end_label_%d",
-                                this->current_index);
+                                "if_icmpeq %s", label.c_str());
                         break;
                     case AstNode::GEOP:
                         snprintf(buf, 1024,
-                                "if_icmpge end_label_%d",
-                                this->current_index);
+                                "if_icmpge %s", label.c_str());
+                        break;
+                    case AstNode::GTOP:
+                        snprintf(buf, 1024,
+                                "if_icmpgt %s", label.c_str());
+                        break;
+                    case AstNode::LTOP:
+                        snprintf(buf, 1024,
+                                "if_icmplt %s", label.c_str());
+                        break;
+                    case AstNode::LEOP:
+                        snprintf(buf, 1024,
+                                "if_icmple %s", label.c_str());
                         break;
                     default:
-                        snprintf(this->buf, 1024, "Unrecognized OP!");
+                        snprintf(this->buf, 1024, "Unrecognized OP %s!",
+                                AstNode::operator2string(op));
                         this->error();
                         return;
                 }
                 this->write(string(buf));
             }
-            else{
+            else if (not is_array){
                 switch(op){
                     case AstNode::NEOP:
                         snprintf(buf, 1024,
-                                "ifne end_label_%d",
-                                this->current_index);
+                                "ifne %s", label.c_str());
                         break;
                     case AstNode::EQOP:
                         snprintf(buf, 1024,
-                                "ifeq end_label_%d",
-                                this->current_index);
+                                "ifeq %s", label.c_str());
                         break;
                     case AstNode::GEOP:
                         snprintf(buf, 1024,
-                                "ifge end_label_%d",
-                                this->current_index);
+                                "ifge %s", label.c_str());
+                        break;
+                    case AstNode::GTOP:
+                        snprintf(buf, 1024,
+                                "ifgt %s", label.c_str());
+                        break;
+                    case AstNode::LTOP:
+                        snprintf(buf, 1024,
+                                "iflt %s", label.c_str());
+                        break;
+                    case AstNode::LEOP:
+                        snprintf(buf, 1024,
+                                "ifle %s", label.c_str());
                         break;
                     default:
-                        snprintf(this->buf, 1024, "Unrecognized OP!");
+                        snprintf(this->buf, 1024, "Unrecognized OP %s!",
+                                AstNode::operator2string(op));
                         this->error();
                         return;
                 }
                 this->write(string("fcmpg"));
+                this->write(string(buf));
+            }
+            else {
+                switch(op){
+                    case AstNode::NEOP:
+                        snprintf(buf, 1024,
+                                "if_acmpne middle_label_%d",
+                                this->current_index);
+                        break;
+                    case AstNode::EQOP:
+                        snprintf(buf, 1024,
+                                "if_acmpeq middle_label_%d",
+                                this->current_index);
+                        break;
+                    default:
+                        snprintf(this->buf, 1024, "Unsupported OP!");
+                        this->error();
+                        return;
+                }
                 this->write(string(buf));
             }
         }
@@ -158,4 +337,7 @@ class CodeGen: public AstVisitor {
         int indent;
         int current_index;
         int lineno;
+        stack<int>* indexes;
+        MethodEntry* current_method;
+        ClassEntry* current_class;
 };

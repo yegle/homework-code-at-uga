@@ -180,21 +180,16 @@ member_decl: field_decl
            }
            ;
 
-field_decl: STATIC type IDENT ASSIGN literal SEMI
+field_decl: STATIC INT IDENT ASSIGN literal SEMI
           {
-            $$ = new FieldDeclaration(yylineno, $3, $2, (LiteralExpression*) $5);
+            $$ = new FieldDeclaration(yylineno, $3, AstNode::TINT, (LiteralExpression*) $5);
             classDecl->addMember($$);
-            //if ($2 == 1){
-            //    field_e = new FieldEntry($3, INT, $5);
-            //}
-            //else if ($2 == 2){
-            //    field_e = new FieldEntry($3, FLOAT, $5);
-            //}
-            //else {
-            //    throw string("unkown type in field_decl");
-            //}
-            //table->install(field_e);
-            //((FieldDeclaration*)$$)->setEntry(field_e);
+          }
+          |
+          STATIC FLOAT IDENT ASSIGN literal SEMI
+          {
+            $$ = new FieldDeclaration(yylineno, $3, AstNode::TFLOAT, (LiteralExpression*) $5);
+            classDecl->addMember($$);
           }
           |
           STATIC type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
@@ -508,6 +503,7 @@ statement_list: statement statement_list
 opt_else: ELSE statement
         {
         $$ = new BlockStatement(yylineno);
+        ((BlockStatement*)$$)->addStatement($2);
         }
         |
         empty

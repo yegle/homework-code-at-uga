@@ -87,9 +87,9 @@ SymbolTable::SymbolTable(){
     MethodEntry* printInt_entry = new MethodEntry("SimpleIO", "printInt",
             AstNode::TVOID);
     MethodEntry* printFloat_entry = new MethodEntry("SimpleIO", "printFloat",
-            AstNode::TFLOAT);
+            AstNode::TVOID);
     MethodEntry* printString_entry = new MethodEntry("SimpleIO", "printString",
-            AstNode::TFLOAT);
+            AstNode::TVOID);
 
     vector<ParameterEntry*>* pe_list_1 = new vector<ParameterEntry*>();
     pe_list_1->push_back(new ParameterEntry("ival", AstNode::TINT));
@@ -497,6 +497,7 @@ void MethodEntry::setVariables(vector<VariableEntry *>* variable_list){
 ClassEntry::ClassEntry(const char* name){
     this->name = string(name);
     this->kind = AstNode::DCLASS;
+    this->has_constructor = false;
 }
 
 FieldEntry::FieldEntry(const char* class_name, const char* name, int type, const char* init_value){

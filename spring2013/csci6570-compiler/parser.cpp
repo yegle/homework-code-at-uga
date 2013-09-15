@@ -7,7 +7,6 @@
 #include "Ast.h"
 #include "y.tab.h"
 #include "AstPrinter.h"
-#include "SymbolTable.h"
 #include "SymbolTableBuilder.h"
 #include "CodeGen.h"
 #include "check_filename.h"
@@ -68,6 +67,7 @@ int main(int argc, char* argv[]){
 
             if(not builder->has_error){
                 declTree->accept(new CodeGen());
+                //declTree->accept(new AstPrinter(0));
             }
         }
     }

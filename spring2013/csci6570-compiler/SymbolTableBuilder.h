@@ -1,3 +1,5 @@
+#include "SymbolTable.h"
+
 class SymbolTableBuilder: public AstVisitor {
     public:
         SymbolTableBuilder();
