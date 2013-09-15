@@ -1,64 +1,47 @@
 # compiler to use
-CC = /usr/bin/gcc
+CC = /usr/bin/g++
 CXX = /usr/bin/g++
-CFLAGS = -std=c99 -fPIC -I./ast
+CFLAGS = -fPIC -I./ast
 CXXFLAGS = -fPIC -I./ast
+YFLAGS = -yd
 
-# object files needed for the project
-OBJS    = lex.yy.o check_filename.o 
+LEXFILE = TinyJava.l
+YACCFILE = TinyJava.y
+
+SRCS	:= $(wildcard *.cpp)
+OBJS	:= $(SRCS:.cpp=.o) tjc_bison.o tjc_flex.o
+
+TEMPFILES := tjc_flex.c tjc_bison.c tjc y.tab.h $(wildcard *.o)
 
 LEX = /usr/bin/flex
-BISON = /usr/bin/bison
+YACC = /usr/bin/bison
 
 LDFLAGS = -L./ast
 LDLIBS = -lAst -lfl
 
-.PHONY: symboltable
+all: tjc_bison.o tjc_flex.o libtjlex.so tjc libtjparse.so y.tab.h y.tab.c tjc
 
-all: tjc libtjlex.so tjc libtjparse.so symboltable
-
-tjc: $(OBJS) y.tab.o parser.o check_filename.o lex.yy.o AstPrinter.o SymbolTable.o
+tjc: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
-
-parser.o: parser.c
-	$(CXX) -c $(CXXFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
 test: tjc
 	./test.sh
 
-y.tab.o: y.tab.c y.tab.h ast/Ast.h
-	$(CXX) -c $(CXXFLAGS) -o $@ y.tab.c $(LDFLAGS) $(LDLIBS)
+#y.tab.c y.tab.h: $(YACCFILE)
+#	$(YACC) $(YFLAGS) $<
 
-check_filename.o: check_filename.c
-	$(CXX) -c $(CXXFLAGS) -o $@ $^
+y.tab.c: tjc_flex.c
 
-y.tab.c: TinyJava.y
-	$(BISON) --report=all --report-file=y.output -b y $<
+libtjlex.so: tjc_flex.o
+	$(CXX) $(CXXFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
 
-y.tab.h: TinyJava.y
-	$(BISON) -d --debug -b y --report=all --report-file=y.output $<
+libtjparse.so: tjc_bison.o
+	$(CXX) $(CXXFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
 
-# dependencies
-tjc.o: tjc.c y.tab.h
-	$(CXX) -c $(CXXFLAGS) -o $@ tjc.c
-
-lex.yy.o: lex.yy.c y.tab.h ast/Ast.h
-	$(CXX) -c $(CXXFLAGS) -o $@ lex.yy.c
-
-libtjlex.so: lex.yy.o
-	$(CC) $(CFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
-
-libtjparse.so: y.tab.o
-	$(CC) $(CFLAGS) -lfl -ll -shared -Wl,-soname,$@ -o $@ $<
-
-lex.yy.c: TinyJava.l
-	$(LEX) TinyJava.l
-
-AstPrinter.o: AstPrinter.cpp
-	$(CXX) -c $(CXXFLAGS) -o $@ $^
+#klex.yy.c: TinyJava.l
+#k	$(LEX) $<
 
 clean:
-	$(RM) $(OBJS) lex.yy.c tjc parser *.o *.so y.tab.* y.output
+	$(RM) $(OBJS) $(TEMPFILES)
 
-SymbolTable.o: SymbolTable.h SymbolTable.cpp
-	$(CXX) $(CXXFLAGS) -g -c -o $@ SymbolTable.cpp
+SymbolTableBuilder.o SymbolTable.o: 

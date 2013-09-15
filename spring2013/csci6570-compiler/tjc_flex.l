@@ -105,7 +105,7 @@ Class                   class
 {FloatingPointLiteral}              yylval.sval = strdup(yytext); BEGIN(TokenNotAllowed); return FLOATLITERAL;
 {DecimalIntegerLiteral}             yylval.sval = strdup(yytext); BEGIN(TokenNotAllowed); return INTLITERAL;
 <TokenNotAllowed>[_a-zA-Z0-9]       {
-    reason = "This token is not allowed right after the previous token";
+    snprintf(reason, 1024, "This token is not allowed right after the previous token");
     return ERROR;
 }
 <TokenNotAllowed>[^_a-zA-Z0-9]      BEGIN(INITIAL); unput(yytext[0]);
@@ -135,6 +135,6 @@ Class                   class
 {Divide}                            return DIVIDE;
 {Comma}                             return COMMA;
 .                                   {
-    reason="Unrecognized token";
+    snprintf(reason, 1024, "Unrecognized token");
     return ERROR;
 }

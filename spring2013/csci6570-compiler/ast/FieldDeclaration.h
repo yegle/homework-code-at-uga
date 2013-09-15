@@ -10,6 +10,7 @@
 #include "Declaration.h"
 #include "AstVisitor.h"
 #include "AstException.h"
+#include "LiteralExpression.h"
 
 
 
@@ -25,8 +26,8 @@ class ENTRY;
  * A class field is represented by:
  * - #field name - a string
  * - #type - an integer value, as defined in the AstNode class
- * - #initial value - a string representing the initial value literal
- * - #a pointer to the symbol table ENTRY for the field may be provided, as well.
+ * - #initial value - either a string representing the initial value literal or a LiteralExpression node
+* - #a pointer to the symbol table ENTRY for the field may be provided, as well.
  *
  * ENTRY should be defined as a macro, and its value should be a class, which is 
  * the root of the symbol table entry hierarchy. 
@@ -36,10 +37,11 @@ class ENTRY;
 class FieldDeclaration: public Declaration {
 
 private:
-  const char  *name;
-  int          type;
-  const char  *initVal;
-  ENTRY	      *entry;     // field's symtab entry
+  const char  		*name;	  	// field's name
+  int          		 type;	  	// field's type
+  const char  		*initVal;	// initial value as a string (lexeme)
+  LiteralExpression 	*initLit;	// initial value as a LiteralExpression
+  ENTRY	      		*entry;     	// field's symtab entry
 
 public:
 
@@ -65,7 +67,34 @@ public:
       throw AstException( "FieldDeclaration::FieldDeclaration: field initial value is NULL\n" );
     else
       initVal  = iv;
-    entry    = NULL;
+    initLit = NULL;
+    entry   = NULL;
+  }
+
+  /** 
+   * Create a new FieldDeclaration object.
+   * 
+   * @param lno a source code line number with the field declaration.
+   * @param fieldName a string with the field name
+   * @param tp an integer representing the type, as defined in the AstNode class
+   * @param il a reference to a LiteralExpression representing the initial value literal
+   * @throws AstException if the fieldName or the initial value is NULL
+   */  
+  FieldDeclaration( int lno, const char *fieldName, int tp, LiteralExpression *il )
+  {
+    setKind( DFIELD );
+    setLineNo( lno );
+    if( fieldName == NULL )
+      throw AstException( "FieldDeclaration::FieldDeclaration: field name is NULL\n" );
+    else
+      name     = fieldName;
+    type     = tp;
+    if( il == NULL )
+      throw AstException( "FieldDeclaration::FieldDeclaration: field initial value LiteralExpression is NULL\n" );
+    else
+      initLit = il;
+    initVal = il->getLiteral();
+    entry   = NULL;
   }
 
   /** 
@@ -135,6 +164,30 @@ public:
       throw AstException( "FieldDeclaration::setInitValue: field initial value is NULL\n" );
     else
       initVal  = iv;
+  }
+
+  /** 
+   * Return the initialization literal of this FieldDeclaration.
+   * 
+   * @return a reference to a LiteralExpression representing the initial literal of the field.
+   */
+  LiteralExpression *getInitLiteral()
+  {
+    return initLit;
+  }
+
+  /** 
+   * Set the new initialization literal of this FieldDeclaration.
+   * 
+   * @param il a LiteralExpression reference representing the initialization literal.
+   * @throws AstException if the initial value is NULL
+   */
+  void setInitLiteral( LiteralExpression *il )
+  {
+    if( il == NULL )
+      throw AstException( "FieldDeclaration::setInitValue: field initialization literal is NULL\n" );
+    else
+      initLit  = il;
   }
 
   /** 

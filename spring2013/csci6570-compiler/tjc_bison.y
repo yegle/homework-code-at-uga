@@ -36,6 +36,13 @@ extern Declaration *declTree;
 MethodDeclaration *methodDecl = NULL;
 ClassDeclaration *classDecl = NULL;
 SymbolTable* table = new SymbolTable();
+
+ParameterEntry* parameter_e = NULL;
+MethodEntry* method_e = NULL;
+VariableEntry* variable_e = NULL;
+ClassEntry* class_e = NULL;
+FieldEntry* field_e = NULL;
+char current_class_name[1024];
 %}
 
 %union {
@@ -105,7 +112,7 @@ SymbolTable* table = new SymbolTable();
 %type <sval>   FLOATLITERAL
 %type <sval>   STRING
 %type <sval>   NULL_
-%type <sval>   literal
+%type <xval>   literal
 %type <ival>   type
 %type <xval>   primary_expression
 %type <xval>   unary_expression
@@ -142,6 +149,7 @@ tiny_java_program: class_decl
 
 class_decl: class_decl PUBLIC CLASS IDENT
           {
+            snprintf(current_class_name, 1024, $4);
             classDecl = new ClassDeclaration( yylineno, $4 );
           }
           LBRACE member_decl_list RBRACE
@@ -174,7 +182,33 @@ member_decl: field_decl
 
 field_decl: STATIC type IDENT ASSIGN literal SEMI
           {
-            classDecl->addMember(new FieldDeclaration(yylineno, $3, $2, $5));
+            $$ = new FieldDeclaration(yylineno, $3, $2, (LiteralExpression*) $5);
+            classDecl->addMember($$);
+            //if ($2 == 1){
+            //    field_e = new FieldEntry($3, INT, $5);
+            //}
+            //else if ($2 == 2){
+            //    field_e = new FieldEntry($3, FLOAT, $5);
+            //}
+            //else {
+            //    throw string("unkown type in field_decl");
+            //}
+            //table->install(field_e);
+            //((FieldDeclaration*)$$)->setEntry(field_e);
+          }
+          |
+          STATIC type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
+          {
+            if ($2 == AstNode::TINT){
+                $$ = new FieldDeclaration(yylineno, $5, AstNode::TINTA, (LiteralExpression*) $7);
+            }
+            else if ($2 == AstNode::TFLOAT){
+                $$ = new FieldDeclaration(yylineno, $5, AstNode::TFLOATA, (LiteralExpression*) $7);
+            }
+            else if ($2 == AstNode::TSTRING){
+                $$ = new FieldDeclaration(yylineno, $5, AstNode::TSTRINGA, (LiteralExpression*) $7);
+            }
+            classDecl->addMember($$);
           }
           /*
           |
@@ -195,20 +229,25 @@ field_decl: STATIC type IDENT ASSIGN literal SEMI
           */
           ;
 
-array_define_index: array_index
-                  |
-                  LBRACKET RBRACKET
-                  ;
-
 method_decl:
            STATIC VOID IDENT LPAR
            {
               methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TVOID );
               classDecl->addMember( methodDecl );
+
+
+              //table->use_scope("class");
+              //method_e = new MethodEntry($3, VOID);
+              //table->install(method_e);
+              //methodDecl->setEntry(method_e);
+              //table->use_scope("method");
+              //table->get_scope()->set_name($3);
            }
            formal_param_list RPAR
            {
+            //table->use_scope("method");
             methodDecl->setParameters( $6 );
+            //method_e->setParameters($6);
            }
            LBRACE method_body RBRACE
            |
@@ -216,10 +255,18 @@ method_decl:
            {
               methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TINT );
               classDecl->addMember( methodDecl );
+
+              //table->use_scope("class");
+              //method_e = new MethodEntry($3, INT);
+              //table->install(method_e);
+              //methodDecl->setEntry(method_e);
+              //table->use_scope("method");
+              //table->get_scope()->set_name($3);
            }
            formal_param_list RPAR
            {
             methodDecl->setParameters( $6 );
+            //method_e->setParameters($6);
            }
            LBRACE method_body RBRACE
            |
@@ -227,10 +274,18 @@ method_decl:
            {
               methodDecl = new MethodDeclaration( yylineno, $3, AstNode::TFLOAT );
               classDecl->addMember( methodDecl );
+
+              //table->use_scope("class");
+              //method_e = new MethodEntry($3, FLOAT);
+              //table->install(method_e);
+              //methodDecl->setEntry(method_e);
+              //table->use_scope("method");
+              //table->get_scope()->set_name($3);
            }
            formal_param_list RPAR
            {
             methodDecl->setParameters( $6 );
+            //method_e->setParameters($6);
            }
            LBRACE method_body RBRACE
            |
@@ -238,6 +293,13 @@ method_decl:
            {
             methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TVOID);
             classDecl->addMember(methodDecl);
+
+            //table->use_scope("class");
+            //method_e = new MethodEntry($3, VOID);
+            //table->install(method_e);
+            //methodDecl->setEntry(method_e);
+            //table->use_scope("method");
+            //table->get_scope()->set_name($3);
            }
            LBRACE method_body RBRACE
            |
@@ -245,6 +307,13 @@ method_decl:
            {
             methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TINT);
             classDecl->addMember(methodDecl);
+
+            //table->use_scope("class");
+            //method_e = new MethodEntry($3, INT);
+            //table->install(method_e);
+            //methodDecl->setEntry(method_e);
+            //table->use_scope("method");
+            //table->get_scope()->set_name($3);
            }
            LBRACE method_body RBRACE
            |
@@ -252,6 +321,13 @@ method_decl:
            {
             methodDecl = new MethodDeclaration(yylineno, $3, AstNode::TFLOAT);
             classDecl->addMember(methodDecl);
+
+            //table->use_scope("class");
+            //method_e = new MethodEntry($3, FLOAT);
+            //table->install(method_e);
+            //methodDecl->setEntry(method_e);
+            //table->use_scope("method");
+            //table->get_scope()->set_name($3);
            }
            LBRACE method_body RBRACE
            |
@@ -270,16 +346,22 @@ method_decl:
               methodDecl->setParameters( pv );
               methodDecl->setPublicMethod( true );
               classDecl->addMember(methodDecl);
+
               // SymbolTable
-              ParameterEntry* e = new ParameterEntry($9, INT);
-              table->install(e);
+              //parameter_e = new ParameterEntry($9, INT);
+              //method_e = new MethodEntry($4, VOID);
+              //method_e->setParameters(pv);
+              //table->use_scope("class");
+              //table->install(method_e);
+              //table->use_scope("method");
+              //table->install(parameter_e);
+              //table->get_scope()->set_name($4);
+
+              //pd->setEntry(parameter_e);
+              //methodDecl->setEntry(method_e);
+              // end of symbol table
            }
            LBRACE method_body RBRACE
-           ;
-
-array_index: LBRACKET INTLITERAL RBRACKET
-           |
-           LBRACKET qualified_name RBRACKET
            ;
 
 type: INT
@@ -310,11 +392,43 @@ formal_param_list: formal_param
 formal_param: type IDENT
             {
                 $$ = new ParameterDeclaration(yylineno, $2, $1);
+                //ParameterDeclaration* pd = new ParameterDeclaration(yylineno, $2, $1);
+                //if($1 == 1){
+                //    parameter_e = new ParameterEntry($2, INT);
+                //}
+                //else if ($1 == 2){
+                //    parameter_e = new ParameterEntry($2, FLOAT);
+                //}
+                //else {
+                //    throw string("Unkown type in formal_param");
+                //}
+                //table->install(parameter_e);
+                //pd->setEntry(parameter_e);
+                //$$ = pd;
             }
             |
             type LBRACKET RBRACKET IDENT
             {
-                $$ = new ParameterDeclaration(yylineno, $4, $1);
+                if($1 == AstNode::TINT){
+                    $$ = new ParameterDeclaration(yylineno, $4, AstNode::TINTA);
+                }
+                else if($1 == AstNode::TFLOAT){
+                    $$ = new ParameterDeclaration(yylineno, $4, AstNode::TFLOATA);
+                }
+                else if($1 == AstNode::TSTRING){
+                    $$ = new ParameterDeclaration(yylineno, $4, AstNode::TSTRINGA);
+                }
+                //if($1 == 1){
+                //    parameter_e = new ParameterEntry($4, INT);
+                //}
+                //else if ($1==2){
+                //    parameter_e = new ParameterEntry($4, FLOAT);
+                //}
+                //else {
+                //    throw string("Unkown type in formal_param");
+                //}
+                //table->install(parameter_e);
+                //((ParameterDeclaration*)$$)->setEntry(parameter_e);
             }
             ;
 
@@ -338,19 +452,33 @@ local_decl_list: local_decl local_decl_list
 
 local_decl: type IDENT ASSIGN literal SEMI
           {
-            $$ = new VariableDeclaration( yylineno, $2, $1, $4);
-            //VariableEntry* v = new VariableEntry($2, $1, $4);
-            //table->install(v);
+            VariableDeclaration* vd = new VariableDeclaration( yylineno, $2, $1, (LiteralExpression*) $4);
+            $$ = vd;
+            //if ($1 == 1){
+            //    variable_e = new VariableEntry($2, INT, $4);
+            //}
+            //else if ($1 == 2){
+            //    variable_e = new VariableEntry($2, FLOAT, $4);
+            //}
+            //else{
+            //    throw string("Unkown type in local_decl");
+            //}
+            //table->install(variable_e);
+            //vd->setEntry(variable_e);
           }
           |
-          type LBRACKET RBRACKET IDENT ASSIGN literal SEMI
+          INT LBRACKET RBRACKET IDENT ASSIGN literal SEMI
           {
-            $$ = new VariableDeclaration( yylineno, $4, $1, $6);
+            $$ = new VariableDeclaration( yylineno, $4, AstNode::TINTA, (LiteralExpression*)$6);
+            //if ($1 == 1){
+            //    variable_e = new VariableEntry($4, INT, $6);
+            //}
+            //else if ($1 == 2){
+            //    variable_e = new VariableEntry($4, FLOAT, $6);
+            //}
+            //table->install(variable_e);
+            //vd->setEntry(variable_e);
           }
-          /*
-          |
-          type IDENT array_index ASSIGN literal SEMI
-          */
           ;
 
 method_statement_list: statement method_statement_list
@@ -392,11 +520,15 @@ opt_else: ELSE statement
 statement: IDENT ASSIGN expression SEMI
          {
 	        $$ = new AssignStatement( yylineno, $1, $3 );
+            //Entry* e = table->lookup($1);
+            //((AssignStatement*)$$)->setEntry(e);
          }
          |
          IDENT LBRACKET primary_expression RBRACKET ASSIGN expression SEMI
          {
 	        $$ = new AssignStatement( yylineno, $1, $3, $6);
+            //Entry* e = table->lookup($1);
+            //((AssignStatement*)$$)->setEntry(e);
          }
          |
          IF LPAR expression RPAR statement opt_else
@@ -412,15 +544,18 @@ statement: IDENT ASSIGN expression SEMI
          FOR LPAR IDENT ASSIGN expression SEMI expression SEMI expression RPAR statement
          {
             $$ = new ForStatement(yylineno, $3, $5, $7, $9, $11);
+            //Entry* e = table->lookup($3);
+            //((ForStatement*)$$)->setEntry(e);
          }
          |
          FOR LPAR IDENT LBRACKET expression RBRACKET ASSIGN expression SEMI expression SEMI expression RPAR statement
          {
             $$ = new ForStatement(yylineno, $3, $5, $8, $10, $12, $14);
+            //Entry* e = table->lookup($3);
+            //((ForStatement*)$$)->setEntry(e);
          }
          |
-         method_invocation SEMI
-         {
+         method_invocation SEMI{
 	        $$ = new MethodCallStatement( yylineno, $1 );
          }
          |
@@ -437,30 +572,6 @@ statement: IDENT ASSIGN expression SEMI
          }
          ;
 
-for_part_1: expression SEMI
-          |
-          local_decl
-          |
-          IDENT ASSIGN expression SEMI
-          |
-          SEMI
-          ;
-
-for_part_2: expression SEMI
-          |
-          SEMI
-          ;
-
-for_part_3: expression
-          |
-          empty
-          ;
-
-inc_dec_operator: INCREMENT
-                |
-                DECREMENT
-                ;
-
 return_statement: RETURN expression SEMI
                 {
 	                $$ = new ReturnStatement( yylineno, NULL, $2 );
@@ -474,30 +585,42 @@ return_statement: RETURN expression SEMI
 
 method_invocation: IDENT LPAR argument_list RPAR
                  {
-	                $$ = new MethodCallExpression( yylineno, NULL, $1, $3 );
+	                $$ = new MethodCallExpression( yylineno, current_class_name, $1, $3 );
+                    //Entry* e = table->lookup($1);
+                    //((MethodCallExpression*)$$)->setEntry(e);
                  }
                  |
                  IDENT LPAR RPAR
                  {
-	                $$ = new MethodCallExpression( yylineno, NULL, $1, (vector<Expression *> *) NULL );
+	                $$ = new MethodCallExpression( yylineno, current_class_name, $1, (vector<Expression *> *) NULL );
+                    //Entry* e = table->lookup($1);
+                    //((MethodCallExpression*)$$)->setEntry(e);
                  }
                  |
                  IDENT DOT IDENT LPAR argument_list RPAR
                  {
 	                $$ = new MethodCallExpression( yylineno, $1, $3, $5 );
+                    //if(strcmp($1, "SimpleIO")==0){
+                    //    Entry* e = table->get_scope("simpleio")->lookup($3);
+                    //    ((MethodCallExpression*)$$)->setEntry(e);
+                    //}
+                    //else{
+                    //    throw string("Class method invocation only supports SimpleIO class");
+                    //}
                  }
                  |
                  IDENT DOT IDENT LPAR RPAR
                  {
 	                $$ = new MethodCallExpression( yylineno, $1, $3, (vector<Expression *> *) NULL );
+                    //if(strcmp($1, "SimpleIO")==0){
+                    //    Entry* e = table->get_scope("simpleio")->lookup($3);
+                    //    ((MethodCallExpression*)$$)->setEntry(e);
+                    //}
+                    //else{
+                    //    throw string("Class method invocation only supports SimpleIO class");
+                    //}
                  }
                  ;
-
-qualified_name: IDENT DOT IDENT
-              |
-              IDENT
-              ;
-
 
 argument_list: expression
              {
@@ -617,7 +740,7 @@ unary_expression: primary_expression
                 }
                 ;
 
-primary_expression: INTLITERAL
+primary_expression: /*INTLITERAL
                    {
                    $$ = new LiteralExpression(yylineno, $1, AstNode::TINT);
                    }
@@ -636,15 +759,24 @@ primary_expression: INTLITERAL
                    {
                    $$ = new LiteralExpression(yylineno, $1, AstNode::TREF);
                    }
+                   */
+                  literal
+                  {
+                    $$ = $1;
+                  }
                   |
                   IDENT
                   {
                   $$ = new ReferenceExpression(yylineno, $1);
+                  //Entry* e = table->lookup($1);
+                  //((ReferenceExpression*)$$)->setEntry(e);
                   }
                   |
                   IDENT LBRACKET primary_expression RBRACKET
                   {
                     $$ = new ReferenceExpression(yylineno, $1, $3);
+                    //Entry* e = table->lookup($1);
+                    //((ReferenceExpression*)$$)->setEntry(e);
                   }
                   |
                   method_invocation
@@ -659,65 +791,39 @@ primary_expression: INTLITERAL
                   |
                   NEW INT LBRACKET primary_expression RBRACKET
                   {
-                  $$ = new NewExpression(yylineno, AstNode::TINT, $4);
+                  $$ = new NewExpression(yylineno, AstNode::TINTA, $4);
                   }
                   |
                   NEW FLOAT LBRACKET primary_expression RBRACKET
                   {
-                  $$ = new NewExpression(yylineno, AstNode::TFLOAT, $4);
+                  $$ = new NewExpression(yylineno, AstNode::TFLOATA, $4);
                   }
                   ;
 
 literal: INTLITERAL
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TINT);
        }
        |
        FLOATLITERAL
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TFLOAT);
        }
        |
        STRING
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TSTRING);
        }
        |
        NULL_
        {
-       $$ = $1;
+       $$ = new LiteralExpression(yylineno, $1, AstNode::TREF);
        }
        ;
 
-list_literal: LBRACE int_list RBRACE
-            |
-            LBRACE float_list RBRACE
-            |
-            LBRACE string_list RBRACE
-            |
-            LBRACE RBRACE
-            ;
-
-int_list: INTLITERAL
-        |
-        INTLITERAL COMMA int_list
-        ;
-
-float_list: FLOATLITERAL
-          |
-          FLOATLITERAL COMMA float_list
-          ;
-
-string_list: STRING
-           |
-           STRING COMMA string_list
-           ;
-
 empty: ;
 
-err: ;
 %%
-
 
 void
 yyerror( const char *msg )

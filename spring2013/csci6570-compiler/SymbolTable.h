@@ -1,4 +1,5 @@
 #include <string>
+#include <map>
 
 #include "Ast.h"
 #include "y.tab.h"
@@ -6,45 +7,87 @@
 
 using namespace std;
 
-enum Kind {
-    KCLASS,
-    KVARIABLE,
-    KMETHOD,
-    KFIELD,
-    KPARAMETER,
-};
 
 class Entry {
     public:
-        virtual Kind get_kind();
+        AstNode::AstNodeKind get_kind();
         string get_name();
     protected:
-        Kind kind;
+        AstNode::AstNodeKind kind;
         string name;
 };
 
 class ParameterEntry: public Entry {
     public:
-        ParameterEntry(const char*, yytokentype);
+        ParameterEntry(const char*, int);
+        ParameterEntry(ParameterDeclaration*);
+        int get_parameter_type();
+        int parameter_base_type();
+        int get_index() {
+            return this->index;
+        }
+        void set_index(int index){
+            this->index = index;
+            return;
+        }
     private:
-        yytokentype parameter_type;
+        int parameter_type;
+        int index;
 };
 
 class VariableEntry: public Entry {
     public:
-        VariableEntry(const char*, yytokentype, string);
+        VariableEntry(const char*, int, LiteralExpression*);
+        VariableEntry(VariableDeclaration*);
+        int get_variable_type();
+        int variable_base_type();
+        int get_index(){
+            return this->index;
+        }
+        void set_index(int index){
+            this->index = index;
+            return;
+        }
     private:
-        yytokentype variable_type;
-        string init_value;
+        int variable_type;
+        LiteralExpression* init_expression;
+        int index;
 };
 
 class MethodEntry: public Entry {
     public:
-        MethodEntry(const char*, yytokentype);
+        MethodEntry(const char*, const char*, int);
+        MethodEntry(const char*, const char*, int, vector<ParameterEntry*>*, vector<VariableEntry*>*);
+        void setParameters(vector<Declaration*>*);
+        void setParameters(vector<ParameterEntry *>*);
+        vector<ParameterEntry*>* getParameters();
+
+        void setVariables(vector<Declaration*>*);
+        void setVariables(vector<VariableEntry*>*);
+        vector<VariableEntry*>* getVariables();
+        int get_current_index(){
+            return this->current_index;
+        }
+        void inc_current_index(){
+            this->current_index += 1;
+        }
+        int get_return_type(){
+            return this->return_type;
+        }
+        string get_return_type_spec(){
+            return this->return_type_spec;
+        }
+        string get_arg_specs(){
+            return this->arg_specs;
+        }
     private:
-        yytokentype return_type;
+        int return_type;
         vector<ParameterEntry *>* parameter_list;
-        vector<VariableEntry *> variable_list;
+        vector<VariableEntry *>* variable_list;
+        int current_index;
+        string return_type_spec;
+        string arg_specs;
+        string class_name;
 };
 
 class ClassEntry: public Entry {
@@ -57,39 +100,60 @@ class ClassEntry: public Entry {
 
 class FieldEntry: public Entry {
     public:
-        FieldEntry(const char*, yytokentype, string);
+        FieldEntry(const char*, const char*, int, const char*);
+        int get_field_type();
+        int field_base_type();
+        string get_field_spec(){
+            return this->class_name + "/" + this->name;
+        }
     private:
-        yytokentype type;
+        int field_type;
         string init_value;
+        string class_name;
 };
 
 class Scope {
     public:
-        Scope();
+        //Scope();
         ~Scope();
+
+        Scope(const char*);
 
         void install(Entry*);
         Entry* lookup(string);
         void clear();
+        void print();
+
+        string get_name();
+        void set_name(const char*);
     private:
+        string name;
         vector<Entry *>* entry_list;
+        map<string, Entry*>* list;
 };
 
 class SymbolTable {
     public:
-        void open_scope();
+        //void open_scope();
         void install(Entry*);
-        void close_scope();
         Entry* lookup(const char*);
 
+        void use_scope(const char*);
+
         Scope* get_scope();
+        Scope* get_scope(const char*);
 
         SymbolTable();
         ~SymbolTable();
+        string get_current_method_name(){
+            return this->current_method_name;
+        }
     private:
-        Scope* package_scope;
-        Scope* class_scope;
-        Scope* method_scope;
+        //Scope* package_scope;
+        //Scope* class_scope;
+        //Scope* method_scope;
+        //Scope* simpleio_scope;
         Scope* current_scope;
+        map<string, Scope*>* scopes;
+        string current_method_name;
 };
-
