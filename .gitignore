@@ -42,3 +42,8 @@ y.tab.c
 *.aux
 *.log
 *.toc
+*.pdf
+
+# Machine learning temp file
+*.dot
+*.png
