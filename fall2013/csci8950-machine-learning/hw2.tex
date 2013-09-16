@@ -186,8 +186,8 @@
         It doesn't look like the tree on the textbook. The reason might be:
 
         \begin{itemize}
-            \item The \texttt{scikit-learn} package uses \texttt{CART} (Classification And Regression Trees) algorithm to construct the decision tree, which can only construct a binary tree.
-            \item The \texttt{scikit-learn} package may use a different classification criteria.
+            \item The \texttt{scikit-learn} package uses \texttt{CART} (Classification And Regression Trees) algorithm to construct the decision tree, which can only construct a binary tree, and the tree on the text book is definitely not a binary tree.
+            \item The \texttt{scikit-learn} package may use a different classification criteria (difference in information gain calculation maybe).
         \end{itemize}
 
     }
@@ -196,7 +196,7 @@
     (b) Use the leave-one-out cross-validation method described on page 235 in the text book to estimate the error of the decision tree. You can do this manually by removing one example at a time and training on the remaining 13 and then testing on the one you removed, or you can use the package to do this for you automatically by asking for a 14-fold cross-validation if the package supports cross-validation. The See5/C5.0 package supports cross-validation.
 
     \problemAnswer{
-        Code List \ref{code/hw2/p1} (at the end of this document) also contains the cross-validation code. The accuracy was 8 out of 14.
+        Code List \ref{code/hw2/p1} (at the end of this document) also contains the cross-validation code. The accuracy in my test was 57.14\% (8 out of 14 accuracy).
     }
 \end{homeworkProblem}
 
@@ -217,6 +217,8 @@
         \url{http://cs.uga.edu/~ying/ml/p2.png}
 
         Since this is a small dataset (958 lines of training examples), the learning time is less then 1 second.
+
+        We didn't enable pruning, so the decision tree would be a full grown decision tree that accurately fit the training set. So the accuracy of this tree on the training set itself is 100\% (overfitting the training set).
     }
 
     (b) Use 10-fold cross validation to estimate the error (again without pruning)

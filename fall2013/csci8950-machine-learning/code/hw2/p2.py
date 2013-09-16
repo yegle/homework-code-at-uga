@@ -36,6 +36,9 @@ if __name__ == '__main__':
         clf.fit(vectorized_training_set.toarray(),
                 target_set)
 
+        s = clf.score(vectorized_training_set.toarray(), target_set)
+        print("score on training set: %s" % (s))
+
         with open("p2.dot", "w") as output_file:
             tree.export_graphviz(clf, out_file=output_file,
                                  feature_names=vec.get_feature_names())
