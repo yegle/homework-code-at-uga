@@ -1,0 +1,488 @@
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc}
+\definecolor{nodecolor}{HTML}{9999AA}
+\tikzset{basic/.style={draw,fill=nodecolor!20,text width=1em,text badly centered}}
+\tikzset{input/.style={basic,circle,node distance=3em}}
+\tikzset{weights/.style={basic,rectangle}}
+\tikzset{functions/.style={basic,circle,fill=nodecolor!10}}
+\tikzset{every left delimiter/.style={xshift=0.7em,font=\scriptsize}}
+% Set the overall layout of the tree
+\tikzstyle{level 1}=[level distance=3.5cm, sibling distance=3.5cm]
+\tikzstyle{level 2}=[level distance=3.5cm, sibling distance=2cm]
+
+% Define styles for bags and leafs
+\tikzstyle{bag} = [text width=4em, text centered]
+\tikzstyle{end} = [circle, minimum width=3pt,fill, inner sep=0pt]
+\usepackage{hyperref}
+\usepackage{amsmath}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ (\hmwkClassInstructor\ \hmwkClassTime): \hmwkTitle} % Top center head
+\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Perl} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Perl, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=5, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\pythonscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1,language=python]{#1.py}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+    \noindent\framebox[\columnwidth][c]{
+        \begin{minipage}{0.98\columnwidth}
+            \textbf{Answer}
+
+            #1
+        \end{minipage}
+    } % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Assignment \#3} % Assignment title
+\newcommand{\hmwkDueDate}{Thursday, September 26, 2013} % Due date
+\newcommand{\hmwkClass}{CSCI 8950} % Course/class
+\newcommand{\hmwkClassTime}{} % Class/lecture time
+\newcommand{\hmwkClassInstructor}{Dr. Rasheed} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{Yuchen Ying} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}\large{\textit{\hmwkClassInstructor\ \hmwkClassTime}}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+%\setcounter{tocdepth}{1} % Uncomment this line if you don't want subsections listed in the ToC
+
+\newpage
+\tableofcontents
+\newpage
+
+\begin{homeworkProblem}
+    Solve problem 4.9 on page 125 of the textbook.
+
+    Recall the $8\times3\times8$ network described in Figure 4.7. Consider trying to train a $8\times1\times8$ network for the same task; that is, a network with just one hidden unit. Notice the eight training examples in Figure 4.7 could be represented by eight distinct values for the single hidden unit (e.g. $0.1, 0.2, ... 0.8$). Could a network with just one hidden unit therefore learn the identity function defined over these training examples? Hint: Consider questions such as ``do there exist values for the hidden unit weights that can create the hidden unit encoding suggested above?'' ``do there exist values for the output unit weights that could correctly decode this encoding of the input? '' and ``is gradient descent likely to find such weights?''
+
+    \problemAnswer{
+        A neural network cannot learn anything if there's a hidden layer contains only one unit.
+
+        $o(\vec{x}) = \sum_{i=0}^{n} w_ix_i = w \sum_{i=0}^{n}x_i = 1$ for any weight of this hidden node
+    }
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+    Consider the following training set of samples for machine learning:
+
+    \begin{table}[h]
+        \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            Example & A1 & A2 & A3 & A4 & label \\
+            \hline
+            1 & 1 & 2 & 2 & 2 & - \\
+            2 & 1 & 1 & 1 & 1 & a \\
+            3 & 2 & 3 & 2 & 1 & b \\
+            4 & 1 & 3 & 3 & 3 & c \\
+            5 & 3 & 1 & 2 & 1 & d \\
+            6 & 1 & 1 & 1 & 2 & - \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    The attributes \textbf{A1} through \textbf{A4} are integers with values in the range $[1,2,3]$ each.
+
+    (a) For the label assignment $(a=-, b=+, c=-, d=+)$ give a minimal size (measured by the total number of nodes) decision tree that can correctly classify all the training examples.
+
+    \problemAnswer{
+
+        \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            Example & A1 & A2 & A3 & A4 & label \\
+            \hline
+            1 & 1 & 2 & 2 & 2 & - \\
+            2 & 1 & 1 & 1 & 1 & - \\
+            3 & 2 & 3 & 2 & 1 & + \\
+            4 & 1 & 3 & 3 & 3 & - \\
+            5 & 3 & 1 & 2 & 1 & + \\
+            6 & 1 & 1 & 1 & 2 & - \\
+            \hline
+        \end{tabular}
+
+        \begin{align*}
+            Entropy(S) &= \sum_{i=1}^{c} -p_i\log_2{p_i} \\
+                       &= - \frac{2}{6}\log_2{\frac{2}{6}} - \frac{4}{6}\log_2{\frac{4}{6}} \\
+                       &=0.9183
+        \end{align*}
+
+        \begin{align*}
+            Gain(S, A1) &= Entropy(S) - \frac{3}{6}Entrypy(S_{A1=1}) - \frac{1}{6} Entrypy(S_{A1=2}) - \frac{1}{6} Entrypy(S_{A1=3}) \\
+                        &=0.9183
+        \end{align*} 
+
+        \begin{align*}
+            Gain(S, A2) &= Entropy(S) - \frac{3}{6}Entrypy(S_{A2=1}) - \frac{2}{6} Entrypy(S_{A2=2}) - \frac{2}{6} Entrypy(S_{A2=3}) \\
+                        &= 0.9183 - 0.4591 - 0.3333 \\
+                        &= 0.1259
+        \end{align*} 
+
+        \begin{align*}
+            Gain(S, A3) &= Entropy(S) - \frac{2}{6}Entrypy(S_{A3=1}) - \frac{3}{6} Entrypy(S_{A3=2}) - \frac{1}{6} Entrypy(S_{A3=3}) \\
+                        &= 0.9183 - 0.4591 \\
+                        &= 0.4592
+        \end{align*} 
+
+        \begin{align*}
+            Gain(S, A4) &= Entropy(S) - \frac{3}{6}Entrypy(S_{A4=1}) - \frac{2}{6} Entrypy(S_{A4=2}) - \frac{1}{6} Entrypy(S_{A4=3}) \\
+                        &= 0.9183 - 0.4591 \\
+                        &= 0.4592
+        \end{align*} 
+
+        According to information gain, we should split using $A1$.
+
+        After splitting, all negative examples has feature $A1=1$. Thus the minimal size decision tree only contains one node, which is $A1$.
+
+    }
+
+    (b) How would the tree give in Part (a) above classify the following examples: $(1,2,2,3)$ and $(3,2,1,1)$
+
+    \problemAnswer{
+        $(1,2,2,3) \to -$
+
+        $(3,2,1,1) \to +$
+    }
+
+    (c) Propose a label assignment for $a, b, c$ and $d$ that will make attribute \textbf{A4} better than attribute \textbf{A3} according to the $ID3$ information gain measure.
+
+    \problemAnswer{
+        Let $(a=+, b=+, c=-, d=+)$
+
+        \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            Example & A1 & A2 & A3 & A4 & label \\
+            \hline
+            1 & 1 & 2 & 2 & 2 & - \\
+            2 & 1 & 1 & 1 & 1 & + \\
+            3 & 2 & 3 & 2 & 1 & + \\
+            4 & 1 & 3 & 3 & 3 & - \\
+            5 & 3 & 1 & 2 & 1 & + \\
+            6 & 1 & 1 & 1 & 2 & - \\
+            \hline
+        \end{tabular}
+
+        \begin{align*}
+            Gain(S, A3) &= Entropy(S) - \frac{2}{6}Entropy(S_{A3=1}) - \frac{3}{6}Entropy(S_{A3=2}) = \frac{1}{6}Entropy(S_{A3=3}) \\
+                        & < Entropy(S) \\
+            Gain(S, A4) &= Entropy(S) \\
+            Gain(S, A4) &> Gain(S, A3)
+        \end{align*}
+    }
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+    Consider the following diagram of a set of samples for machine learning:
+
+    \begin{tikzpicture}[thick, scale=1.5, every node/.style={scale=1.5}]
+        % Draw axes
+        \draw [<->,thick] (0,3) node (yaxis) [above] {$X1$}
+        |- (7,0) node (xaxis) [right] {$X2$};
+        %\draw[style=help lines] (0,0) grid (10.5, 2.5);
+        \foreach \x in {0,1,...,6} \draw (\x cm, 0 cm) node[anchor=north]{\x};
+        \foreach \y in {0,1,...,2}  \draw (0 cm, \y cm) node[anchor=east]{\y};
+
+        \node (1) at (1,1) {-};
+        \node (2) at (1,2) {-};
+        \node (3) at (2,1) {-};
+        \node (4) at (2,2) {-};
+        \node (5) at (3,1) {b};
+        \node (6) at (3,2) {a};
+        \node (7) at (4,1) {d};
+        \node (8) at (4,2) {c};
+        \node (9) at (5,1) {+};
+        \node (10) at (5,2) {+};
+        \node (11) at (6,1) {+};
+        \node (12) at (6,2) {+};
+    \end{tikzpicture}
+
+    (a) For the label assignment $(a=+, b=+, c=-, d=-)$ can all the given samples (including $a,b,c$ and $d$) be correctly classified by a properly trained (or computed in any possible way) Perceptron, whose inputs are $X1, X2$ and has 2 variable weights and a variable threshold? If your answer is YES, sketch one such Perceptron. If your answer is NO, briefly explain why.
+
+    \problemAnswer{
+
+        \begin{tikzpicture}[thick, scale=1.5, every node/.style={scale=1.5}]
+            % Draw axes
+            \draw [<->,thick] (0,3) node (yaxis) [above] {$X1$}
+            |- (7,0) node (xaxis) [right] {$X2$};
+            %\draw[style=help lines] (0,0) grid (10.5, 2.5);
+            \foreach \x in {0,1,...,6} \draw (\x cm, 0 cm) node[anchor=north]{\x};
+            \foreach \y in {0,1,...,2}  \draw (0 cm, \y cm) node[anchor=east]{\y};
+            \node (1) at (1,1) {-};
+            \node (2) at (1,2) {-};
+            \node (3) at (2,1) {-};
+            \node (4) at (2,2) {-};
+            \node (5) at (3,1) {+};
+            \node (6) at (3,2) {+};
+            \node (7) at (4,1) {-};
+            \node (8) at (4,2) {-};
+            \node (9) at (5,1) {+};
+            \node (10) at (5,2) {+};
+            \node (11) at (6,1) {+};
+            \node (12) at (6,2) {+};
+        \end{tikzpicture}
+
+        We need to solve these equations:
+
+        \begin{align*}
+            w_0 + w_1 + w_2 &= -1 \\
+            w_0 + 2 \times w_1  + w_2 &= -1 \\
+            w_0 + w_1 + 2 \times w_2 &= -1 \\
+            w_0 + w_1 + 4 \times w_2 &= -1 \\
+            w_0 + 2 \times w_1 + 2\times w_2 &= -1 \\
+            w_0 + 2 \times w_1 + 4\times w_2 &= -1 \\
+            w_0 + w_1 + 3 \times w_2 &= 1 \\
+            w_0 + w_1 + 5 \times w_2 &= 1 \\
+            w_0 + w_1 + 6 \times w_2 &= 1 \\
+            w_0 + 2 \times w_1 + 3\times w_2 &= 1 \\
+            w_0 + 2 \times w_1 + 5\times w_2 &= 1 \\
+            w_0 + 2 \times w_1 + 6\times w_2 &= 1 \\
+        \end{align*}
+
+        Which apparently has no solution.
+    }
+
+    (b) For the label assignment $(a=+, b=-, c=+, d=-)$ can all the given samples (including $a,b,c$ and $d$) be correctly classified by a properly trained (or computed in any possible way) binary decision tree with at most 2 levels (2 decisions along each path)? The decision at each level will be of the form $X_i \le V$ where $i$ is 1 or 2 and $V$ is a variable threshold. If your answer is YES, sketch one such decision tree. If your answer is NO, briefly explain why.
+
+    \problemAnswer{
+        \begin{tikzpicture}[thick, scale=1.5, every node/.style={scale=1.5}]
+            % Draw axes
+            \draw [<->,thick] (0,3) node (yaxis) [above] {$X1$}
+            |- (7,0) node (xaxis) [right] {$X2$};
+            %\draw[style=help lines] (0,0) grid (10.5, 2.5);
+            \foreach \x in {0,1,...,6} \draw (\x cm, 0 cm) node[anchor=north]{\x};
+            \foreach \y in {0,1,...,2}  \draw (0 cm, \y cm) node[anchor=east]{\y};
+
+            \node (1) at (1,1) {-};
+            \node (2) at (1,2) {-};
+            \node (3) at (2,1) {-};
+            \node (4) at (2,2) {-};
+            \node (5) at (3,1) {-};
+            \node (6) at (3,2) {+};
+            \node (7) at (4,1) {-};
+            \node (8) at (4,2) {+};
+            \node (9) at (5,1) {+};
+            \node (10) at (5,2) {+};
+            \node (11) at (6,1) {+};
+            \node (12) at (6,2) {+};
+        \end{tikzpicture}
+
+        The examples can be classified by the following binary decision tree:
+
+        \begin{tikzpicture}[grow=right, sloped]
+            \node[bag] {$X_2 \le 1$}
+            child {
+                node[bag] {$X_1 \le 2$}
+                child {
+                    node[end, label=right:
+                    {$+$}] {}
+                    edge from parent
+                    node[above] {$NO$}
+                }
+                child {
+                    node[end, label=right:
+                    {$-$}] {}
+                    edge from parent
+                    node[above] {$YES$}
+                }
+                edge from parent
+                node[above] {$NO$}
+            }
+            child {
+                node[bag] {$X_1 \le 4$}
+                child {
+                    node[end, label=right:
+                    {$+$}] {}
+                    edge from parent
+                    node[above] {$NO$}
+                }
+                child {
+                    node[end, label=right:
+                    {$-$}] {}
+                    edge from parent
+                    node[above] {$YES$}
+                }
+                edge from parent
+                node[above] {$YES$}
+            };
+        \end{tikzpicture}
+    }
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+    (a) Give the name of one algorithm that searches an incomplete space of hypotheses but seaches it completely.
+
+    \problemAnswer{
+        The version space \textsc{Candidate-Elimination} algorithm
+    }
+
+    (b) Give the name of one algorithm that searches a complete space of hypotheses but searches it incompletely.
+
+    \problemAnswer{
+        The ID3 algorithm of decision tree generating
+    }
+
+    (c) Why should the initial weights of a backpropagation neural network be set to very small values?
+
+    \problemAnswer{
+        The sigmoid function has the steepest portion between $[-0.5, 0.5]$, so that the weights will be changed most for each backpropagation iteration.
+    }
+
+    (d) Give one advantage to using the information GainRatio measure over the information Gain measure for constructing decision trees.
+
+    \problemAnswer{
+        Some features can perfectly separate the training data but cannot be a useful predictor, like the timestamp of training examples. Using GainRatio can avoid choosing these features when constructing the decision tree.
+    }
+
+    (e) Give one advantage for using two-fold cross-validation over ten-fold cross-validation
+
+    \problemAnswer{
+        This has the advantage that our training and test sets are both large, and each data point is used for both training and validation on each fold. (via Wikipedia)
+    }
+\end{homeworkProblem}
+
+\begin{homeworkProblem}
+    Suppose that in order to estimate the true error $error_D(h)$ for some hypothesis $h$, we tested it on 100 instances that were not used for training in any possible way. We observed that $h$ correctly classified 85 of these instances.
+
+    (a) Based on this information only, give the most probable value for $error_D(h)$, the standard deviation in this error estimate and $95\%$ two-sided confidence interval. You may leave all of these answers as expressions (no need to use the calculator or do the arithmetic!)
+
+    \problemAnswer{
+        The most probable value of $error_D(h)$ is $error_S(h) = 0.15$
+
+        The standard deviation in this error estimate is $\sigma_{error_S(h)} \approx \sqrt{\frac{0.15 \times 0.85}{100}}$
+
+        The $95\%$ two-sided confidence interval is $0.15 \pm 1.96 \sqrt{\frac{0.15 \times 0.85}{100}}$
+    }
+
+    (b) Suppose you are told that when $h$ was tested on the 1000 instances of training data that were used to create it, it correctly classified only 800 of these! Use this additional information to come up with better answers than the ones you gave in part (a) above if you can. (again no need to use the calculator or do the arithmetic!)
+
+    \problemAnswer{
+        The test ran on the 1000 instances of training data cannot improve the numbers I answered in (a), since the sample is not independent of $h$ now.
+    }
+\end{homeworkProblem}
+\end{document}

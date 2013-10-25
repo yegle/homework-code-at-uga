@@ -1,0 +1,253 @@
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+\usepackage{courier} % Required for the courier font
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkClass\ (\hmwkClassInstructor\ \hmwkClassTime): \hmwkTitle} % Top center head
+\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+\definecolor{MyDarkGreen}{rgb}{0.0,0.4,0.0} % This is the color used for comments
+\lstloadlanguages{Perl} % Load Perl syntax for listings, for a list of other languages supported see: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstset{language=Perl, % Use Perl in this example
+        frame=single, % Single frame around code
+        basicstyle=\small\ttfamily, % Use small true type font
+        keywordstyle=[1]\color{Blue}\bf, % Perl functions bold and blue
+        keywordstyle=[2]\color{Purple}, % Perl function arguments purple
+        keywordstyle=[3]\color{Blue}\underbar, % Custom functions underlined and blue
+        identifierstyle=, % Nothing special about identifiers
+        commentstyle=\usefont{T1}{pcr}{m}{sl}\color{MyDarkGreen}\small, % Comments small dark green courier font
+        stringstyle=\color{Purple}, % Strings are purple
+        showstringspaces=false, % Don't put marks in string spaces
+        tabsize=5, % 5 spaces per tab
+        %
+        % Put standard Perl functions not included in the default language here
+        morekeywords={rand},
+        %
+        % Put Perl function parameters here
+        morekeywords=[2]{on, off, interp},
+        %
+        % Put user defined functions here
+        morekeywords=[3]{test},
+       	%
+        morecomment=[l][\color{Blue}]{...}, % Line continuation (...) like blue comment
+        numbers=left, % Line numbers on left
+        firstnumber=1, % Line numbers start with line 1
+        numberstyle=\tiny\color{Blue}, % Line numbers are blue and small
+        stepnumber=5 % Line numbers go in steps of 5
+}
+
+% Creates a new command to include a perl script, the first parameter is the filename of the script (without .pl), the second parameter is the caption
+\newcommand{\pythonscript}[2]{
+\begin{itemize}
+\item[]\lstinputlisting[caption=#2,label=#1,language=python]{#1.py}
+\end{itemize}
+}
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+% Header and footer for when a page split occurs within a problem environment
+\newcommand{\enterProblemHeader}[1]{
+\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+}
+
+% Header and footer for when a page split occurs between problem environments
+\newcommand{\exitProblemHeader}[1]{
+\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak
+\nobreak\extramarks{#1}{}\nobreak
+}
+
+\setcounter{secnumdepth}{0} % Removes default section numbers
+\newcounter{homeworkProblemCounter} % Creates a counter to keep track of the number of problems
+
+\newcommand{\homeworkProblemName}{}
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]{ % Makes a new environment called homeworkProblem which takes 1 argument (custom name) but the default is "Problem #"
+\stepcounter{homeworkProblemCounter} % Increase counter for number of problems
+\renewcommand{\homeworkProblemName}{#1} % Assign \homeworkProblemName the name of the problem
+\section{\homeworkProblemName} % Make a section in the document with the custom problem count
+\enterProblemHeader{\homeworkProblemName} % Header and footer within the environment
+}{
+\exitProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+\newcommand{\problemAnswer}[1]{ % Defines the problem answer command with the content as the only argument
+    \noindent\framebox[\columnwidth][c]{
+        \begin{minipage}{0.98\columnwidth}
+            \textbf{Answer}
+
+            #1
+        \end{minipage}
+    } % Makes the box around the problem answer and puts the content inside
+}
+
+\newcommand{\homeworkSectionName}{}
+\newenvironment{homeworkSection}[1]{ % New environment for sections within homework problems, takes 1 argument - the name of the section
+\renewcommand{\homeworkSectionName}{#1} % Assign \homeworkSectionName to the name of the section from the environment argument
+\subsection{\homeworkSectionName} % Make a subsection with the custom name of the subsection
+\enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]} % Header and footer within the environment
+}{
+\enterProblemHeader{\homeworkProblemName} % Header and footer after the environment
+}
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Assignment \#4} % Assignment title
+\newcommand{\hmwkDueDate}{Tuesday, Oct 17, 2013} % Due date
+\newcommand{\hmwkClass}{CSCI 8950} % Course/class
+\newcommand{\hmwkClassTime}{} % Class/lecture time
+\newcommand{\hmwkClassInstructor}{Dr. Rasheed} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{Yuchen Ying} % Your name
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title{
+\vspace{2in}
+\textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+\normalsize\vspace{0.1in}\small{Due\ on\ \hmwkDueDate}\\
+\vspace{0.1in}\large{\textit{\hmwkClassInstructor\ \hmwkClassTime}}
+\vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{} % Insert date here if you want it to appear below your name
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+%\setcounter{tocdepth}{1} % Uncomment this line if you don't want subsections listed in the ToC
+
+\newpage
+\tableofcontents
+\newpage
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+% To have just one problem per page, simply put a \clearpage after each problem
+
+\begin{homeworkProblem}
+    For this assignment you need to create or use a suitable \texttt{Backpropagation} neural network package.
+
+    You should \textbf{experiment} to find the best number of hidden units and report your experimental results
+
+    \problemAnswer{
+        The dataset I used was \textbf{Tic-Tac-Toe Endgame Data Set} (\url{http://archive.ics.uci.edu/ml/datasets/Tic-Tac-Toe+Endgame})
+
+        For the experiment, I write Code List \ref{code/hw4/experiment} (at the end of this document) to do the experiment. You need to specify a number as the first argument of this Python script, and the code will run 500 iteration on a Feed Forward Neural Network, using the specified number of hidden units, then do a 2-fold cross-validation and calculate the MSE (mean square error) as a proof of accuracy.
+
+        The result of the experiment can be found at \ref{table_1} (at the end of this document).  To have a simpler NN as well as higher accuracy, I'll use 3 hidden units.
+
+        The design of my neural network would be:
+
+        \begin{itemize}
+            \item Input Layer: 9 units corresponding to 9 features in input dataset
+            \item Hidden Layer: 3 units as the experiment suggest. Use Sigmoid function to squash data from input layer
+            \item Output Layer: 1 units indicating the positive/negative output, where 1 indicates positive and 0 indicates negative
+        \end{itemize}
+
+        Parameters I used in my \texttt{Backpropagation} trainer:
+
+        \begin{itemize}
+            \item $weightdecay = 0.001$
+            \item $learningrate = 0.1$
+            \item $momentum = 0.0$ (default value)
+            \item $lrdecay = 1.0$ (default value)
+        \end{itemize}
+
+        The main code I used to do the learning is Code List \ref{code/hw4/main} (at the end of this document).
+
+        It will split the raw data into two parts, 75\% of them are used as training set, 25\% of them are used as validation set.
+
+        It then iterate using \texttt{backpropagation} for 6000 times. Every time it find a minimum error, it will do 10 more iteration and see if it's really the minimum error.
+
+        The final training error: 0.088998. The corresponding validation error: 0.107706
+
+        After training, I did a 10-fold cross-validation over the whole dataset, and the MSE (mean squared error) is 0.178744789109
+
+        Total training time is 83m23.387s, with 6000 iteration.
+    }
+
+
+\end{homeworkProblem}
+
+\clearpage
+\pythonscript{code/hw4/experiment}{Python code to do experiment}
+
+\clearpage
+\pythonscript{code/hw4/main}{Main Python code}
+
+\clearpage
+
+\begin{table}[hbp]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        Count of Hidden Units & Mean Squared Error \\
+        \hline
+        1 & 1.09002171863 \\
+        \hline
+        2 & 2.73573239857 \\
+        \hline
+        3 & 0.793887549803 \\
+        \hline
+        4 & 15.2119612277 \\
+        \hline
+        5 & 6.59174665629 \\
+        \hline
+        6 & 12.7988201822 \\
+        \hline
+        7 & 1.91940534104 \\
+        \hline
+        8 & 0.755597260501 \\
+        \hline
+        9 & 12.442981528 \\
+        \hline
+    \end{tabular}
+    \caption{2-fold cross-validation result with different count of hidden units}
+    \label{table_1}
+\end{table}
+\end{document}

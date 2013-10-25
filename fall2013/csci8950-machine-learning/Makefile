@@ -1,4 +1,7 @@
-all: hw1.pdf hw2.pdf
+TEX := $(wildcard *.tex)
+PDF := $(TEX:.tex=.pdf)
+
+all: $(PDF)
 
 %.pdf: %.tex
 	xelatex $<
